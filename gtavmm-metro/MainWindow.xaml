@@ -1,0 +1,75 @@
+﻿<Controls:MetroWindow x:Class="gtavmm_metro.MainWindow"
+                      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                      xmlns:Controls="http://metro.mahapps.com/winfx/xaml/controls"
+                      Title="GTAV Mod Manager Metro"
+                      x:Name="_this"
+                      
+                      Height="600"
+                      MinHeight="530"
+                      
+                      Width="1100"
+                      MinWidth="900"
+                      
+                      Icon="Assets/Icons/main.ico"
+                      IconEdgeMode="Aliased"
+                      
+                      TextOptions.TextFormattingMode="Ideal"
+                      
+                      GlowBrush="{DynamicResource AccentColorBrush}"
+                      
+                      ContentRendered="MetroWindow_ContentRendered">
+
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" MaxHeight="60"/>
+            <RowDefinition Height="8*" />
+        </Grid.RowDefinitions>
+
+        <Controls:ProgressRing Foreground="{DynamicResource AccentColorBrush}" x:Name="MainProgressRing" IsActive="True"
+                               HorizontalAlignment="Center" VerticalAlignment="Center" Grid.RowSpan="2" />
+
+        <TabControl x:Name="MainTabControl" TabStripPlacement="Top" Grid.RowSpan="2" BorderThickness="0" IsEnabled="False" Opacity="0.3" Padding="0 0 0 0" Controls:TabControlHelper.IsUnderlined="True">
+
+            <TabItem Header="Home" Padding="10 10 5 10" HorizontalAlignment="Right">
+                <Grid>
+                    <Image x:Name="MainBackground" Source="./Assets/Images/home_1.png" Stretch="UniformToFill" Grid.Row="0" OpacityMask="Black"/>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Script Mods" Padding="10 10 5 10" HorizontalAlignment="Right">
+
+            </TabItem>
+            <TabItem Header="Asset Mods" Padding="10 10 5 10" HorizontalAlignment="Right">
+
+            </TabItem>
+            <TabItem Header="Settings" Padding="10 10 5 10" HorizontalAlignment="Right">
+
+            </TabItem>
+            <TabItem Header="Updates" Padding="10 10 5 10" HorizontalAlignment="Right">
+
+            </TabItem>
+            <TabItem Header="Help" Padding="10 10 5 10" HorizontalAlignment="Right">
+
+            </TabItem>
+            <TabItem Header="About" Padding="10 10 5 10" HorizontalAlignment="Right">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Grid.Column="0" Grid.Row="0" Margin="30 30" Grid.ColumnSpan="2">
+                        <TextBlock Text="{Binding ElementName=_this, Path=AppNameAndVer}" FontSize="40" FontWeight="Light"/>
+                        <TextBlock Text="Work in progress" FontSize="30" FontWeight="Light" />
+                    </StackPanel>
+                </Grid>
+            </TabItem>
+        </TabControl>
+    </Grid>
+</Controls:MetroWindow>
