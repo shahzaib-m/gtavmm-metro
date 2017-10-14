@@ -44,25 +44,32 @@ namespace gtavmm_metro
             // perform all tasks (check files, load mods, etc.) here while the user is shown a progress ring
             await Task.Delay(1000);     // temp substitute for work delay
 
-            
-            ScriptMods = new ObservableCollection<Script_Mod>();
-            ScriptMods.Add(new Script_Mod { Id = 1, Name = "MP Vehicles", Description = "Allows MP vehicles to be spawned in SP", IsEnabled = true });
-            ScriptMods.Add(new Script_Mod { Id = 2, Name = "Turbo Boost", Description = "NFS like turbo boost for vehicles", IsEnabled = false });
-            ScriptMods.Add(new Script_Mod { Id = 1, Name = "MP Vehicles", Description = "Allows MP vehicles to be spawned in SP", IsEnabled = true });
-            ScriptMods.Add(new Script_Mod { Id = 2, Name = "Turbo Boost", Description = "NFS like turbo boost for vehicles", IsEnabled = false });
-            ScriptMods.Add(new Script_Mod { Id = 1, Name = "MP Vehicles", Description = "Allows MP vehicles to be spawned in SP", IsEnabled = true });
-            ScriptMods.Add(new Script_Mod { Id = 2, Name = "Turbo Boost", Description = "NFS like turbo boost for vehicles", IsEnabled = false });
-            ScriptMods.Add(new Script_Mod { Id = 1, Name = "MP Vehicles", Description = "Allows MP vehicles to be spawned in SP", IsEnabled = true });
-            ScriptMods.Add(new Script_Mod { Id = 2, Name = "Turbo Boost", Description = "NFS like turbo boost for vehicles", IsEnabled = false });
-
-            this.ScriptModsDataGrid.ItemsSource = ScriptMods;
-
+            await Task.Run(() => LoadScriptMods());
             await Task.Run(() => UserInteractionStartNow());    // enable the UI for the user when tasks finished.
+        }
+
+        private void LoadScriptMods()
+        {
+            ScriptMods = new ObservableCollection<Script_Mod>();
+            // Dummy data
+            ScriptMods.Add(new Script_Mod { Id = 1, Name = "MP Vehicles", Description = "Allows MP vehicles to be spawned in SP", IsEnabled = true });
+            ScriptMods.Add(new Script_Mod { Id = 2, Name = "Turbo Boost", Description = "NFS like turbo boost for vehicles", IsEnabled = false });
+            ScriptMods.Add(new Script_Mod { Id = 1, Name = "MP Vehicles", Description = "Allows MP vehicles to be spawned in SP", IsEnabled = true });
+            ScriptMods.Add(new Script_Mod { Id = 2, Name = "Turbo Boost", Description = "NFS like turbo boost for vehicles", IsEnabled = false });
+            ScriptMods.Add(new Script_Mod { Id = 1, Name = "MP Vehicles", Description = "Allows MP vehicles to be spawned in SP", IsEnabled = true });
+            ScriptMods.Add(new Script_Mod { Id = 2, Name = "Turbo Boost", Description = "NFS like turbo boost for vehicles", IsEnabled = false });
+            ScriptMods.Add(new Script_Mod { Id = 1, Name = "MP Vehicles", Description = "Allows MP vehicles to be spawned in SP", IsEnabled = true });
+            ScriptMods.Add(new Script_Mod { Id = 2, Name = "Turbo Boost", Description = "NFS like turbo boost for vehicles", IsEnabled = false });
+
+            this.Dispatcher.Invoke(() =>    // needed as MainWindow control is being modified from a non-main thread
+            {
+                this.ScriptModsDataGrid.ItemsSource = ScriptMods;
+            });
         }
 
         private void UserInteractionStartNow()
         {
-            this.Dispatcher.Invoke(() =>
+            this.Dispatcher.Invoke(() =>    // needed as MainWindow control is being modified from a non-main thread
             {
                 this.MainTabControl.IsEnabled = true;
 
