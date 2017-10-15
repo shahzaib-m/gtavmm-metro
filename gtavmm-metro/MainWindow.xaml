@@ -48,7 +48,7 @@
                         <DataGridTemplateColumn>
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
-                                    <Controls:ToggleSwitch Margin="20 20 20 20" OnLabel="" OffLabel="" IsChecked="{Binding Path=IsEnabled, Mode=TwoWay}"/>
+                                    <Controls:ToggleSwitch Margin="20 20 20 20" OnLabel="" OffLabel="" IsChecked="{Binding Path=IsEnabled, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>

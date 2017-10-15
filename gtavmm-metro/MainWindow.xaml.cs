@@ -96,7 +96,7 @@ namespace gtavmm_metro
         private void EditScriptModButton_Click(object sender, RoutedEventArgs e)
         {
             Script_Mod chosen_mod = ((FrameworkElement)sender).DataContext as Script_Mod; // the sender Script_Mod object from the datagrid
-            MessageBox.Show("Sender Name: " + chosen_mod.Name);
+            MessageBox.Show(String.Format("Sender Name: {0}, Enabled: {1}", chosen_mod.Name, chosen_mod.IsEnabled));
         }
     }
 }
