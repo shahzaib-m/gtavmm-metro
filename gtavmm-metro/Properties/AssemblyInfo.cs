@@ -8,7 +8,7 @@ using System.Windows;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("GTAV Mod Manager Metro")]
-[assembly: AssemblyDescription("Metro style modifications manager for Grand Theft Auto V,")]
+[assembly: AssemblyDescription("Metro style modifications manager for Grand Theft Auto V.")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("GTAV Mod Manager Metro")]
