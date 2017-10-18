@@ -1,21 +1,13 @@
-﻿using gtavmm_metro.Models;
+﻿using System;
+using System.Windows;
+using System.Threading.Tasks;
+using System.Windows.Controls;
+using System.Collections.ObjectModel;
+
 using MahApps.Metro.Controls;
 using MahApps.Metro.Controls.Dialogs;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+
+using gtavmm_metro.Models;
 
 namespace gtavmm_metro.Tabs
 {
@@ -50,7 +42,7 @@ namespace gtavmm_metro.Tabs
                 new ScriptMod { Id = 8, Name = "Turbo Boost", Description = "NFS like turbo boost for vehicles", IsEnabled = false }
             };
 
-            this.Dispatcher.Invoke(() =>    // needed as MainWindow control is being modified from a non-main thread
+            this.Dispatcher.Invoke(() =>    // needed as UC element is being modified from a non-main thread
             {
                 this.ScriptModsDataGrid.ItemsSource = ScriptMods;
             });
@@ -58,18 +50,19 @@ namespace gtavmm_metro.Tabs
 
         private void ViewScriptModFolder_Click(object sender, RoutedEventArgs e)
         {
-            ScriptMod chosen_mod = ((FrameworkElement)sender).DataContext as ScriptMod; // the sender Script_Mod object from the datagrid
+            ScriptMod chosen_mod = ((FrameworkElement)sender).DataContext as ScriptMod; // the sender ScriptMod object from the datagrid
             MessageBox.Show(String.Format("Sender Name: {0}, Enabled: {1}", chosen_mod.Name, chosen_mod.IsEnabled));
         }
 
         private async void DeleteScriptModButton_Click(object sender, RoutedEventArgs e)
         {
-            ScriptMod chosen_mod = ((FrameworkElement)sender).DataContext as ScriptMod; // the sender Script_Mod object from the datagrid
+            ScriptMod chosen_mod = ((FrameworkElement)sender).DataContext as ScriptMod; // the sender ScriptMod object from the datagrid
 
             string dialog_title = "Delete modification";
             string dialog_message = "Are you sure you want to delete the selected modification?";
             MetroDialogSettings dialog_settings = new MetroDialogSettings { AffirmativeButtonText = "Yes", NegativeButtonText = "No" };
-            var metroWindow = (Application.Current.MainWindow as MetroWindow);
+
+            MetroWindow metroWindow = (Application.Current.MainWindow as MetroWindow);  // needed to access ShowMessageAsync() method in MetroWindow
             MessageDialogResult result = await metroWindow.ShowMessageAsync(dialog_title, dialog_message, MessageDialogStyle.AffirmativeAndNegative, dialog_settings);
             if (result.ToString() == "Affirmative")
             {

@@ -1,25 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using MahApps.Metro.Controls;
-using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Media.Animation;
-using System.Reflection;
-using System.Diagnostics;
-using System.Collections.ObjectModel;
-using gtavmm_metro.Models;
-using MahApps.Metro.Controls.Dialogs;
+
+using MahApps.Metro.Controls;
+
 using gtavmm_metro.Tabs;
 
 namespace gtavmm_metro
@@ -53,7 +38,7 @@ namespace gtavmm_metro
 
         private void AssignUCToTabs()
         {
-            this.Dispatcher.Invoke(() => // needed as MainWindow control is being modified from a non-main thread
+            this.Dispatcher.Invoke(() => // needed as window control is being modified from a non-main thread
             {
                 // Assigning ScriptMods UserControl to Script Mods tab
                 this.ScriptModsUserControl = new ScriptModsUC();
@@ -67,7 +52,7 @@ namespace gtavmm_metro
 
         private void UserInteractionStartNow()
         {
-            this.Dispatcher.Invoke(() =>    // needed as MainWindow control is being modified from a non-main thread
+            this.Dispatcher.Invoke(() =>    // needed as window element is being modified from a non-main thread
             {
                 this.MainTabControl.IsEnabled = true;
 
