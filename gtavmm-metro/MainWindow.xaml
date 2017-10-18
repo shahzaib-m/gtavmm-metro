@@ -32,74 +32,10 @@
 
         <TabControl x:Name="MainTabControl" TabStripPlacement="Top" Grid.RowSpan="2" BorderThickness="0" IsEnabled="False"
                     Opacity="0.3" Padding="0 0 0 0" Controls:TabControlHelper.IsUnderlined="True">
-
-            <TabItem Header="Home" Padding="10 10 5 10" HorizontalAlignment="Right">
-                <Grid>
-                    <Image x:Name="MainBackground" Source="./Assets/Images/home_1.png" Stretch="UniformToFill" Grid.Row="0" OpacityMask="Black"/>
-                </Grid>
+            <TabItem x:Name="HomeTabItem" Header="Home" Padding="10 10 5 10" HorizontalAlignment="Right">
+                <Image x:Name="MainBackground" Source="./Assets/Images/home_1.png" Stretch="UniformToFill" Grid.Row="0" OpacityMask="Black"/>
             </TabItem>
-            <TabItem Header="Script Mods" Padding="10 10 5 10" HorizontalAlignment="Right">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="*" />
-                        <RowDefinition Height="80"/>
-                    </Grid.RowDefinitions>
-                    
-                    <DataGrid x:Name="ScriptModsDataGrid" CanUserAddRows="False" CanUserDeleteRows="False"
-                          ItemsSource="{Binding Path=ScriptMods, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                          AutoGenerateColumns="False" FontSize="20" FontWeight="Light"
-                          ScrollViewer.CanContentScroll="False" Grid.Row="0" HeadersVisibility="None">
-                        <!-- ScrollViewer.CanContentScroll="False" - smooth scrolling -->
-                        <DataGrid.Columns>
-                            <DataGridTemplateColumn Header="Enabled">
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <Controls:ToggleSwitch Margin="20 20 20 20" OnLabel="" OffLabel="" IsChecked="{Binding Path=IsEnabled, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                            </DataGridTemplateColumn>
-                            <DataGridTextColumn Header="Name" Binding="{Binding Path=Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
-                                <DataGridTextColumn.ElementStyle>
-                                    <Style TargetType="{x:Type TextBlock}">
-                                        <Setter Property="Margin" Value="5 20 20 20" />
-                                    </Style>
-                                </DataGridTextColumn.ElementStyle>
-                            </DataGridTextColumn>
-                            <DataGridTextColumn Header="Description" Binding="{Binding Path=Description, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
-                                <DataGridTextColumn.ElementStyle>
-                                    <Style TargetType="{x:Type TextBlock}">
-                                        <Setter Property="Margin" Value="5 20 20 20" />
-                                    </Style>
-                                </DataGridTextColumn.ElementStyle>
-                            </DataGridTextColumn>
-                            <DataGridTemplateColumn>
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <Button x:Name="ViewScriptModFolderButton" Content="{iconPacks:PackIconMaterial FolderOutline, Width=25, Height=25}"
-                                            Style="{DynamicResource MetroCircleButtonStyle}" Width="60" Height="60"
-                                            Click="ViewScriptModFolder_Click" />
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                            </DataGridTemplateColumn>
-                            <DataGridTemplateColumn>
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <Button x:Name="DeleteScriptModButton" Content="{iconPacks:PackIconMaterial Delete, Width=25, Height=25}"
-                                            Style="{DynamicResource MetroCircleButtonStyle}" Width="60" Height="60"
-                                            Click="DeleteScriptModButton_Click"  Margin="10 0 0 0" />
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                            </DataGridTemplateColumn>
-                        </DataGrid.Columns>
-                    </DataGrid>
-
-                    <Grid Grid.Row="1">
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                            <Button Content="{iconPacks:PackIconMaterial Plus, Width=25, Height=25}"
-                                    Style="{DynamicResource MetroCircleButtonStyle}" Margin="30 0" Width="60" Height="60" />
-                        </StackPanel>
-                    </Grid>
-                </Grid>
+            <TabItem x:Name="ScriptModsTabItem" Header="Script Mods" Padding="10 10 5 10" HorizontalAlignment="Right">
                 
             </TabItem>
             <TabItem Header="Asset Mods" Padding="10 10 5 10" HorizontalAlignment="Right">
@@ -114,23 +50,8 @@
             <TabItem Header="Help" Padding="10 10 5 10" HorizontalAlignment="Right">
 
             </TabItem>
-            <TabItem Header="About" Padding="10 10 5 10" HorizontalAlignment="Right">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="*" />
-                    </Grid.ColumnDefinitions>
-
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="*" />
-                        <RowDefinition Height="*" />
-                    </Grid.RowDefinitions>
-
-                    <StackPanel Grid.Column="0" Grid.Row="0" Margin="30 30" Grid.ColumnSpan="2">
-                        <TextBlock Text="{Binding ElementName=_this, Path=AppNameAndVer}" FontSize="40" FontWeight="Light"/>
-                        <TextBlock Text="Work in progress" FontSize="30" FontWeight="Light" />
-                    </StackPanel>
-                </Grid>
+            <TabItem x:Name="AboutTabItem" Header="About" Padding="10 10 5 10" HorizontalAlignment="Right">
+                
             </TabItem>
         </TabControl>
     </Grid>

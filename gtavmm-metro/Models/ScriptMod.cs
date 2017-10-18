@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace gtavmm_metro.Models
 {
-    class Script_Mod
+    public class ScriptMod
     {
         public int Id { get; set; }
         public string Name { get; set; }
