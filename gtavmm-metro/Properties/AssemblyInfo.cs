@@ -10,7 +10,7 @@ using System.Windows;
 [assembly: AssemblyTitle("GTAV Mod Manager Metro")]
 [assembly: AssemblyDescription("Metro style modifications manager for Grand Theft Auto V.")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("Shahzaib M")]
 [assembly: AssemblyProduct("GTAV Mod Manager Metro")]
 [assembly: AssemblyCopyright("Copyright Shahzaib Mirani ©  2017")]
 [assembly: AssemblyTrademark("")]

@@ -9,11 +9,6 @@ namespace gtavmm_metro.Tabs
     /// </summary>
     public partial class AboutUC : UserControl
     {
-        public AboutUC()
-        {
-            InitializeComponent();
-        }
-
         public string AppNameAndVer
         {
             get
@@ -25,6 +20,11 @@ namespace gtavmm_metro.Tabs
 
                 return String.Format("GTAV Mod Manager Metro {0}.{1}.{2}", major, minor, build);
             }
+        }
+
+        public AboutUC()
+        {
+            InitializeComponent();
         }
     }
 }

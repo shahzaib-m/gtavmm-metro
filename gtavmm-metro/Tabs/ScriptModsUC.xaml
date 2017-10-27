@@ -6,8 +6,9 @@
              xmlns:local="clr-namespace:gtavmm_metro.Tabs"
              xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
              xmlns:Controls="http://metro.mahapps.com/winfx/xaml/controls"
+             xmlns:simpleChildWindow="clr-namespace:MahApps.Metro.SimpleChildWindow;assembly=MahApps.Metro.SimpleChildWindow"
              mc:Ignorable="d" 
-             d:DesignHeight="600" d:DesignWidth="1100"
+             d:DesignHeight="670" d:DesignWidth="1220"
              
              x:Name="ScriptModsUserControl"
              Loaded="ScriptModsUserControl_Loaded">
@@ -17,58 +18,185 @@
             <RowDefinition Height="80"/>
         </Grid.RowDefinitions>
 
+        <Controls:ProgressRing Foreground="{DynamicResource AccentColorBrush}" x:Name="ScriptModsProgressRing" IsActive="{Binding ScriptModsProgressRingIsActive}"
+                               HorizontalAlignment="Center" VerticalAlignment="Center" Grid.RowSpan="2" />
+
+        <simpleChildWindow:ChildWindow
+            IsOpen="false"
+            HorizontalContentAlignment="Stretch"
+            VerticalContentAlignment="Stretch"
+            Padding="15"
+            Title="SCRIPT MODIFICATIONS SETTINGS"
+            x:Name="ScriptModSettingsChildWindow"
+            Grid.RowSpan="2"
+            ShowTitleBar="True">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="100" />
+                </Grid.RowDefinitions>
+                
+                <Button x:Name="ScriptModSettings_CloseButton" Click="ScriptModSettings_CloseButton_Click" Grid.Row="1" Grid.Column="1" 
+                        Width="120" Height="40" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="15 15">
+                    <TextBlock Text="DONE" FontSize="16" FontWeight="Light"/>
+                </Button>
+            </Grid>
+        </simpleChildWindow:ChildWindow>
+
         <DataGrid x:Name="ScriptModsDataGrid" CanUserAddRows="False" CanUserDeleteRows="False"
                           AutoGenerateColumns="False" FontSize="20" FontWeight="Light"
-                          ScrollViewer.CanContentScroll="False" Grid.Row="0" HeadersVisibility="None">
+                          ScrollViewer.CanContentScroll="False" Grid.Row="0" HeadersVisibility="None"
+                          Opacity="0.0" CellEditEnding="ScriptModsDataGrid_CellEditEnding"
+                  >
             <!-- ScrollViewer.CanContentScroll="False" - smooth scrolling -->
             <DataGrid.Columns>
                 <DataGridTemplateColumn Header="Enabled">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <Controls:ToggleSwitch Margin="20 20 20 20" OnLabel="" OffLabel="" IsChecked="{Binding Path=IsEnabled, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                            <Controls:ToggleSwitch x:Name="ScriptModDGIsEnabled" Margin="20 20 20 20" OnLabel="" OffLabel="" IsChecked="{Binding Path=IsEnabled, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsCheckedChanged="ScriptModDGIsEnabled_IsCheckedChanged">
+                                <Controls:ToggleSwitch.ToolTip>
+                                    <StackPanel Orientation="Vertical">
+                                        <StackPanel Orientation="Horizontal">
+                                            <Controls:ToggleSwitch OnLabel="" OffLabel="" IsChecked="True"/>
+                                            <TextBlock Margin="5 0 0 0" Text="This modification will be enabled when launching GTAV" VerticalAlignment="Center" />
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal">
+                                            <Controls:ToggleSwitch OnLabel="" OffLabel="" IsChecked="False"/>
+                                            <TextBlock Margin="5 0 0 0" Text="This modification will be disabled when launching GTAV" VerticalAlignment="Center" />
+                                        </StackPanel>
+                                    </StackPanel>
+                                </Controls:ToggleSwitch.ToolTip>
+                            </Controls:ToggleSwitch>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTextColumn Header="Name" Binding="{Binding Path=Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                <DataGridTextColumn Header="Name" Binding="{Binding Path=Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="330">
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="{x:Type TextBlock}">
                             <Setter Property="Margin" Value="5 20 20 20" />
+                            <Setter Property="HorizontalAlignment" Value="Center" />
+                            <Setter Property="TextWrapping" Value="Wrap" />
                         </Style>
                     </DataGridTextColumn.ElementStyle>
+                    <DataGridTextColumn.EditingElementStyle>
+                        <Style TargetType="{x:Type TextBox}">
+                            <Setter Property="Margin" Value="5 20 20 20" />
+                            <Setter Property="MaxLength" Value="30" />
+                            <Setter Property="TextWrapping" Value="Wrap" />
+                            <Setter Property="HorizontalAlignment" Value="Center" />
+                        </Style>
+                    </DataGridTextColumn.EditingElementStyle>
                 </DataGridTextColumn>
-                <DataGridTextColumn Header="Description" Binding="{Binding Path=Description, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                <DataGridTextColumn Header="Description" Binding="{Binding Path=Description, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="*">
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="{x:Type TextBlock}">
                             <Setter Property="Margin" Value="5 20 20 20" />
+                            <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
                         </Style>
                     </DataGridTextColumn.ElementStyle>
+                    <DataGridTextColumn.EditingElementStyle>
+                        <Style TargetType="{x:Type TextBox}">
+                            <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                            <Setter Property="Margin" Value="5 20 20 20" />
+                            <!-- limit description text maxlength if needed -->
+                            <!-- <Setter Property="MaxLength" Value="60" /> -->
+                        </Style>
+                    </DataGridTextColumn.EditingElementStyle>
                 </DataGridTextColumn>
                 <DataGridTemplateColumn>
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <Button x:Name="ViewScriptModFolderButton" Content="{iconPacks:PackIconMaterial FolderOutline, Width=25, Height=25}"
                                             Style="{DynamicResource MetroCircleButtonStyle}" Width="60" Height="60"
-                                            Click="ViewScriptModFolder_Click" />
+                                            Click="ViewScriptModFolder_Click">
+                                <Button.ToolTip>
+                                    <StackPanel Orientation="Horizontal">
+                                        <iconPacks:PackIconMaterial Kind="FolderOutline" Margin="0 5" />
+                                        <TextBlock Margin="5 0 0 0" Text="Open this modification's folder" VerticalAlignment="Center" />
+                                    </StackPanel>
+                                </Button.ToolTip>
+                            </Button>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
                 <DataGridTemplateColumn>
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <Button x:Name="DeleteScriptModButton" Content="{iconPacks:PackIconMaterial Delete, Width=25, Height=25}"
+                            <Button x:Name="RemoveScriptModButton" Content="{iconPacks:PackIconMaterial Delete, Width=25, Height=25}"
                                             Style="{DynamicResource MetroCircleButtonStyle}" Width="60" Height="60"
-                                            Click="DeleteScriptModButton_Click"  Margin="10 0 0 0" />
+                                            Click="RemoveScriptModButton_Click"  Margin="10 0 0 0">
+                                <Button.ToolTip>
+                                    <StackPanel Orientation="Horizontal">
+                                        <iconPacks:PackIconMaterial Kind="Delete" Margin="0 5" />
+                                        <TextBlock Margin="5 0 0 0" Text="Remove this modification but preserve the files" VerticalAlignment="Center" />
+                                    </StackPanel>
+                                </Button.ToolTip>
+                            </Button>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn>
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Button x:Name="RemoveAndDeleteScriptModButton" Content="{iconPacks:PackIconMaterial DeleteForever, Width=25, Height=25}"
+                                            Style="{DynamicResource MetroCircleButtonStyle}" Width="60" Height="60"
+                                            Click="RemoveAndDeleteScriptModButton_Click" Margin="10 0 50 0">
+                                <Button.ToolTip>
+                                    <StackPanel Orientation="Horizontal">
+                                        <iconPacks:PackIconMaterial Kind="DeleteForever" Margin="0 5" />
+                                        <TextBlock Margin="5 0 0 0" Text="Remove this modification and delete all of its files" VerticalAlignment="Center" />
+                                    </StackPanel>
+                                </Button.ToolTip>
+                            </Button>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
             </DataGrid.Columns>
         </DataGrid>
 
-        <Grid Grid.Row="1">
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button Content="{iconPacks:PackIconMaterial Plus, Width=25, Height=25}"
-                        Style="{DynamicResource MetroCircleButtonStyle}" Margin="30 0" Width="60" Height="60" />
-            </StackPanel>
+        <Grid Grid.Row="1" Background="{DynamicResource AccentColorBrush2}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Grid.Column="0">
+                    
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Grid.Column="1">
+                    <Button Style="{DynamicResource MetroCircleButtonStyle}" Margin="10 0 0 0"
+                        Content="{iconPacks:PackIconModern Settings, Width=25, Height=25}" Width="60" Height="60"
+                        x:Name="ScriptModSettingsButton" Click="ScriptModSettingsButton_Click">
+                        <Button.ToolTip>
+                            <StackPanel Orientation="Horizontal">
+                                <iconPacks:PackIconModern Kind="Settings" Margin="0 5" />
+                                <TextBlock Margin="5 0 0 0" Text="View and modify settings related to script modifications" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button.ToolTip>
+                    </Button>
+                    <Button Style="{DynamicResource MetroCircleButtonStyle}" Margin="10 0 0 0"
+                        Content="{iconPacks:PackIconMaterial FolderMultipleOutline, Width=25, Height=25}" Width="60" Height="60">
+                        <Button.ToolTip>
+                            <StackPanel Orientation="Horizontal">
+                                <iconPacks:PackIconMaterial Kind="FolderMultipleOutline" Margin="0 5" />
+                                <TextBlock Margin="5 0 0 0" Text="View the folder where all script modifications are contained" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button.ToolTip>
+                    </Button>
+                    <Button Content="{iconPacks:PackIconMaterial Plus, Width=25, Height=25}"
+                        Style="{DynamicResource MetroCircleButtonStyle}" Margin="10 0 30 0" Width="60" Height="60"
+                        x:Name="AddNewScriptModButton" Click="AddNewScriptModButton_Click">
+                        <Button.ToolTip>
+                            <StackPanel Orientation="Horizontal">
+                                <iconPacks:PackIconMaterial Kind="Plus" Margin="0 5" />
+                                <TextBlock Margin="5 0 0 0" Text="Create a new modification" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button.ToolTip>
+                    </Button>
+                </StackPanel>
+            </Grid>
         </Grid>
     </Grid>
 </UserControl>
