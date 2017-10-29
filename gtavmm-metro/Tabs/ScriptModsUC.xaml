@@ -58,11 +58,11 @@
                                     <StackPanel Orientation="Vertical">
                                         <StackPanel Orientation="Horizontal">
                                             <Controls:ToggleSwitch OnLabel="" OffLabel="" IsChecked="True"/>
-                                            <TextBlock Margin="5 0 0 0" Text="This modification will be enabled when launching GTAV" VerticalAlignment="Center" />
+                                            <TextBlock Margin="5 0 0 0" Text="This modification will be copied into GTAV's folder when modifications are loaded" VerticalAlignment="Center" />
                                         </StackPanel>
                                         <StackPanel Orientation="Horizontal">
                                             <Controls:ToggleSwitch OnLabel="" OffLabel="" IsChecked="False"/>
-                                            <TextBlock Margin="5 0 0 0" Text="This modification will be disabled when launching GTAV" VerticalAlignment="Center" />
+                                            <TextBlock Margin="5 0 0 0" Text="This modification will not copied into GTAV's folder when modifications are loaded" VerticalAlignment="Center" />
                                         </StackPanel>
                                     </StackPanel>
                                 </Controls:ToggleSwitch.ToolTip>
@@ -70,7 +70,7 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTextColumn Header="Name" Binding="{Binding Path=Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="330">
+                <DataGridTextColumn Header="Name" Binding="{Binding Path=Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" Width="330">
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="{x:Type TextBlock}">
                             <Setter Property="Margin" Value="5 20 20 20" />
@@ -99,7 +99,7 @@
                             <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
                             <Setter Property="Margin" Value="5 20 20 20" />
                             <!-- limit description text maxlength if needed -->
-                            <!-- <Setter Property="MaxLength" Value="60" /> -->
+                            <Setter Property="MaxLength" Value="600" />
                         </Style>
                     </DataGridTextColumn.EditingElementStyle>
                 </DataGridTextColumn>
@@ -177,7 +177,8 @@
                         </Button.ToolTip>
                     </Button>
                     <Button Style="{DynamicResource MetroCircleButtonStyle}" Margin="10 0 0 0"
-                        Content="{iconPacks:PackIconMaterial FolderMultipleOutline, Width=25, Height=25}" Width="60" Height="60">
+                        Content="{iconPacks:PackIconMaterial FolderMultipleOutline, Width=25, Height=25}" Width="60" Height="60"
+                            x:Name="ViewScriptModsRootFolderButton" Click="ViewScriptModsRootFolderButton_Click">
                         <Button.ToolTip>
                             <StackPanel Orientation="Horizontal">
                                 <iconPacks:PackIconMaterial Kind="FolderMultipleOutline" Margin="0 5" />

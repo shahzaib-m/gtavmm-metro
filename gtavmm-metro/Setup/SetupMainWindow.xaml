@@ -1,0 +1,21 @@
+﻿<Controls:MetroWindow x:Class="gtavmm_metro.Setup.SetupMainWindow"
+                      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                      xmlns:Controls="http://metro.mahapps.com/winfx/xaml/controls"
+                      x:Name="Setup"
+                      Height="400"
+                      Width="700"
+                      
+                      ShowTitleBar="False"
+                      WindowStyle="None"
+                      WindowStartupLocation="CenterScreen"
+                      ResizeMode="CanMinimize"
+                      
+                      Loaded="Setup_Loaded"
+                      MouseDown="Window_MouseDown">
+    <Border Margin="10 10">
+        <Controls:TransitioningContentControl x:Name="SetupContainer">
+
+        </Controls:TransitioningContentControl>
+    </Border>
+</Controls:MetroWindow>

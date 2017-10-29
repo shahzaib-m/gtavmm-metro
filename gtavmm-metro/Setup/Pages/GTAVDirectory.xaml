@@ -1,0 +1,88 @@
+﻿<UserControl x:Class="gtavmm_metro.Setup.Pages.GTAVDirectory"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+             xmlns:Controls="http://metro.mahapps.com/winfx/xaml/controls"
+             mc:Ignorable="d" 
+             d:DesignHeight="400" d:DesignWidth="700"
+             
+             x:Name="GTAVDirectorySelect"
+             Loaded="GTAVDirectorySelect_Loaded">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="7*" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Grid x:Name="GTAVDirectoryGrid">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="100"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <Grid Grid.Row="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="80" />
+                </Grid.ColumnDefinitions>
+
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="30" />
+                </Grid.RowDefinitions>
+
+                <TextBlock Text="Grand Theft Auto V Directory" FontWeight="Light" FontSize="20" Grid.Row="0" Margin="0 20 0 0"/>
+                <TextBox x:Name="GTAVDirectoryTextBlock" Grid.Row="1" Grid.Column="0" VerticalContentAlignment="Center" FontSize="13" IsReadOnly="True" Height="28"
+                         Controls:TextBoxHelper.Watermark="Could not automatically detect GTAV's location. Select it manually..."/>
+                <Button Grid.Column="1" Grid.Row="1" Margin="10 0 0 0" x:Name="BrowseGTAVDirectory" Click="BrowseGTAVDirectory_Click">
+                    <TextBlock Text="BROWSE" FontWeight="Light" FontSize="12" ToolTip="Select the folder where Grand Theft Auto V is located"/>
+                </Button>
+            </Grid>
+
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="80" />
+                </Grid.ColumnDefinitions>
+
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="30" />
+                </Grid.RowDefinitions>
+
+                <TextBlock Text="Grand Theft Auto V DRM/Copy" FontWeight="Light" FontSize="20" Grid.Row="0" Margin="0 60 0 0"/>
+                <StackPanel Grid.Row="0" Margin="0 110 0 20" Orientation="Horizontal" HorizontalAlignment="Center" Grid.ColumnSpan="2"
+                            x:Name="DRMChooserPanel" IsEnabled="False">
+                    <RadioButton x:Name="SteamDRM_Radio" ToolTip="Select this if you have the Steam copy of Grand Theft Auto V">
+                        <Label>
+                            <StackPanel Orientation="Horizontal">
+                                <iconPacks:PackIconMaterial Kind="Steam" Width="30" Height="30" />
+                                <TextBlock Text="Steam" FontWeight="Normal" FontSize="18" Width="80" Margin="10 0 0 0"/>
+                            </StackPanel>
+                        </Label>
+                    </RadioButton>
+                    <RadioButton Margin="10 0 0 0" Name="RockstarDRM_Radio"  ToolTip="Select this if you have the Rockstar Warehouse copy of Grand Theft Auto V">
+                        <Label>
+                            <StackPanel Orientation="Horizontal">
+                                <Image Source="pack://application:,,,/Assets/Logos/Rockstar_Games_Logo.svg.png" Width="30" Height="30" RenderOptions.BitmapScalingMode="HighQuality"/>
+                                <TextBlock Text="Rockstar" FontWeight="Normal" FontSize="18" Width="80" Margin="10 0 0 0"/>
+                            </StackPanel>
+                        </Label>
+                    </RadioButton>
+                </StackPanel>
+            </Grid>
+        </Grid>
+
+        <Button HorizontalAlignment="Left" Width="50" Height="50" Padding="0 0 0 0" Grid.Row="1"
+                Style="{DynamicResource MetroCircleButtonStyle}" Content="{iconPacks:PackIconMaterial ArrowLeft, Width=20, Height=20}"
+                x:Name="GoBack" Click="GoBack_Click" ToolTip="Go Back">
+        </Button>
+
+        <Button HorizontalAlignment="Right" Width="50" Height="50" Padding="0 0 0 0" Grid.Row="1" IsEnabled="False"
+                Style="{DynamicResource MetroCircleButtonStyle}" Content="{iconPacks:PackIconMaterial ArrowRight, Width=20, Height=20}"
+                x:Name="GoForward" Click="GoForward_Click" ToolTip="Next">
+        </Button>
+    </Grid>
+</UserControl>

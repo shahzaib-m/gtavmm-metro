@@ -16,6 +16,7 @@ using MahApps.Metro.Controls;
 using MahApps.Metro.Controls.Dialogs;
 
 using gtavmm_metro.Models;
+using gtavmm_metro.Properties;
 
 namespace gtavmm_metro.Tabs
 {
@@ -41,7 +42,7 @@ namespace gtavmm_metro.Tabs
         {
             if (FirstLoad)
             {
-                this.ScriptModsRootFolder = Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location), "ScriptMods");   // temp
+                this.ScriptModsRootFolder = Settings.Default.ScriptModsDirectory;
 
                 await Task.Run(() => this.LoadScriptMods());
 
@@ -51,11 +52,6 @@ namespace gtavmm_metro.Tabs
 
                 FirstLoad = false;
             }
-        }
-
-        private void AddNewScriptModButton_Click(object sender, RoutedEventArgs e)
-        {
-            this.ScriptMods.Add(ScriptMod.CreateScriptMod(this.ScriptModsRootFolder, "New Mod Name", "New Mod Description", false));   // temp
         }
 
         private void ViewScriptModFolder_Click(object sender, RoutedEventArgs e)
@@ -94,7 +90,7 @@ namespace gtavmm_metro.Tabs
 
                 foreach (ScriptMod scriptMod in selectedScriptMods)
                 {
-                    scriptMod.RemoveAndOrDeleteScriptMod(this.ScriptModsRootFolder, false);  // temp
+                    scriptMod.RemoveAndOrDeleteScriptMod(this.ScriptModsRootFolder, false);
                     this.ScriptMods.Remove(scriptMod);
                 }
 
@@ -130,9 +126,9 @@ namespace gtavmm_metro.Tabs
                 this.ScriptModsDataGrid.IsEnabled = false;
                 this.ScriptModsProgressRingIsActive = true;
 
-                foreach(ScriptMod scriptMod in selectedScriptMods)
+                foreach (ScriptMod scriptMod in selectedScriptMods)
                 {
-                    scriptMod.RemoveAndOrDeleteScriptMod(this.ScriptModsRootFolder, true);  // temp
+                    scriptMod.RemoveAndOrDeleteScriptMod(this.ScriptModsRootFolder, true);
                     this.ScriptMods.Remove(scriptMod);
                 }
 
@@ -145,8 +141,18 @@ namespace gtavmm_metro.Tabs
         {
             ScriptMod editedScriptMod = e.Row.Item as ScriptMod;
 
-            await Task.Run(() => editedScriptMod.UpdateScriptMod(this.ScriptModsRootFolder, editedScriptMod.Name, // temp
-                                                                    editedScriptMod.Description, editedScriptMod.IsEnabled));
+            string whichColumn = e.Column.Header as string;
+            if (whichColumn == "Name")
+            {
+                if (String.IsNullOrWhiteSpace(editedScriptMod.Name))
+                {
+                    e.Cancel = true;
+                    return;
+                }
+            }
+
+            await Task.Run(() => editedScriptMod.UpdateScriptMod(this.ScriptModsRootFolder, editedScriptMod.Name,
+                                                    editedScriptMod.Description, editedScriptMod.IsEnabled));
         }
 
         private async void ScriptModDGIsEnabled_IsCheckedChanged(object sender, EventArgs e)
@@ -154,9 +160,29 @@ namespace gtavmm_metro.Tabs
             if (!this.FirstLoad)
             {
                 ScriptMod editedScriptMod = ((FrameworkElement)sender).DataContext as ScriptMod; // the sender ScriptMod object from the datagrid
-                await Task.Run(() => editedScriptMod.UpdateScriptMod(this.ScriptModsRootFolder, editedScriptMod.Name,  // temp;
+                await Task.Run(() => editedScriptMod.UpdateScriptMod(this.ScriptModsRootFolder, editedScriptMod.Name,
                                                                         editedScriptMod.Description, editedScriptMod.IsEnabled));
             }
+        }
+
+        // Bottom bar buttons
+        private void ScriptModSettingsButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.ScriptModSettingsChildWindow.IsOpen = true;
+        }
+        private void ScriptModSettings_CloseButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.ScriptModSettingsChildWindow.IsOpen = false;
+        }
+
+        private void ViewScriptModsRootFolderButton_Click(object sender, RoutedEventArgs e)
+        {
+            Process.Start(this.ScriptModsRootFolder);
+        }
+
+        private void AddNewScriptModButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.ScriptMods.Add(ScriptMod.CreateScriptMod(this.ScriptModsRootFolder, "New Mod Name", "New Mod Description", false));
         }
         #endregion
 
@@ -165,20 +191,10 @@ namespace gtavmm_metro.Tabs
         {
             this.Dispatcher.Invoke(() =>
             {
-                 this.ScriptMods = ScriptMod.GetAllScriptMods(this.ScriptModsRootFolder);   // temp;
-                 this.ScriptModsDataGrid.ItemsSource = this.ScriptMods;
+                this.ScriptMods = ScriptMod.GetAllScriptMods(this.ScriptModsRootFolder);
+                this.ScriptModsDataGrid.ItemsSource = this.ScriptMods;
             });
         }
         #endregion
-
-        private void ScriptModSettingsButton_Click(object sender, RoutedEventArgs e)
-        {
-            this.ScriptModSettingsChildWindow.IsOpen = true;
-        }
-
-        private void ScriptModSettings_CloseButton_Click(object sender, RoutedEventArgs e)
-        {
-            this.ScriptModSettingsChildWindow.IsOpen = false;
-        }
     }
 }

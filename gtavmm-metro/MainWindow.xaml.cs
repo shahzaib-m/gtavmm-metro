@@ -24,29 +24,13 @@ namespace gtavmm_metro
         public MainWindow()
         {
             InitializeComponent();
+            Application.Current.MainWindow = this;
         }
 
 
         #region MainWindow Events
         private async void MetroWindow_ContentRendered(object sender, EventArgs e)
         {
-            // perform all tasks (check files, load mods, etc.) here while the user is shown a progress ring
-            if (Settings.Default.IsFirstLaunch) // test check, implement proper first time setup TODO
-            {
-                // temp ----------------------------------- fix this
-                MessageBox.Show("First launch");    
-                Directory.CreateDirectory("ScriptMods");
-
-                for (int i = 0; i <= 4; i++)
-                {
-                    ScriptMod.CreateScriptMod(@"ScriptMods", "GFX Enhancements", "Reshade Profile 1 (Test)"); // temp dir
-                    ScriptMod.CreateScriptMod(@"ScriptMods", "Turbo Boost", "Turbo boost mod for vehicles (Test)", false); // temp dir
-                }
-                // ---------------------------------------- fix this
-
-                Settings.Default.IsFirstLaunch = false;
-            }
-
             await this.Init();   // initialize once the window is rendered
         }
 

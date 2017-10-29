@@ -34,5 +34,53 @@ namespace gtavmm_metro.Properties {
                 this["IsFirstLaunch"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string GTAVDirectory {
+            get {
+                return ((string)(this["GTAVDirectory"]));
+            }
+            set {
+                this["GTAVDirectory"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool IsSteamDRM {
+            get {
+                return ((bool)(this["IsSteamDRM"]));
+            }
+            set {
+                this["IsSteamDRM"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string ScriptModsDirectory {
+            get {
+                return ((string)(this["ScriptModsDirectory"]));
+            }
+            set {
+                this["ScriptModsDirectory"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string AssetModsDirectory {
+            get {
+                return ((string)(this["AssetModsDirectory"]));
+            }
+            set {
+                this["AssetModsDirectory"] = value;
+            }
+        }
     }
 }

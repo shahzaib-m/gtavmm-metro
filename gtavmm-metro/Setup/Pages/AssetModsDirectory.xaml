@@ -1,0 +1,59 @@
+﻿<UserControl x:Class="gtavmm_metro.Setup.Pages.AssetModsDirectory"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+             xmlns:Controls="http://metro.mahapps.com/winfx/xaml/controls"
+             mc:Ignorable="d" 
+             d:DesignHeight="400" d:DesignWidth="700"
+             
+             x:Name="AssetModsDirectorySelect">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="7*" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Grid x:Name="AssetModsDirectoryGrid">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="100"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <Grid Grid.Row="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="80" />
+                </Grid.ColumnDefinitions>
+
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="30" />
+                </Grid.RowDefinitions>
+
+                <TextBlock Text="Your Asset Modifications Directory" FontWeight="Light" FontSize="20" Grid.Row="0" Margin="0 20 0 0"/>
+                <TextBox x:Name="AssetModsDirectoryTextBlock" Grid.Row="1" Grid.Column="0" VerticalContentAlignment="Center" FontSize="13" IsReadOnly="True" Height="28"
+                             Controls:TextBoxHelper.Watermark="Select an empty directory..."/>
+                <Button Grid.Column="1" Grid.Row="1" Margin="10 0 0 0" x:Name="BrowseAssetModsDirectory" Click="BrowseAssetModsDirectory_Click"
+                        ToolTip="Select an empty folder where you would like this application to store and look for asset modifications.">
+                    <TextBlock Text="BROWSE" FontWeight="Light" FontSize="12"/>
+                </Button>
+            </Grid>
+
+            <TextBlock Grid.Row="1" Margin="0 30" TextWrapping="Wrap" FontWeight="Light" FontSize="15">
+                These are the modified package files (.rpf) that modify/add/remove assets such as textures, audio, vehicles, etc. Please ensure that the folder you select is <Bold>empty</Bold> and ideally on the same drive as GTAV to ensure quick loading and unloading of modifications to and from GTAV's directory.
+            </TextBlock>
+        </Grid>
+
+        <Button HorizontalAlignment="Left" Width="50" Height="50" Padding="0 0 0 0" Grid.Row="1"
+                Style="{DynamicResource MetroCircleButtonStyle}" Content="{iconPacks:PackIconMaterial ArrowLeft, Width=20, Height=20}"
+                x:Name="GoBack" Click="GoBack_Click" ToolTip="Go Back">
+        </Button>
+
+        <Button HorizontalAlignment="Right" Width="50" Height="50" Padding="0 0 0 0" Grid.Row="1" IsEnabled="False"
+                Style="{DynamicResource MetroCircleButtonStyle}" Content="{iconPacks:PackIconMaterial Check, Width=20, Height=20}"
+                x:Name="Finish" Click="Finish_Click" ToolTip="Finish">
+        </Button>
+    </Grid>
+</UserControl>

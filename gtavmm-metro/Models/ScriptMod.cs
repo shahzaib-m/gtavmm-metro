@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.ComponentModel;
 using System.Collections.ObjectModel;
 
 using Newtonsoft.Json;
@@ -54,7 +55,7 @@ namespace gtavmm_metro.Models
         {
             ObservableCollection<ScriptMod> result = new ObservableCollection<ScriptMod>();
 
-            DirectoryInfo scriptModsRootFolder = new DirectoryInfo(@"ScriptMods"); // temp
+            DirectoryInfo scriptModsRootFolder = new DirectoryInfo(scriptModsRootPath);
             string fileContent;
             FileInfo[] scriptModFiles = scriptModsRootFolder.GetFiles("*.json");
             foreach (FileInfo file in scriptModFiles)

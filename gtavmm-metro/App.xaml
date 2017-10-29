@@ -1,8 +1,8 @@
 ﻿<Application x:Class="gtavmm_metro.App"
-             x:Name="gtavmm_metro"
+             x:Name="gtavmmapp"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             StartupUri="MainWindow.xaml">
+             Startup="gtavmmapp_Startup">
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
