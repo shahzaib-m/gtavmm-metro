@@ -1,14 +1,14 @@
 ﻿using System;
-using System.IO;
 using System.Threading.Tasks;
 
 using System.Windows;
+using System.Windows.Media.Imaging;
 using System.Windows.Media.Animation;
 
+using MahApps.Metro;
 using MahApps.Metro.Controls;
 
 using gtavmm_metro.Tabs;
-using gtavmm_metro.Models;
 using gtavmm_metro.Properties;
 
 namespace gtavmm_metro
@@ -18,6 +18,7 @@ namespace gtavmm_metro
     /// </summary>
     public partial class MainWindow : MetroWindow
     {
+        private HomeUC HomeUserControl;
         private ScriptModsUC ScriptModsUserControl;
         private AboutUC AboutUserControl;
 
@@ -25,6 +26,9 @@ namespace gtavmm_metro
         {
             InitializeComponent();
             Application.Current.MainWindow = this;
+
+            Tuple<AppTheme, Accent> appStyle = ThemeManager.DetectAppStyle(Application.Current);        // temp
+            this.Icon = new BitmapImage(new Uri(String.Format("pack://application:,,,/Assets/Icons/{0}.ico", appStyle.Item2.Name)));   // temp
         }
 
 
@@ -62,6 +66,10 @@ namespace gtavmm_metro
             this.Dispatcher.Invoke(() => // needed as window elements are being modified from a non-main thread
             {
                 // Assigning ScriptMods UserControl to Script Mods tab
+                this.HomeUserControl = new HomeUC();
+                this.HomeTabItem.Content = this.HomeUserControl;
+
+                // Assigning ScriptMods UserControl to Script Mods tab
                 this.ScriptModsUserControl = new ScriptModsUC();
                 this.ScriptModsTabItem.Content = this.ScriptModsUserControl;
 
@@ -80,8 +88,8 @@ namespace gtavmm_metro
             {
                 this.MainTabControl.IsEnabled = true;
 
-                DoubleAnimation smooth_fadein = new DoubleAnimation(0.3, 1.0, new Duration(new TimeSpan(0, 0, 0, 0, 300)));
-                this.MainTabControl.BeginAnimation(OpacityProperty, smooth_fadein);
+                DoubleAnimation smoothFadeIn = new DoubleAnimation(0.3, 1.0, new Duration(new TimeSpan(0, 0, 0, 0, 300)));
+                this.MainTabControl.BeginAnimation(OpacityProperty, smoothFadeIn);
 
                 this.MainProgressRing.IsActive = false;
             });

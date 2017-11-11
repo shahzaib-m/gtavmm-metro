@@ -10,9 +10,9 @@ namespace gtavmm_metro
     /// </summary>
     public partial class App : Application
     {
-        private void gtavmmapp_Startup(object sender, StartupEventArgs e)
+        private void gtavmm_metro_Startup(object sender, StartupEventArgs e)
         {
-            if (Settings.Default.IsFirstLaunch)   
+            if (Settings.Default.IsFirstLaunch)
             {
                 SetupMainWindow setupWindow = new SetupMainWindow();
                 setupWindow.Show();
@@ -20,7 +20,7 @@ namespace gtavmm_metro
             else
             {
                 MainWindow mainWindow = new MainWindow();
-                Application.Current.MainWindow = mainWindow;
+                Current.MainWindow = mainWindow;
                 mainWindow.Show();
             }
         }

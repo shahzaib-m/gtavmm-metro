@@ -55,7 +55,10 @@
                 <TextBlock Text="Grand Theft Auto V DRM/Copy" FontWeight="Light" FontSize="20" Grid.Row="0" Margin="0 60 0 0"/>
                 <StackPanel Grid.Row="0" Margin="0 110 0 20" Orientation="Horizontal" HorizontalAlignment="Center" Grid.ColumnSpan="2"
                             x:Name="DRMChooserPanel" IsEnabled="False">
-                    <RadioButton x:Name="SteamDRM_Radio" ToolTip="Select this if you have the Steam copy of Grand Theft Auto V">
+                    <RadioButton x:Name="SteamDRM_Radio">
+                        <RadioButton.ToolTip>
+                            <TextBlock>Select this if you have the <Bold>Steam</Bold> copy of Grand Theft Auto V</TextBlock>
+                        </RadioButton.ToolTip>
                         <Label>
                             <StackPanel Orientation="Horizontal">
                                 <iconPacks:PackIconMaterial Kind="Steam" Width="30" Height="30" />
@@ -63,7 +66,10 @@
                             </StackPanel>
                         </Label>
                     </RadioButton>
-                    <RadioButton Margin="10 0 0 0" Name="RockstarDRM_Radio"  ToolTip="Select this if you have the Rockstar Warehouse copy of Grand Theft Auto V">
+                    <RadioButton Margin="10 0 0 0" Name="RockstarDRM_Radio">
+                        <RadioButton.ToolTip>
+                            <TextBlock>Select this if you have the <Bold>Rockstar Warehouse</Bold> copy of Grand Theft Auto V</TextBlock>
+                        </RadioButton.ToolTip>
                         <Label>
                             <StackPanel Orientation="Horizontal">
                                 <Image Source="pack://application:,,,/Assets/Logos/Rockstar_Games_Logo.svg.png" Width="30" Height="30" RenderOptions.BitmapScalingMode="HighQuality"/>

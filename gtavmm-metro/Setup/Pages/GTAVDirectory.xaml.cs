@@ -5,9 +5,11 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 
-using Microsoft.WindowsAPICodePack.Dialogs;
 using System.Windows.Media;
 using System.Collections.Generic;
+
+using Microsoft.WindowsAPICodePack.Dialogs;
+
 using gtavmm_metro.Models;
 
 namespace gtavmm_metro.Setup.Pages

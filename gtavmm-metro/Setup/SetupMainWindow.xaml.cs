@@ -55,10 +55,10 @@ namespace gtavmm_metro.Setup
             Settings.Default.IsSteamDRM = this.GTAVDirectoryPage.IsSteamDRM;
             Settings.Default.ScriptModsDirectory = this.ScriptModsDirectoryPage.ScriptModsDirectoryConfirmedLocation.FullName;
             Settings.Default.AssetModsDirectory = this.AssetModsDirectoryPage.AssetModsDirectoryConfirmedLocation.FullName;
-
             Settings.Default.Save();
 
-            ScriptMod.CreateScriptMod(Settings.Default.ScriptModsDirectory, "Script Hook V", "Script Hook V by Alexander Blade (not included, please download yourself.)", false); // temp dir
+            ScriptMod.CreateScriptMod(Settings.Default.ScriptModsDirectory, "Script Hook V + ASI Loader", "Script Hook V + ASI Loader © - not included, please download yourself. Required to load most modifications (NOT for GTA Online). Should be up-to-date as new GTAV updates are released to ensure compatibility and avoid crashes.", false);
+            ScriptMod.CreateScriptMod(Settings.Default.ScriptModsDirectory, "OpenIV.ASI", "OpenIV.ASI © - not included, please download yourself (usually included with OpenIV ©.) Required to load asset mods (NOT for GTA Online), the modified .rpf files that go inside the \"mods\" folder in the GTAV directory instead of the original files.", false);
 
             MainWindow mainWindow = new MainWindow();
             mainWindow.Show();
