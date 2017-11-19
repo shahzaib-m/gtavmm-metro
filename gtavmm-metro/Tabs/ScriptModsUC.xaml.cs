@@ -17,6 +17,7 @@ using MahApps.Metro.Controls.Dialogs;
 
 using gtavmm_metro.Models;
 using gtavmm_metro.Properties;
+using System.Text.RegularExpressions;
 
 namespace gtavmm_metro.Tabs
 {
@@ -29,7 +30,6 @@ namespace gtavmm_metro.Tabs
         private ScriptModAPI ScriptModAPI { get; set; }
         public string ScriptModsRootFolder { get; set; }
         private bool FirstLoad { get; set; } = true;
-        private bool OrderIndexUpdateInProgress { get; set; } = false;
         private bool ScriptModsProgressRingIsActive { get; set; } = true;
 
         public ScriptModsUC()
@@ -85,12 +85,12 @@ namespace gtavmm_metro.Tabs
             string dialogMessage;
             if (!multiSelection)
             {
-                dialogTitle = "Remove and Delete Modification";
+                dialogTitle = "Remove and delete modification";
                 dialogMessage = "Are you sure you want to remove the selected modification and delete all of its files? Note that the modification folder and everything inside it will be deleted. Proceed with caution.";
             }
             else
             {
-                dialogTitle = "Remove and Delete Selected Modifications";
+                dialogTitle = "Remove and delete selected modifications";
                 dialogMessage = "Are you sure you want to remove the selected modifications and delete all of their files? Note that the selected modifications' folders and everything inside them will be deleted. Proceed with caution.";
             }
 
@@ -112,16 +112,16 @@ namespace gtavmm_metro.Tabs
                     while (!deleteSuccess && userWantsToRetry)
                     {
                         MessageDialogResult deleteFailResult = await metroWindow.ShowMessageAsync(String.Format(errorDialogTitle, scriptMod.Name), errorDialogMessage, MessageDialogStyle.AffirmativeAndNegative, dialogSettings);
-                        if (deleteFailResult == MessageDialogResult.Affirmative)
-                        {
-                            userWantsToRetry = true;
-                        }
-                        else
+                        if (deleteFailResult == MessageDialogResult.Negative)
                         {
                             userWantsToRetry = false;
                         }
+                        else
+                        {
+                            deleteSuccess = await this.ScriptModAPI.RemoveAndDeleteScriptMod(scriptMod.Id);
+                        }
                     }
-                    
+
                     if (deleteSuccess)
                     {
                         this.ScriptMods.Remove(scriptMod);
@@ -138,15 +138,11 @@ namespace gtavmm_metro.Tabs
             if (this.ScriptMods.ElementAt(0).Id == chosenScriptMod.Id)
                 return;
 
-            this.OrderIndexUpdateInProgress = true;
-
             int oldIndex = this.ScriptMods.IndexOf(chosenScriptMod);
             int newIndex = oldIndex - 1;
 
             this.ScriptMods.Move(oldIndex, newIndex);
             Task.Run(() => this.ScriptModAPI.UpdateScriptModOrderIndexes(this.ScriptMods));
-
-            this.OrderIndexUpdateInProgress = false;
         }
 
         private void MoveScriptModDownButton_Click(object sender, RoutedEventArgs e)
@@ -155,15 +151,11 @@ namespace gtavmm_metro.Tabs
             if (this.ScriptMods.ElementAt(this.ScriptMods.Count - 1).Id == chosenScriptMod.Id)
                 return;
 
-            this.OrderIndexUpdateInProgress = true;
-
             int oldIndex = this.ScriptMods.IndexOf(chosenScriptMod);
             int newIndex = oldIndex + 1;
 
             this.ScriptMods.Move(oldIndex, newIndex);
             Task.Run(() => this.ScriptModAPI.UpdateScriptModOrderIndexes(this.ScriptMods));
-
-            this.OrderIndexUpdateInProgress = false;
         }
 
         private async void ScriptModsDataGrid_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
@@ -178,8 +170,30 @@ namespace gtavmm_metro.Tabs
                     editedScriptMod.Name = await this.ScriptModAPI.GetOldNameBeforeIllegalEdit(editedScriptMod.Id);
                     return;
                 }
+                else if (editedScriptMod.Name == await this.ScriptModAPI.GetOldNameBeforeIllegalEdit(editedScriptMod.Id))
+                    return;
+                else
+                {
+                    Regex invalidFileNameCharsRegex = new Regex("[" + Regex.Escape(new string(Path.GetInvalidFileNameChars())) + "]");
+                    if (invalidFileNameCharsRegex.IsMatch(editedScriptMod.Name))
+                    {
+                        editedScriptMod.Name = await this.ScriptModAPI.GetOldNameBeforeIllegalEdit(editedScriptMod.Id);
+                        return;
+                    }
+                }
 
-                await this.ScriptModAPI.UpdateScriptModName(editedScriptMod.Id, editedScriptMod.Name);
+                bool changeNameIsSuccess = await this.ScriptModAPI.UpdateScriptModName(editedScriptMod.Id, editedScriptMod.Name);
+                if (!changeNameIsSuccess)
+                {
+                    this.SetScriptModNameOldValue(editedScriptMod);
+
+                    MetroWindow metroWindow = (Application.Current.MainWindow as MetroWindow);  // needed to access ShowMessageAsync() method in MetroWindow
+
+                    string errorDialogTitle = "Unable to rename modification";
+                    string errorDialogMessage = "Unable to rename this modification. The folder and/or its files may be in use by an application (or alternatively the name has unknown invalid characters).";
+
+                    MessageDialogResult result = await metroWindow.ShowMessageAsync(errorDialogTitle, errorDialogMessage, MessageDialogStyle.Affirmative);
+                }
             }
             else if (whichColumn == "Description")
             {
@@ -189,11 +203,8 @@ namespace gtavmm_metro.Tabs
 
         private async void ScriptModDGIsEnabled_Click(object sender, EventArgs e)
         {
-            if (!this.FirstLoad && !this.OrderIndexUpdateInProgress)
-            {
-                ScriptMod editedScriptMod = ((FrameworkElement)sender).DataContext as ScriptMod; // the sender ScriptMod object from the datagrid
-                await this.ScriptModAPI.UpdateScriptModIsEnabled(editedScriptMod.Id, editedScriptMod.IsEnabled);
-            }
+            ScriptMod editedScriptMod = ((FrameworkElement)sender).DataContext as ScriptMod; // the sender ScriptMod object from the datagrid
+            await this.ScriptModAPI.UpdateScriptModIsEnabled(editedScriptMod.Id, editedScriptMod.IsEnabled);
         }
 
         // Bottom bar buttons
@@ -237,6 +248,11 @@ namespace gtavmm_metro.Tabs
 
                 this.ScriptModsDataGrid.ItemsSource = this.ScriptMods;
             });
+        }
+
+        private async void SetScriptModNameOldValue(ScriptMod scriptMod)
+        {
+            scriptMod.Name = await this.ScriptModAPI.GetOldNameBeforeIllegalEdit(scriptMod.Id);
         }
         #endregion
     }

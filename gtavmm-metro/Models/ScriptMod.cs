@@ -1,11 +1,4 @@
-﻿using System;
-using System.IO;
-using System.Collections.ObjectModel;
-
-using Newtonsoft.Json;
-using System.Collections.Generic;
-
-namespace gtavmm_metro.Models
+﻿namespace gtavmm_metro.Models
 {
     public class ScriptMod
     {

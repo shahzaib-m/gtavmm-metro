@@ -5,9 +5,6 @@ using System.Data.SQLite;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 
-using Newtonsoft.Json;
-using System.Windows;
-
 namespace gtavmm_metro.Models
 {
     public class ScriptModAPI
@@ -72,9 +69,13 @@ namespace gtavmm_metro.Models
 
             this.ScriptModsDb.Open();
 
-            string sql = String.Format("INSERT into ScriptMod (id, name, description, isEnabled, orderIndex) values ('{0}', '{1}', '{2}', '{3}', '{4}')",
-                newScriptMod.Id, newScriptMod.Name, newScriptMod.Description, Convert.ToInt32(newScriptMod.IsEnabled), newScriptMod.OrderIndex);
+            string sql = "INSERT into ScriptMod (id, name, description, isEnabled, orderIndex) VALUES (@id, @name, @description, @isEnabled, @orderIndex)";
             SQLiteCommand command = new SQLiteCommand(sql, this.ScriptModsDb);
+            command.Parameters.AddWithValue("id", newScriptMod.Id);
+            command.Parameters.AddWithValue("name", newScriptMod.Name);
+            command.Parameters.AddWithValue("description", newScriptMod.Description);
+            command.Parameters.AddWithValue("isEnabled", Convert.ToInt32(newScriptMod.IsEnabled));
+            command.Parameters.AddWithValue("orderIndex", newScriptMod.OrderIndex);
             await command.ExecuteNonQueryAsync();
 
             this.ScriptModsDb.Close();
@@ -140,8 +141,9 @@ namespace gtavmm_metro.Models
         {
             this.ScriptModsDb.Open();
 
-            string sql = String.Format("SELECT * FROM ScriptMod WHERE id='{0}'", scriptModId);
+            string sql = "SELECT * FROM ScriptMod WHERE id=@id";
             SQLiteCommand command = new SQLiteCommand(sql, this.ScriptModsDb);
+            command.Parameters.AddWithValue("id", scriptModId);
 
             ScriptMod resultScriptMod = new ScriptMod();
             DbDataReader reader = await command.ExecuteReaderAsync();
@@ -190,8 +192,10 @@ namespace gtavmm_metro.Models
 
             this.ScriptModsDb.Open();
 
-            string sql = String.Format("UPDATE ScriptMod SET name='{0}' WHERE id='{1}'", newName, scriptModId);
+            string sql = "UPDATE ScriptMod SET name=@name WHERE id=@id";
             SQLiteCommand command = new SQLiteCommand(sql, this.ScriptModsDb);
+            command.Parameters.AddWithValue("name", newName);
+            command.Parameters.AddWithValue("id", scriptModId);
             await command.ExecuteNonQueryAsync();
 
             this.ScriptModsDb.Close();
@@ -204,8 +208,10 @@ namespace gtavmm_metro.Models
         {
             this.ScriptModsDb.Open();
 
-            string sql = String.Format("UPDATE ScriptMod SET description='{0}' WHERE id='{1}'", newDescription, scriptModId);
+            string sql = "UPDATE ScriptMod SET description=@description WHERE id=@id";
             SQLiteCommand command = new SQLiteCommand(sql, this.ScriptModsDb);
+            command.Parameters.AddWithValue("description", newDescription);
+            command.Parameters.AddWithValue("id", scriptModId);
             await command.ExecuteNonQueryAsync();
 
             this.ScriptModsDb.Close();
@@ -215,8 +221,10 @@ namespace gtavmm_metro.Models
         {
             this.ScriptModsDb.Open();
 
-            string sql = String.Format("UPDATE ScriptMod SET isEnabled='{0}' WHERE id='{1}'", Convert.ToInt32(newIsEnabled), scriptModId);
+            string sql = "UPDATE ScriptMod SET isEnabled=@isEnabled WHERE id=@id";
             SQLiteCommand command = new SQLiteCommand(sql, this.ScriptModsDb);
+            command.Parameters.AddWithValue("isEnabled", Convert.ToInt32(newIsEnabled));
+            command.Parameters.AddWithValue("id", scriptModId);
             await command.ExecuteNonQueryAsync();
 
             this.ScriptModsDb.Close();
@@ -226,8 +234,10 @@ namespace gtavmm_metro.Models
         {
             this.ScriptModsDb.Open();
 
-            string sql = String.Format("UPDATE ScriptMod SET orderIndex='{0}' WHERE id='{1}'", newIndex, scriptModId);
+            string sql = "UPDATE ScriptMod SET orderIndex=@orderIndex WHERE id=@id";
             SQLiteCommand command = new SQLiteCommand(sql, this.ScriptModsDb);
+            command.Parameters.AddWithValue("orderIndex", newIndex);
+            command.Parameters.AddWithValue("id", scriptModId);
             await command.ExecuteNonQueryAsync();
 
             this.ScriptModsDb.Close();
@@ -267,8 +277,9 @@ namespace gtavmm_metro.Models
 
             this.ScriptModsDb.Open();
 
-            string sql = String.Format("DELETE FROM ScriptMod WHERE id='{0}'", scriptModId);
+            string sql = "DELETE FROM ScriptMod WHERE id=@id";
             SQLiteCommand command = new SQLiteCommand(sql, this.ScriptModsDb);
+            command.Parameters.AddWithValue("id", scriptModId);
             await command.ExecuteNonQueryAsync();
 
             this.ScriptModsDb.Close();
