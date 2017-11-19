@@ -26,8 +26,10 @@ namespace gtavmm_metro.Tabs
     public partial class ScriptModsUC : UserControl
     {
         private ObservableCollection<ScriptMod> ScriptMods { get; set; }
+        private ScriptModAPI ScriptModAPI { get; set; }
         public string ScriptModsRootFolder { get; set; }
         private bool FirstLoad { get; set; } = true;
+        private bool OrderIndexUpdateInProgress { get; set; } = false;
         private bool ScriptModsProgressRingIsActive { get; set; } = true;
 
         public ScriptModsUC()
@@ -43,6 +45,7 @@ namespace gtavmm_metro.Tabs
             if (FirstLoad)
             {
                 this.ScriptModsRootFolder = Settings.Default.ScriptModsDirectory;
+                this.ScriptModAPI = new ScriptModAPI(this.ScriptModsRootFolder);
 
                 await Task.Run(() => this.LoadScriptMods());
 
@@ -56,50 +59,24 @@ namespace gtavmm_metro.Tabs
 
         private void ViewScriptModFolder_Click(object sender, RoutedEventArgs e)
         {
-            int chosenModId = (((FrameworkElement)sender).DataContext as ScriptMod).Id; // the sender ScriptMod object from the datagrid
+            string chosenModName = (((FrameworkElement)sender).DataContext as ScriptMod).Name; // the sender ScriptMod object from the datagrid
 
-            Process.Start(Path.Combine(this.ScriptModsRootFolder, chosenModId.ToString()));
-        }
-
-        private async void RemoveScriptModButton_Click(object sender, RoutedEventArgs e)
-        {
-            List<ScriptMod> selectedScriptMods = this.ScriptModsDataGrid.SelectedItems.Cast<ScriptMod>().ToList();
-            bool multiSelection = (selectedScriptMods.Count > 1);
-
-            string dialogTitle;
-            string dialogMessage;
-            if (!multiSelection)
+            try
             {
-                dialogTitle = "Remove Modification";
-                dialogMessage = "Are you sure you want to remove the selected modification and preserve all files? Note that the modification folder will be marked with '.removed' inside your script modifications' directory.";
+                Process.Start(Path.Combine(this.ScriptModsRootFolder, chosenModName));
             }
-            else
+            catch (Exception ex)
             {
-                dialogTitle = "Remove Selected Modifications";
-                dialogMessage = "Are you sure you want to remove the selected modifications and preserve all files? Note that the selected modifications' folders will be marked with '.removed' inside your script modifications' directory.";
-            }
-
-            MetroDialogSettings dialogSettings = new MetroDialogSettings { AffirmativeButtonText = "Yes", NegativeButtonText = "No" };
-            MetroWindow metroWindow = (Application.Current.MainWindow as MetroWindow);  // needed to access ShowMessageAsync() method in MetroWindow
-
-            MessageDialogResult result = await metroWindow.ShowMessageAsync(dialogTitle, dialogMessage, MessageDialogStyle.AffirmativeAndNegative, dialogSettings);
-            if (result.ToString() == "Affirmative")
-            {
-                this.ScriptModsDataGrid.IsEnabled = false;
-                this.ScriptModsProgressRingIsActive = true;
-
-                foreach (ScriptMod scriptMod in selectedScriptMods)
+                if (ex is DirectoryNotFoundException)
                 {
-                    scriptMod.RemoveAndOrDeleteScriptMod(this.ScriptModsRootFolder, false);
-                    this.ScriptMods.Remove(scriptMod);
+
                 }
 
-                this.ScriptModsDataGrid.IsEnabled = true;
-                this.ScriptModsProgressRingIsActive = false;
+                throw;
             }
         }
 
-        private async void RemoveAndDeleteScriptModButton_Click(object sender, RoutedEventArgs e)
+        private async void DeleteScriptModButton_Click(object sender, RoutedEventArgs e)
         {
             List<ScriptMod> selectedScriptMods = this.ScriptModsDataGrid.SelectedItems.Cast<ScriptMod>().ToList();
             bool multiSelection = (selectedScriptMods.Count > 1);
@@ -121,20 +98,72 @@ namespace gtavmm_metro.Tabs
             MetroWindow metroWindow = (Application.Current.MainWindow as MetroWindow);  // needed to access ShowMessageAsync() method in MetroWindow
 
             MessageDialogResult result = await metroWindow.ShowMessageAsync(dialogTitle, dialogMessage, MessageDialogStyle.AffirmativeAndNegative, dialogSettings);
-            if (result.ToString() == "Affirmative")
+            if (result == MessageDialogResult.Affirmative)
             {
-                this.ScriptModsDataGrid.IsEnabled = false;
                 this.ScriptModsProgressRingIsActive = true;
+
+                string errorDialogTitle = "{0} - Unable to delete modification";
+                string errorDialogMessage = "Unable to delete this modification. The folder and/or its files may be in use by an application. Attempt to delete it again?";
 
                 foreach (ScriptMod scriptMod in selectedScriptMods)
                 {
-                    scriptMod.RemoveAndOrDeleteScriptMod(this.ScriptModsRootFolder, true);
-                    this.ScriptMods.Remove(scriptMod);
+                    bool deleteSuccess = await this.ScriptModAPI.RemoveAndDeleteScriptMod(scriptMod.Id);
+                    bool userWantsToRetry = true;
+                    while (!deleteSuccess && userWantsToRetry)
+                    {
+                        MessageDialogResult deleteFailResult = await metroWindow.ShowMessageAsync(String.Format(errorDialogTitle, scriptMod.Name), errorDialogMessage, MessageDialogStyle.AffirmativeAndNegative, dialogSettings);
+                        if (deleteFailResult == MessageDialogResult.Affirmative)
+                        {
+                            userWantsToRetry = true;
+                        }
+                        else
+                        {
+                            userWantsToRetry = false;
+                        }
+                    }
+                    
+                    if (deleteSuccess)
+                    {
+                        this.ScriptMods.Remove(scriptMod);
+                    }
                 }
 
-                this.ScriptModsDataGrid.IsEnabled = true;
                 this.ScriptModsProgressRingIsActive = false;
             }
+        }
+
+        private void MoveScriptModUpButton_Click(object sender, RoutedEventArgs e)
+        {
+            ScriptMod chosenScriptMod = ((FrameworkElement)sender).DataContext as ScriptMod;
+            if (this.ScriptMods.ElementAt(0).Id == chosenScriptMod.Id)
+                return;
+
+            this.OrderIndexUpdateInProgress = true;
+
+            int oldIndex = this.ScriptMods.IndexOf(chosenScriptMod);
+            int newIndex = oldIndex - 1;
+
+            this.ScriptMods.Move(oldIndex, newIndex);
+            Task.Run(() => this.ScriptModAPI.UpdateScriptModOrderIndexes(this.ScriptMods));
+
+            this.OrderIndexUpdateInProgress = false;
+        }
+
+        private void MoveScriptModDownButton_Click(object sender, RoutedEventArgs e)
+        {
+            ScriptMod chosenScriptMod = ((FrameworkElement)sender).DataContext as ScriptMod;
+            if (this.ScriptMods.ElementAt(this.ScriptMods.Count - 1).Id == chosenScriptMod.Id)
+                return;
+
+            this.OrderIndexUpdateInProgress = true;
+
+            int oldIndex = this.ScriptMods.IndexOf(chosenScriptMod);
+            int newIndex = oldIndex + 1;
+
+            this.ScriptMods.Move(oldIndex, newIndex);
+            Task.Run(() => this.ScriptModAPI.UpdateScriptModOrderIndexes(this.ScriptMods));
+
+            this.OrderIndexUpdateInProgress = false;
         }
 
         private async void ScriptModsDataGrid_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
@@ -146,22 +175,24 @@ namespace gtavmm_metro.Tabs
             {
                 if (String.IsNullOrWhiteSpace(editedScriptMod.Name))
                 {
-                    e.Cancel = true;
+                    editedScriptMod.Name = await this.ScriptModAPI.GetOldNameBeforeIllegalEdit(editedScriptMod.Id);
                     return;
                 }
-            }
 
-            await Task.Run(() => editedScriptMod.UpdateScriptMod(this.ScriptModsRootFolder, editedScriptMod.Name,
-                                                    editedScriptMod.Description, editedScriptMod.IsEnabled));
+                await this.ScriptModAPI.UpdateScriptModName(editedScriptMod.Id, editedScriptMod.Name);
+            }
+            else if (whichColumn == "Description")
+            {
+                await this.ScriptModAPI.UpdateScriptModDescription(editedScriptMod.Id, editedScriptMod.Description);
+            }
         }
 
-        private async void ScriptModDGIsEnabled_IsCheckedChanged(object sender, EventArgs e)
+        private async void ScriptModDGIsEnabled_Click(object sender, EventArgs e)
         {
-            if (!this.FirstLoad)
+            if (!this.FirstLoad && !this.OrderIndexUpdateInProgress)
             {
                 ScriptMod editedScriptMod = ((FrameworkElement)sender).DataContext as ScriptMod; // the sender ScriptMod object from the datagrid
-                await Task.Run(() => editedScriptMod.UpdateScriptMod(this.ScriptModsRootFolder, editedScriptMod.Name,
-                                                                        editedScriptMod.Description, editedScriptMod.IsEnabled));
+                await this.ScriptModAPI.UpdateScriptModIsEnabled(editedScriptMod.Id, editedScriptMod.IsEnabled);
             }
         }
 
@@ -180,18 +211,30 @@ namespace gtavmm_metro.Tabs
             Process.Start(this.ScriptModsRootFolder);
         }
 
-        private void AddNewScriptModButton_Click(object sender, RoutedEventArgs e)
+        private async void AddNewScriptModButton_Click(object sender, RoutedEventArgs e)
         {
-            this.ScriptMods.Add(ScriptMod.CreateScriptMod(this.ScriptModsRootFolder, "New Mod Name", "New Mod Description", false));
+            ScriptMod newScriptMod = await this.ScriptModAPI.CreateScriptMod("New Mod Name", this.ScriptMods.Count, "New Mod Description", false);
+            this.ScriptMods.Add(newScriptMod);
         }
         #endregion
 
         #region My Methods
-        private void LoadScriptMods()
+        private async void LoadScriptMods()
         {
-            this.Dispatcher.Invoke(() =>
+            await this.Dispatcher.Invoke(async () =>
             {
-                this.ScriptMods = ScriptMod.GetAllScriptMods(this.ScriptModsRootFolder);
+                List<ScriptMod> scriptModsFromDb = await this.ScriptModAPI.GetAllScriptMods();
+                if (scriptModsFromDb == null)
+                {
+                    this.ScriptMods = new ObservableCollection<ScriptMod>();
+                    this.ScriptMods.Add(await this.ScriptModAPI.CreateScriptMod("New Mod Name", 0, "New Mod Description", false));
+                    // UI margins act odd when datagrid is empty and a new script mod is added for the first time manually. Adding one by default.
+                }
+                else
+                {
+                    this.ScriptMods = new ObservableCollection<ScriptMod>(scriptModsFromDb);
+                }
+
                 this.ScriptModsDataGrid.ItemsSource = this.ScriptMods;
             });
         }

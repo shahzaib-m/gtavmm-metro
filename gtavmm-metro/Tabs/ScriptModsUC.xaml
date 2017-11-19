@@ -27,14 +27,14 @@
             Padding="15"
             Title="SCRIPT MODIFICATIONS SETTINGS"
             x:Name="ScriptModSettingsChildWindow"
-            Grid.RowSpan="2"
-            ShowTitleBar="True">
+            Grid.RowSpan="20"
+            ShowTitleBar="False">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*" />
                     <RowDefinition Height="100" />
                 </Grid.RowDefinitions>
-                
+
                 <Button x:Name="ScriptModSettings_CloseButton" Click="ScriptModSettings_CloseButton_Click" Grid.Row="1" Grid.Column="1" 
                         Width="120" Height="40" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="15 15">
                     <TextBlock Text="DONE" FontSize="16" FontWeight="Light"/>
@@ -47,11 +47,20 @@
                           ScrollViewer.CanContentScroll="False" Grid.Row="0" HeadersVisibility="None"
                           Opacity="0.0" CellEditEnding="ScriptModsDataGrid_CellEditEnding">
             <!-- ScrollViewer.CanContentScroll="False" - smooth scrolling -->
+            <DataGrid.ItemContainerStyle>
+                <Style TargetType="DataGridRow">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding Path=Id, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" Value="-1">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </DataGrid.ItemContainerStyle>
             <DataGrid.Columns>
                 <DataGridTemplateColumn Header="Enabled">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <Controls:ToggleSwitch x:Name="ScriptModDGIsEnabled" Margin="20 20 20 20" OnLabel="" OffLabel="" IsChecked="{Binding Path=IsEnabled, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsCheckedChanged="ScriptModDGIsEnabled_IsCheckedChanged">
+                            <Controls:ToggleSwitch x:Name="ScriptModDGIsEnabled" Margin="20 20 20 20" OnLabel="" OffLabel="" IsChecked="{Binding Path=IsEnabled, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Click="ScriptModDGIsEnabled_Click">
                                 <Controls:ToggleSwitch.ToolTip>
                                     <StackPanel Orientation="Vertical">
                                         <StackPanel Orientation="Horizontal">
@@ -120,13 +129,13 @@
                 <DataGridTemplateColumn>
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <Button x:Name="RemoveScriptModButton" Content="{iconPacks:PackIconMaterial Delete, Width=25, Height=25}"
+                            <Button x:Name="DeleteScriptModButton" Content="{iconPacks:PackIconMaterial Delete, Width=25, Height=25}"
                                             Style="{DynamicResource MetroCircleButtonStyle}" Width="60" Height="60"
-                                            Click="RemoveScriptModButton_Click"  Margin="10 0 0 0">
+                                            Click="DeleteScriptModButton_Click"  Margin="10 0 30 0">
                                 <Button.ToolTip>
                                     <StackPanel Orientation="Horizontal">
                                         <iconPacks:PackIconMaterial Kind="Delete" Margin="0 5" />
-                                        <TextBlock Margin="5 0 0 0" Text="Remove this modification but preserve the files" VerticalAlignment="Center" />
+                                        <TextBlock Margin="5 0 0 0" Text="Delete this modification and all of its files" VerticalAlignment="Center" />
                                     </StackPanel>
                                 </Button.ToolTip>
                             </Button>
@@ -136,16 +145,30 @@
                 <DataGridTemplateColumn>
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <Button x:Name="RemoveAndDeleteScriptModButton" Content="{iconPacks:PackIconMaterial DeleteForever, Width=25, Height=25}"
-                                            Style="{DynamicResource MetroCircleButtonStyle}" Width="60" Height="60"
-                                            Click="RemoveAndDeleteScriptModButton_Click" Margin="10 0 50 0">
-                                <Button.ToolTip>
-                                    <StackPanel Orientation="Horizontal">
-                                        <iconPacks:PackIconMaterial Kind="DeleteForever" Margin="0 5" />
-                                        <TextBlock Margin="5 0 0 0" Text="Remove this modification and delete all of its files" VerticalAlignment="Center" />
-                                    </StackPanel>
-                                </Button.ToolTip>
-                            </Button>
+                            <StackPanel>
+                                <Button x:Name="MoveScriptModUpButton" Width="80" Height="30" BorderThickness="0"
+                                                Margin="10 0 10 0" Style="{StaticResource AccentedSquareButtonStyle}"
+                                                Click="MoveScriptModUpButton_Click">
+                                    <Button.ToolTip>
+                                        <StackPanel Orientation="Horizontal">
+                                            <iconPacks:PackIconMaterial Kind="MenuUp" Margin="0 5" />
+                                            <TextBlock Margin="5 0 0 0" Text="Move this modification up" VerticalAlignment="Center" />
+                                        </StackPanel>
+                                    </Button.ToolTip>
+                                    <iconPacks:PackIconMaterial Kind="MenuUp" Width="20"/>
+                                </Button>
+                                <Button x:Name="MoveScriptModDownButton" Width="80" Height="30" BorderThickness="0"
+                                                Margin="10 0 10 0" Style="{StaticResource AccentedSquareButtonStyle}"
+                                                Click="MoveScriptModDownButton_Click">
+                                    <Button.ToolTip>
+                                        <StackPanel Orientation="Horizontal">
+                                            <iconPacks:PackIconMaterial Kind="MenuDown" Margin="0 5" />
+                                            <TextBlock Margin="5 0 0 0" Text="Move this modification down" VerticalAlignment="Center" />
+                                        </StackPanel>
+                                    </Button.ToolTip>
+                                    <iconPacks:PackIconMaterial Kind="MenuDown" Width="20"/>
+                                </Button>
+                            </StackPanel>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
@@ -160,7 +183,7 @@
                 </Grid.ColumnDefinitions>
 
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Grid.Column="0">
-                    
+
                 </StackPanel>
 
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Grid.Column="1">

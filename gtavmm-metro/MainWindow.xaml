@@ -11,6 +11,8 @@
                       Width="1220"
                       MinWidth="1220"
                       
+                      SaveWindowPosition="True"
+                      
                       IconEdgeMode="Aliased"
                       
                       TextOptions.TextFormattingMode="Ideal"
@@ -29,7 +31,7 @@
         <TabControl x:Name="MainTabControl" TabStripPlacement="Top" Grid.RowSpan="2" BorderThickness="0" IsEnabled="False"
                     Opacity="0.3" Padding="0 0 0 0" Controls:TabControlHelper.IsUnderlined="True">
             <TabItem x:Name="HomeTabItem" Header="Home" Padding="10 10 5 10">
-                
+
             </TabItem>
             <TabItem x:Name="ScriptModsTabItem" Header="Script Mods" Padding="10 10 5 10" HorizontalAlignment="Right">
 
@@ -38,12 +40,6 @@
 
             </TabItem>
             <TabItem Header="Settings" Padding="10 10 5 10" HorizontalAlignment="Right">
-
-            </TabItem>
-            <TabItem Header="Updates" Padding="10 10 5 10" HorizontalAlignment="Right">
-
-            </TabItem>
-            <TabItem Header="Help" Padding="10 10 5 10" HorizontalAlignment="Right">
 
             </TabItem>
             <TabItem x:Name="AboutTabItem" Header="About" Padding="10 10 5 10" HorizontalAlignment="Right">

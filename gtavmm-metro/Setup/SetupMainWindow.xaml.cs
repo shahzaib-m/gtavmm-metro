@@ -48,7 +48,7 @@ namespace gtavmm_metro.Setup
             if (e.ChangedButton == MouseButton.Left) this.DragMove();
         }
 
-        public void FinishSetup()
+        public async void FinishSetup()
         {
             Settings.Default.IsFirstLaunch = false;
             Settings.Default.GTAVDirectory = this.GTAVDirectoryPage.GTAVDirectoryConfirmedLocation.FullName;
@@ -57,8 +57,9 @@ namespace gtavmm_metro.Setup
             Settings.Default.AssetModsDirectory = this.AssetModsDirectoryPage.AssetModsDirectoryConfirmedLocation.FullName;
             Settings.Default.Save();
 
-            ScriptMod.CreateScriptMod(Settings.Default.ScriptModsDirectory, "Script Hook V + ASI Loader", "Script Hook V + ASI Loader © - not included, please download yourself. Required to load most modifications (NOT for GTA Online). Should be up-to-date as new GTAV updates are released to ensure compatibility and avoid crashes.", false);
-            ScriptMod.CreateScriptMod(Settings.Default.ScriptModsDirectory, "OpenIV.ASI", "OpenIV.ASI © - not included, please download yourself (usually included with OpenIV ©.) Required to load asset mods (NOT for GTA Online), the modified .rpf files that go inside the \"mods\" folder in the GTAV directory instead of the original files.", false);
+            ScriptModAPI scriptModAPI = new ScriptModAPI(this.ScriptModsDirectoryPage.ScriptModsDirectoryConfirmedLocation.FullName);
+            await scriptModAPI.CreateScriptMod("Script Hook V + ASI Loader", 0, "Script Hook V + ASI Loader © - not included, please download yourself. Required to load most modifications (NOT for GTA Online). Should be up-to-date as new GTAV updates are released to ensure compatibility and avoid crashes.", false);
+            await scriptModAPI.CreateScriptMod("OpenIV.ASI", 1, "OpenIV.ASI © - not included, please download yourself (usually included with OpenIV ©.) Required to load asset mods (NOT for GTA Online), the modified .rpf files that go inside the \"mods\" folder in the GTAV directory instead of the original files.", false);
 
             MainWindow mainWindow = new MainWindow();
             mainWindow.Show();

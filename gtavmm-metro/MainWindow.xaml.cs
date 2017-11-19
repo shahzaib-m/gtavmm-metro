@@ -52,7 +52,7 @@ namespace gtavmm_metro
         /// <returns></returns>
         private async Task Init()
         {
-            await Task.Delay(1000);     // temp substitute for work delay
+            //await Task.Delay(1000);     // temp substitute for work delay
             await Task.Run(() => this.AssignUCToTabs());
 
             await Task.Run(() => this.UserInteractionStartNow());    // enable the UI for the user when tasks finished.
