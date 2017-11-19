@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data.SQLite;
 using System.Threading.Tasks;
 
 using System.Windows;
@@ -10,6 +11,7 @@ using MahApps.Metro.Controls;
 
 using gtavmm_metro.Tabs;
 using gtavmm_metro.Properties;
+using gtavmm_metro.Models;
 
 namespace gtavmm_metro
 {
@@ -21,6 +23,8 @@ namespace gtavmm_metro
         private HomeUC HomeUserControl;
         private ScriptModsUC ScriptModsUserControl;
         private AboutUC AboutUserControl;
+
+        private DBInstance ModsDbConnection;
 
         public MainWindow()
         {
@@ -53,9 +57,15 @@ namespace gtavmm_metro
         private async Task Init()
         {
             //await Task.Delay(1000);     // temp substitute for work delay
+            await Task.Run(() => this.CreatePersistentDbConnection());
             await Task.Run(() => this.AssignUCToTabs());
 
             await Task.Run(() => this.UserInteractionStartNow());    // enable the UI for the user when tasks finished.
+        }
+
+        private void CreatePersistentDbConnection()
+        {
+            this.ModsDbConnection = new DBInstance(Settings.Default.ModsDirectory);
         }
 
         /// <summary>
@@ -71,6 +81,7 @@ namespace gtavmm_metro
 
                 // Assigning ScriptMods UserControl to Script Mods tab
                 this.ScriptModsUserControl = new ScriptModsUC();
+                this.ScriptModsUserControl.LoadScriptMods(this.ModsDbConnection);
                 this.ScriptModsTabItem.Content = this.ScriptModsUserControl;
 
                 // Assigning About UserControl to About tab

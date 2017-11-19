@@ -1,33 +1,22 @@
 ﻿using System;
 using System.IO;
-using System.Data.Common;
-using System.Data.SQLite;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+
+using System.Data.Common;
+using System.Data.SQLite;
 
 namespace gtavmm_metro.Models
 {
     public class ScriptModAPI
     {
-        private DirectoryInfo ScriptModsRootFolder;
-        private SQLiteConnection ScriptModsDb;
-        private string ScriptModsDbConnectionString = "Data Source={0}\\data.gtavmm-metro;Version=3;";
+        private DirectoryInfo ModsRootFolder;
+        private DBInstance ModsDb;
 
-        public ScriptModAPI(string scriptModsRootFolder)
+        public ScriptModAPI(string ModsRootFolder, DBInstance modsDbConection)
         {
-            this.ScriptModsRootFolder = new DirectoryInfo(scriptModsRootFolder);
-            this.ScriptModsDb = new SQLiteConnection(String.Format(this.ScriptModsDbConnectionString, scriptModsRootFolder));
-            if (!File.Exists(Path.Combine(scriptModsRootFolder, "data.gtavmm-metro")))
-            {
-                SQLiteConnection.CreateFile(Path.Combine(scriptModsRootFolder, "data.gtavmm-metro"));
-                this.ScriptModsDb.Open();
-
-                string sql = "CREATE TABLE ScriptMod (id INT, name VARCHAR(30), description VARCHAR(600), isEnabled INT, orderIndex INT)";
-                SQLiteCommand command = new SQLiteCommand(sql, this.ScriptModsDb);
-                command.ExecuteNonQuery();
-
-                this.ScriptModsDb.Close();
-            }
+            this.ModsRootFolder = new DirectoryInfo(ModsRootFolder);
+            this.ModsDb = modsDbConection;
         }
 
         public async Task<ScriptMod> CreateScriptMod(string Name, int orderIndex, string Description = null, bool IsEnabled = true)
@@ -48,14 +37,14 @@ namespace gtavmm_metro.Models
                 OrderIndex = orderIndex
             };
 
-            if (Directory.Exists(Path.Combine(this.ScriptModsRootFolder.FullName, Name)))
+            if (Directory.Exists(Path.Combine(this.ModsRootFolder.FullName, Name)))
             {
                 int i = 1;
-                string numberAppendedDir = Path.Combine(this.ScriptModsRootFolder.FullName, String.Format("{0} ({1})", newScriptMod.Name, i));
+                string numberAppendedDir = Path.Combine(this.ModsRootFolder.FullName, String.Format("{0} ({1})", newScriptMod.Name, i));
                 while (Directory.Exists(numberAppendedDir))
                 {
                     i++;
-                    numberAppendedDir = Path.Combine(this.ScriptModsRootFolder.FullName, String.Format("{0} ({1})", newScriptMod.Name, i));
+                    numberAppendedDir = Path.Combine(this.ModsRootFolder.FullName, String.Format("{0} ({1})", newScriptMod.Name, i));
                 }
 
                 Directory.CreateDirectory(numberAppendedDir);
@@ -63,14 +52,14 @@ namespace gtavmm_metro.Models
             }
             else
             {
-                Directory.CreateDirectory(Path.Combine(this.ScriptModsRootFolder.FullName, newScriptMod.Name));
+                Directory.CreateDirectory(Path.Combine(this.ModsRootFolder.FullName, newScriptMod.Name));
             }
 
 
-            this.ScriptModsDb.Open();
+            await this.ModsDb.Connection.OpenAsync();
 
             string sql = "INSERT into ScriptMod (id, name, description, isEnabled, orderIndex) VALUES (@id, @name, @description, @isEnabled, @orderIndex)";
-            SQLiteCommand command = new SQLiteCommand(sql, this.ScriptModsDb);
+            SQLiteCommand command = new SQLiteCommand(sql, this.ModsDb.Connection);
             command.Parameters.AddWithValue("id", newScriptMod.Id);
             command.Parameters.AddWithValue("name", newScriptMod.Name);
             command.Parameters.AddWithValue("description", newScriptMod.Description);
@@ -78,7 +67,7 @@ namespace gtavmm_metro.Models
             command.Parameters.AddWithValue("orderIndex", newScriptMod.OrderIndex);
             await command.ExecuteNonQueryAsync();
 
-            this.ScriptModsDb.Close();
+            this.ModsDb.Connection.Close();
 
 
             return newScriptMod;
@@ -89,15 +78,15 @@ namespace gtavmm_metro.Models
             List<ScriptMod> allScriptMods = new List<ScriptMod>();
             List<int> modsByIdWithNoFolders = new List<int>();
 
-            this.ScriptModsDb.Open();
+            await this.ModsDb.Connection.OpenAsync();
 
             string sql = "SELECT * FROM ScriptMod ORDER BY orderIndex ASC";
-            SQLiteCommand command = new SQLiteCommand(sql, this.ScriptModsDb);
+            SQLiteCommand command = new SQLiteCommand(sql, this.ModsDb.Connection);
 
             DbDataReader reader = await command.ExecuteReaderAsync();
             if (!reader.HasRows)
             {
-                this.ScriptModsDb.Close();
+                this.ModsDb.Connection.Close();
                 return null;
             }
             while (await reader.ReadAsync())
@@ -109,7 +98,7 @@ namespace gtavmm_metro.Models
                 int orderIndex = (int)reader["orderIndex"];
 
 
-                if (!Directory.Exists(Path.Combine(this.ScriptModsRootFolder.FullName, name)))
+                if (!Directory.Exists(Path.Combine(this.ModsRootFolder.FullName, name)))
                 {
                     modsByIdWithNoFolders.Add(id);
                 }
@@ -127,7 +116,7 @@ namespace gtavmm_metro.Models
                 }
             }
 
-            this.ScriptModsDb.Close();
+            this.ModsDb.Connection.Close();
 
 
             if (modsByIdWithNoFolders.Count != 0)
@@ -139,17 +128,17 @@ namespace gtavmm_metro.Models
 
         public async Task<ScriptMod> GetScriptModById(int scriptModId)
         {
-            this.ScriptModsDb.Open();
+            await this.ModsDb.Connection.OpenAsync();
 
             string sql = "SELECT * FROM ScriptMod WHERE id=@id";
-            SQLiteCommand command = new SQLiteCommand(sql, this.ScriptModsDb);
+            SQLiteCommand command = new SQLiteCommand(sql, this.ModsDb.Connection);
             command.Parameters.AddWithValue("id", scriptModId);
 
             ScriptMod resultScriptMod = new ScriptMod();
             DbDataReader reader = await command.ExecuteReaderAsync();
             if (!reader.HasRows)
             {
-                this.ScriptModsDb.Close();
+                this.ModsDb.Connection.Close();
                 return null;
             }
             while (await reader.ReadAsync())
@@ -160,7 +149,7 @@ namespace gtavmm_metro.Models
                 resultScriptMod.IsEnabled = Convert.ToBoolean((int)reader["isEnabled"]);
             }
 
-            this.ScriptModsDb.Close();
+            this.ModsDb.Connection.Close();
 
 
             return resultScriptMod;
@@ -178,8 +167,8 @@ namespace gtavmm_metro.Models
             string oldDirectoryName = oldScriptMod.Name;
             try
             {
-                Directory.Move(Path.Combine(this.ScriptModsRootFolder.FullName, oldDirectoryName),
-                    Path.Combine(this.ScriptModsRootFolder.FullName, newName));
+                Directory.Move(Path.Combine(this.ModsRootFolder.FullName, oldDirectoryName),
+                    Path.Combine(this.ModsRootFolder.FullName, newName));
             }
             catch (Exception ex)
             {
@@ -190,15 +179,15 @@ namespace gtavmm_metro.Models
             }
 
 
-            this.ScriptModsDb.Open();
+            await this.ModsDb.Connection.OpenAsync();
 
             string sql = "UPDATE ScriptMod SET name=@name WHERE id=@id";
-            SQLiteCommand command = new SQLiteCommand(sql, this.ScriptModsDb);
+            SQLiteCommand command = new SQLiteCommand(sql, this.ModsDb.Connection);
             command.Parameters.AddWithValue("name", newName);
             command.Parameters.AddWithValue("id", scriptModId);
             await command.ExecuteNonQueryAsync();
 
-            this.ScriptModsDb.Close();
+            this.ModsDb.Connection.Close();
 
 
             return true;
@@ -206,41 +195,40 @@ namespace gtavmm_metro.Models
 
         public async Task UpdateScriptModDescription(int scriptModId, string newDescription)
         {
-            this.ScriptModsDb.Open();
+            await this.ModsDb.Connection.OpenAsync();
 
             string sql = "UPDATE ScriptMod SET description=@description WHERE id=@id";
-            SQLiteCommand command = new SQLiteCommand(sql, this.ScriptModsDb);
+            SQLiteCommand command = new SQLiteCommand(sql, this.ModsDb.Connection);
             command.Parameters.AddWithValue("description", newDescription);
             command.Parameters.AddWithValue("id", scriptModId);
             await command.ExecuteNonQueryAsync();
 
-            this.ScriptModsDb.Close();
+            this.ModsDb.Connection.Close();
         }
 
         public async Task UpdateScriptModIsEnabled(int scriptModId, bool newIsEnabled)
         {
-            this.ScriptModsDb.Open();
+            await this.ModsDb.Connection.OpenAsync();
 
             string sql = "UPDATE ScriptMod SET isEnabled=@isEnabled WHERE id=@id";
-            SQLiteCommand command = new SQLiteCommand(sql, this.ScriptModsDb);
+            SQLiteCommand command = new SQLiteCommand(sql, this.ModsDb.Connection);
             command.Parameters.AddWithValue("isEnabled", Convert.ToInt32(newIsEnabled));
             command.Parameters.AddWithValue("id", scriptModId);
             await command.ExecuteNonQueryAsync();
 
-            this.ScriptModsDb.Close();
+            this.ModsDb.Connection.Close();
         }
 
         private async Task UpdateScriptModOrderIndex(int scriptModId, int newIndex)
         {
-            this.ScriptModsDb.Open();
+            await this.ModsDb.Connection.OpenAsync();
 
             string sql = "UPDATE ScriptMod SET orderIndex=@orderIndex WHERE id=@id";
-            SQLiteCommand command = new SQLiteCommand(sql, this.ScriptModsDb);
+            SQLiteCommand command = new SQLiteCommand(sql, this.ModsDb.Connection);
             command.Parameters.AddWithValue("orderIndex", newIndex);
             command.Parameters.AddWithValue("id", scriptModId);
             await command.ExecuteNonQueryAsync();
-
-            this.ScriptModsDb.Close();
+            this.ModsDb.Connection.Close();
         }
 
         public async void UpdateScriptModOrderIndexes(IList<ScriptMod> scriptMods)
@@ -255,7 +243,7 @@ namespace gtavmm_metro.Models
         {
             if (isManualDelete)
             {
-                string fullFolderPath = Path.Combine(this.ScriptModsRootFolder.FullName, (await this.GetScriptModById(scriptModId)).Name);
+                string fullFolderPath = Path.Combine(this.ModsRootFolder.FullName, (await this.GetScriptModById(scriptModId)).Name);
                 if (Directory.Exists(fullFolderPath))
                 {
                     try
@@ -275,14 +263,14 @@ namespace gtavmm_metro.Models
             }
 
 
-            this.ScriptModsDb.Open();
+            await this.ModsDb.Connection.OpenAsync();
 
             string sql = "DELETE FROM ScriptMod WHERE id=@id";
-            SQLiteCommand command = new SQLiteCommand(sql, this.ScriptModsDb);
+            SQLiteCommand command = new SQLiteCommand(sql, this.ModsDb.Connection);
             command.Parameters.AddWithValue("id", scriptModId);
             await command.ExecuteNonQueryAsync();
 
-            this.ScriptModsDb.Close();
+            this.ModsDb.Connection.Close();
 
 
             return true;

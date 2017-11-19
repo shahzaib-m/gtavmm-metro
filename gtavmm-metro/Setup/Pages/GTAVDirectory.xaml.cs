@@ -159,7 +159,7 @@ namespace gtavmm_metro.Setup.Pages
 
         private void GoForward_Click(object sender, RoutedEventArgs e)
         {
-           this.ParentWindow.SetupContainer.Content = this.ParentWindow.ScriptModsDirectoryPage;
+           this.ParentWindow.SetupContainer.Content = this.ParentWindow.ModsDirectoryPage;
         }
     }
 }

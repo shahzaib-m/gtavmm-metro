@@ -1,4 +1,7 @@
-﻿using System.Windows;
+﻿using System;
+using System.Data.SQLite;
+
+using System.Windows;
 using System.Windows.Input;
 using System.Threading.Tasks;
 
@@ -7,6 +10,7 @@ using MahApps.Metro.Controls;
 using gtavmm_metro.Models;
 using gtavmm_metro.Properties;
 using gtavmm_metro.Setup.Pages;
+
 
 namespace gtavmm_metro.Setup
 {
@@ -17,8 +21,7 @@ namespace gtavmm_metro.Setup
     {
         public Welcome WelcomePage { get; set; }
         public GTAVDirectory GTAVDirectoryPage { get; set; }
-        public ScriptModsDirectory ScriptModsDirectoryPage { get; set; }
-        public AssetModsDirectory AssetModsDirectoryPage { get; set; }
+        public ModsDirectory ModsDirectoryPage { get; set; }
 
         public SetupMainWindow()
         { 
@@ -38,8 +41,7 @@ namespace gtavmm_metro.Setup
             {
                 this.WelcomePage = new Welcome(this);
                 this.GTAVDirectoryPage = new GTAVDirectory(this);
-                this.ScriptModsDirectoryPage = new ScriptModsDirectory(this);
-                this.AssetModsDirectoryPage = new AssetModsDirectory(this);
+                this.ModsDirectoryPage = new ModsDirectory(this);
             });
         }
 
@@ -53,13 +55,15 @@ namespace gtavmm_metro.Setup
             Settings.Default.IsFirstLaunch = false;
             Settings.Default.GTAVDirectory = this.GTAVDirectoryPage.GTAVDirectoryConfirmedLocation.FullName;
             Settings.Default.IsSteamDRM = this.GTAVDirectoryPage.IsSteamDRM;
-            Settings.Default.ScriptModsDirectory = this.ScriptModsDirectoryPage.ScriptModsDirectoryConfirmedLocation.FullName;
-            Settings.Default.AssetModsDirectory = this.AssetModsDirectoryPage.AssetModsDirectoryConfirmedLocation.FullName;
+            Settings.Default.ModsDirectory = this.ModsDirectoryPage.ModsDirectoryConfirmedLocation.FullName;
             Settings.Default.Save();
 
-            ScriptModAPI scriptModAPI = new ScriptModAPI(this.ScriptModsDirectoryPage.ScriptModsDirectoryConfirmedLocation.FullName);
-            await scriptModAPI.CreateScriptMod("Script Hook V + ASI Loader", 0, "Script Hook V + ASI Loader © - not included, please download yourself. Required to load most modifications (NOT for GTA Online). Should be up-to-date as new GTAV updates are released to ensure compatibility and avoid crashes.", false);
-            await scriptModAPI.CreateScriptMod("OpenIV.ASI", 1, "OpenIV.ASI © - not included, please download yourself (usually included with OpenIV ©.) Required to load asset mods (NOT for GTA Online), the modified .rpf files that go inside the \"mods\" folder in the GTAV directory instead of the original files.", false);
+            ScriptModAPI scriptModAPI = new ScriptModAPI(this.ModsDirectoryPage.ModsDirectoryConfirmedLocation.FullName, new DBInstance(this.ModsDirectoryPage.ModsDirectoryConfirmedLocation.FullName));
+            if (await scriptModAPI.GetAllScriptMods() == null)
+            {
+                await scriptModAPI.CreateScriptMod("Script Hook V + ASI Loader", 0, "Script Hook V + ASI Loader © - not included, please download yourself. Required to load most modifications (NOT for GTA Online). Should be up-to-date as new GTAV updates are released to ensure compatibility and avoid crashes.", false);
+                await scriptModAPI.CreateScriptMod("OpenIV.ASI", 1, "OpenIV.ASI © - not included, please download yourself (usually included with OpenIV ©.) Required to load asset mods (NOT for GTA Online), the modified .rpf files that go inside the \"mods\" folder in the GTAV directory instead of the original files.", false);
+            }
 
             MainWindow mainWindow = new MainWindow();
             mainWindow.Show();

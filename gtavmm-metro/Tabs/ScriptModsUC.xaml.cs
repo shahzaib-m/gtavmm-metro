@@ -1,10 +1,11 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Data.SQLite;
+using System.Text.RegularExpressions;
 
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media.Animation;
 
 using System.Diagnostics;
 using System.Threading.Tasks;
@@ -17,7 +18,6 @@ using MahApps.Metro.Controls.Dialogs;
 
 using gtavmm_metro.Models;
 using gtavmm_metro.Properties;
-using System.Text.RegularExpressions;
 
 namespace gtavmm_metro.Tabs
 {
@@ -28,9 +28,9 @@ namespace gtavmm_metro.Tabs
     {
         private ObservableCollection<ScriptMod> ScriptMods { get; set; }
         private ScriptModAPI ScriptModAPI { get; set; }
-        public string ScriptModsRootFolder { get; set; }
+        public string ModsRootFolder { get; set; }
         private bool FirstLoad { get; set; } = true;
-        private bool ScriptModsProgressRingIsActive { get; set; } = true;
+        private bool ScriptModsProgressRingIsActive { get; set; } = false;
 
         public ScriptModsUC()
         {
@@ -40,36 +40,19 @@ namespace gtavmm_metro.Tabs
 
 
         #region UserControl Events
-        private async void ScriptModsUserControl_Loaded(object sender, RoutedEventArgs e)
-        {
-            if (FirstLoad)
-            {
-                this.ScriptModsRootFolder = Settings.Default.ScriptModsDirectory;
-                this.ScriptModAPI = new ScriptModAPI(this.ScriptModsRootFolder);
-
-                await Task.Run(() => this.LoadScriptMods());
-
-                this.ScriptModsProgressRingIsActive = false;
-                DoubleAnimation smoothFadeIn = new DoubleAnimation(0.0, 1.0, new Duration(new TimeSpan(0, 0, 0, 0, 300)));
-                this.ScriptModsDataGrid.BeginAnimation(OpacityProperty, smoothFadeIn);
-
-                FirstLoad = false;
-            }
-        }
-
         private void ViewScriptModFolder_Click(object sender, RoutedEventArgs e)
         {
             string chosenModName = (((FrameworkElement)sender).DataContext as ScriptMod).Name; // the sender ScriptMod object from the datagrid
 
             try
             {
-                Process.Start(Path.Combine(this.ScriptModsRootFolder, chosenModName));
+                Process.Start(Path.Combine(this.ModsRootFolder, chosenModName));
             }
             catch (Exception ex)
             {
                 if (ex is DirectoryNotFoundException)
                 {
-
+                    // TODO - handle this
                 }
 
                 throw;
@@ -217,9 +200,9 @@ namespace gtavmm_metro.Tabs
             this.ScriptModSettingsChildWindow.IsOpen = false;
         }
 
-        private void ViewScriptModsRootFolderButton_Click(object sender, RoutedEventArgs e)
+        private void ViewModsRootFolderButton_Click(object sender, RoutedEventArgs e)
         {
-            Process.Start(this.ScriptModsRootFolder);
+            Process.Start(this.ModsRootFolder);
         }
 
         private async void AddNewScriptModButton_Click(object sender, RoutedEventArgs e)
@@ -230,10 +213,13 @@ namespace gtavmm_metro.Tabs
         #endregion
 
         #region My Methods
-        private async void LoadScriptMods()
+        public async void LoadScriptMods(DBInstance modsDbConnection)
         {
             await this.Dispatcher.Invoke(async () =>
             {
+                this.ModsRootFolder = Settings.Default.ModsDirectory;
+                this.ScriptModAPI = new ScriptModAPI(this.ModsRootFolder, modsDbConnection);
+
                 List<ScriptMod> scriptModsFromDb = await this.ScriptModAPI.GetAllScriptMods();
                 if (scriptModsFromDb == null)
                 {

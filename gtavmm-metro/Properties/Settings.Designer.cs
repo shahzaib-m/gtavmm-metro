@@ -62,24 +62,12 @@ namespace gtavmm_metro.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string ScriptModsDirectory {
+        public string ModsDirectory {
             get {
-                return ((string)(this["ScriptModsDirectory"]));
+                return ((string)(this["ModsDirectory"]));
             }
             set {
-                this["ScriptModsDirectory"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string AssetModsDirectory {
-            get {
-                return ((string)(this["AssetModsDirectory"]));
-            }
-            set {
-                this["AssetModsDirectory"] = value;
+                this["ModsDirectory"] = value;
             }
         }
     }

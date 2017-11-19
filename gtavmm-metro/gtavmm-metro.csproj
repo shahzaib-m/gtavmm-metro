@@ -133,17 +133,15 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Models\DBInstance.cs" />
     <Compile Include="Models\GTAVRockstar.cs" />
     <Compile Include="Models\GTAVSteam.cs" />
     <Compile Include="Models\ScriptModAPI.cs" />
-    <Compile Include="Setup\Pages\AssetModsDirectory.xaml.cs">
-      <DependentUpon>AssetModsDirectory.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Setup\Pages\GTAVDirectory.xaml.cs">
       <DependentUpon>GTAVDirectory.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Setup\Pages\ScriptModsDirectory.xaml.cs">
-      <DependentUpon>ScriptModsDirectory.xaml</DependentUpon>
+    <Compile Include="Setup\Pages\ModsDirectory.xaml.cs">
+      <DependentUpon>ModsDirectory.xaml</DependentUpon>
     </Compile>
     <Compile Include="Setup\Pages\Welcome.xaml.cs">
       <DependentUpon>Welcome.xaml</DependentUpon>
@@ -178,15 +176,11 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="Setup\Pages\AssetModsDirectory.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
     <Page Include="Setup\Pages\GTAVDirectory.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Setup\Pages\ScriptModsDirectory.xaml">
+    <Page Include="Setup\Pages\ModsDirectory.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

@@ -11,10 +11,7 @@
     <Setting Name="IsSteamDRM" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
-    <Setting Name="ScriptModsDirectory" Type="System.String" Scope="User">
-      <Value Profile="(Default)" />
-    </Setting>
-    <Setting Name="AssetModsDirectory" Type="System.String" Scope="User">
+    <Setting Name="ModsDirectory" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
   </Settings>

@@ -11,24 +11,24 @@ using Microsoft.WindowsAPICodePack.Dialogs;
 namespace gtavmm_metro.Setup.Pages
 {
     /// <summary>
-    /// Interaction logic for ScriptModsDirectory.xaml
+    /// Interaction logic for ModsDirectory.xaml
     /// </summary>
-    public partial class ScriptModsDirectory : UserControl
+    public partial class ModsDirectory : UserControl
     {
         private SetupMainWindow ParentWindow { get; set; }
-        public DirectoryInfo ScriptModsDirectoryConfirmedLocation { get; set; }
+        public DirectoryInfo ModsDirectoryConfirmedLocation { get; set; }
 
-        public ScriptModsDirectory(SetupMainWindow parent)
+        public ModsDirectory(SetupMainWindow parent)
         {
             this.ParentWindow = parent;
             InitializeComponent();
         }
 
-        private void BrowseScriptModsDirectory_Click(object sender, RoutedEventArgs e)
+        private void BrowseModsDirectory_Click(object sender, RoutedEventArgs e)
         {
             using (CommonOpenFileDialog folderSelectDialog = new CommonOpenFileDialog
             {
-                Title = "Script Modifications Directory",
+                Title = "Modifications Directory",
                 IsFolderPicker = true,
                 InitialDirectory = Environment.SpecialFolder.MyDocuments.ToString(),
                 DefaultDirectory = Environment.SpecialFolder.MyDocuments.ToString(),
@@ -37,20 +37,20 @@ namespace gtavmm_metro.Setup.Pages
             {
                 if (folderSelectDialog.ShowDialog() == CommonFileDialogResult.Ok)
                 {
-                    this.ScriptModsDirectoryTextBlock.Text = folderSelectDialog.FileName;
+                    this.ModsDirectoryTextBlock.Text = folderSelectDialog.FileName;
 
-                    if (this.IsDirectoryEmpty(folderSelectDialog.FileName))
+                    if (this.IsDirectoryEmpty(folderSelectDialog.FileName) || File.Exists(Path.Combine(folderSelectDialog.FileName, "data.gtavmm-metro")))
                     {
-                        this.ScriptModsDirectoryTextBlock.BorderBrush = Brushes.Green;
-                        this.ScriptModsDirectoryConfirmedLocation = new DirectoryInfo(folderSelectDialog.FileName);
+                        this.ModsDirectoryTextBlock.BorderBrush = Brushes.Green;
+                        this.ModsDirectoryConfirmedLocation = new DirectoryInfo(folderSelectDialog.FileName);
 
-                        this.GoForward.IsEnabled = true;
+                        this.Finish.IsEnabled = true;
                     }
                     else
                     {
-                        this.ScriptModsDirectoryTextBlock.BorderBrush = Brushes.Red;
+                        this.ModsDirectoryTextBlock.BorderBrush = Brushes.Red;
 
-                        this.GoForward.IsEnabled = false;
+                        this.Finish.IsEnabled = false;
                     }
                 }
             }
@@ -66,9 +66,9 @@ namespace gtavmm_metro.Setup.Pages
             this.ParentWindow.SetupContainer.Content = this.ParentWindow.GTAVDirectoryPage;
         }
 
-        private void GoForward_Click(object sender, RoutedEventArgs e)
+        private void Finish_Click(object sender, RoutedEventArgs e)
         {
-            this.ParentWindow.SetupContainer.Content = this.ParentWindow.AssetModsDirectoryPage;
+            this.ParentWindow.FinishSetup();
         }
     }
 }

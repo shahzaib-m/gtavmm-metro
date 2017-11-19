@@ -1,21 +1,21 @@
-﻿<UserControl x:Class="gtavmm_metro.Setup.Pages.ScriptModsDirectory"
+﻿<UserControl x:Class="gtavmm_metro.Setup.Pages.ModsDirectory"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
              xmlns:Controls="http://metro.mahapps.com/winfx/xaml/controls"
              mc:Ignorable="d" 
              d:DesignHeight="400" d:DesignWidth="700"
              
-             x:Name="ScriptModsDirectorySelect">
+             x:Name="ModsDirectorySelect">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="7*" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <Grid x:Name="ScriptModsDirectoryGrid">
+        <Grid x:Name="ModsDirectoryGrid">
             <Grid.RowDefinitions>
                 <RowDefinition Height="100"/>
                 <RowDefinition Height="*"/>
@@ -32,17 +32,19 @@
                     <RowDefinition Height="30" />
                 </Grid.RowDefinitions>
 
-                <TextBlock Text="Your Script Modifications Directory" FontWeight="Light" FontSize="20" Grid.Row="0" Margin="0 20 0 0"/>
-                <TextBox x:Name="ScriptModsDirectoryTextBlock" Grid.Row="1" Grid.Column="0" VerticalContentAlignment="Center" FontSize="13" IsReadOnly="True" Height="28"
+                <TextBlock Text="Your Modifications Directory" FontWeight="Light" FontSize="20" Grid.Row="0" Margin="0 20 0 0"/>
+                <TextBox x:Name="ModsDirectoryTextBlock" Grid.Row="1" Grid.Column="0" VerticalContentAlignment="Center" FontSize="13" IsReadOnly="True" Height="30"
                              Controls:TextBoxHelper.Watermark="Select an empty directory..."/>
-                <Button Grid.Column="1" Grid.Row="1" Margin="10 0 0 0" x:Name="BrowseScriptModsDirectory" Click="BrowseScriptModsDirectory_Click"
-                        ToolTip="Select an empty folder where you would like this application to store and look for script modifications.">
+                <Button Grid.Column="1" Grid.Row="1" Margin="10 0 0 0" x:Name="BrowseModsDirectory" Click="BrowseModsDirectory_Click"
+                        ToolTip="Select an empty folder where you would like this application to store and look for modifications.">
                     <TextBlock Text="BROWSE" FontWeight="Light" FontSize="12"/>
                 </Button>
             </Grid>
 
             <TextBlock Grid.Row="1" Margin="0 30" TextWrapping="Wrap" FontWeight="Light" FontSize="15">
-                These are the mods that are normally put into the root directory of GTAV. Please ensure that the folder you select is <Bold>empty</Bold> and ideally on the same drive as GTAV to ensure quick loading and unloading of modifications to and from GTAV's directory.
+                This is the folder where all your script and asset modifications will be stored. Please ensure that the folder you select is <Bold>empty</Bold> and ideally on the same drive as your GTAV copy to ensure quick loading and unloading of modifications to and from GTAV's directory.
+                <LineBreak /> 
+                <LineBreak /> Alternatively, you can also select an existing directory that has been previously used as a modifications directory for GTAV Mod Manager Metro.
             </TextBlock>
         </Grid>
 
@@ -52,8 +54,8 @@
         </Button>
 
         <Button HorizontalAlignment="Right" Width="50" Height="50" Padding="0 0 0 0" Grid.Row="1" IsEnabled="False"
-                Style="{DynamicResource MetroCircleButtonStyle}" Content="{iconPacks:PackIconMaterial ArrowRight, Width=20, Height=20}"
-                x:Name="GoForward" Click="GoForward_Click" ToolTip="Next">
+                Style="{DynamicResource MetroCircleButtonStyle}" Content="{iconPacks:PackIconMaterial Check, Width=20, Height=20}"
+                x:Name="Finish" Click="Finish_Click" ToolTip="Finish">
         </Button>
     </Grid>
 </UserControl>
