@@ -29,14 +29,14 @@
                                HorizontalAlignment="Center" VerticalAlignment="Center" Grid.RowSpan="2" />
 
         <TabControl x:Name="MainTabControl" TabStripPlacement="Top" Grid.RowSpan="2" BorderThickness="0" IsEnabled="False"
-                    Opacity="0.3" Padding="0 0 0 0" Controls:TabControlHelper.IsUnderlined="True">
+                    Opacity="0.0" Padding="0 0 0 0" Controls:TabControlHelper.IsUnderlined="True">
             <TabItem x:Name="HomeTabItem" Header="Home" Padding="10 10 5 10">
 
             </TabItem>
             <TabItem x:Name="ScriptModsTabItem" Header="Script Mods" Padding="10 10 5 10" HorizontalAlignment="Right">
 
             </TabItem>
-            <TabItem Header="Asset Mods" Padding="10 10 5 10" HorizontalAlignment="Right">
+            <TabItem x:Name="AssetModsTabItem" Header="Asset Mods" Padding="10 10 5 10" HorizontalAlignment="Right">
 
             </TabItem>
             <TabItem Header="Settings" Padding="10 10 5 10" HorizontalAlignment="Right">

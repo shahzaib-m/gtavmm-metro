@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Data.SQLite;
 using System.Threading.Tasks;
 
 using System.Windows;
@@ -22,6 +21,7 @@ namespace gtavmm_metro
     {
         private HomeUC HomeUserControl;
         private ScriptModsUC ScriptModsUserControl;
+        private AssetModsUC AssetModsUserControl;
         private AboutUC AboutUserControl;
 
         private DBInstance ModsDbConnection;
@@ -57,23 +57,24 @@ namespace gtavmm_metro
         private async Task Init()
         {
             //await Task.Delay(1000);     // temp substitute for work delay
-            await Task.Run(() => this.CreatePersistentDbConnection());
-            await Task.Run(() => this.AssignUCToTabs());
+            await this.CreatePersistentDbConnection();
+            await this.AssignUCToTabs();
+            await this.PreloadIntensiveTabs();
 
-            await Task.Run(() => this.UserInteractionStartNow());    // enable the UI for the user when tasks finished.
+            await this.UserInteractionStartNow();    // enable the UI for the user when tasks finished.
         }
 
-        private void CreatePersistentDbConnection()
+        private async Task CreatePersistentDbConnection()
         {
-            this.ModsDbConnection = new DBInstance(Settings.Default.ModsDirectory);
+            await Task.Run(() => this.ModsDbConnection = new DBInstance(Settings.Default.ModsDirectory));
         }
 
         /// <summary>
         /// This method assigns the appropriate usercontrols for all the tabitems in this window.
         /// </summary>
-        private void AssignUCToTabs()
+        private async Task AssignUCToTabs()
         {
-            this.Dispatcher.Invoke(() => // needed as window elements are being modified from a non-main thread
+            await Task.Run(() => this.Dispatcher.Invoke(() => // needed as window elements are being modified from a non-main thread
             {
                 // Assigning ScriptMods UserControl to Script Mods tab
                 this.HomeUserControl = new HomeUC();
@@ -84,26 +85,45 @@ namespace gtavmm_metro
                 this.ScriptModsUserControl.LoadScriptMods(this.ModsDbConnection);
                 this.ScriptModsTabItem.Content = this.ScriptModsUserControl;
 
+                // Assigning AssetMods UserControl to Asset Mods tab
+                this.AssetModsUserControl = new AssetModsUC();
+                this.AssetModsUserControl.LoadAssetMods(this.ModsDbConnection);
+                this.AssetModsTabItem.Content = this.AssetModsUserControl;
+
                 // Assigning About UserControl to About tab
                 this.AboutUserControl = new AboutUC();
                 this.AboutTabItem.Content = this.AboutUserControl;
-            });
+            }));
+        }
+
+        private async Task PreloadIntensiveTabs()
+        {
+            await Task.Run(() => this.Dispatcher.Invoke(() =>
+            {
+                this.MainTabControl.SelectedIndex = 1;
+                this.MainTabControl.UpdateLayout();
+
+                this.MainTabControl.SelectedIndex = 2;
+                this.MainTabControl.UpdateLayout();
+
+                this.MainTabControl.SelectedIndex = 0;
+            }));
         }
 
         /// <summary>
         /// This method should be called after all initial tasks are done and user interaction should now begin.
         /// </summary>
-        private void UserInteractionStartNow()
+        private async Task UserInteractionStartNow()
         {
-            this.Dispatcher.Invoke(() =>    // needed as window elements are being modified from a non-main thread
+            await Task.Run(() => this.Dispatcher.Invoke(() =>    // needed as window elements are being modified from a non-main thread
             {
                 this.MainTabControl.IsEnabled = true;
 
-                DoubleAnimation smoothFadeIn = new DoubleAnimation(0.3, 1.0, new Duration(new TimeSpan(0, 0, 0, 0, 300)));
+                DoubleAnimation smoothFadeIn = new DoubleAnimation(0.0, 1.0, new Duration(new TimeSpan(0, 0, 0, 0, 300)));
                 this.MainTabControl.BeginAnimation(OpacityProperty, smoothFadeIn);
 
                 this.MainProgressRing.IsActive = false;
-            });
+            }));
         }
         #endregion
     }

@@ -133,6 +133,8 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Models\AssetMod.cs" />
+    <Compile Include="Models\AssetModAPI.cs" />
     <Compile Include="Models\DBInstance.cs" />
     <Compile Include="Models\GTAVRockstar.cs" />
     <Compile Include="Models\GTAVSteam.cs" />
@@ -151,6 +153,9 @@
     </Compile>
     <Compile Include="Tabs\AboutUC.xaml.cs">
       <DependentUpon>AboutUC.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Tabs\AssetModsUC.xaml.cs">
+      <DependentUpon>AssetModsUC.xaml</DependentUpon>
     </Compile>
     <Compile Include="Tabs\HomeUC.xaml.cs">
       <DependentUpon>HomeUC.xaml</DependentUpon>
@@ -193,6 +198,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Tabs\AboutUC.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Tabs\AssetModsUC.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -277,7 +286,10 @@
   <ItemGroup>
     <Resource Include="Purple.ico" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <EmbeddedResource Include="costura32\SQLite.Interop.dll" />
+    <EmbeddedResource Include="costura64\SQLite.Interop.dll" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>

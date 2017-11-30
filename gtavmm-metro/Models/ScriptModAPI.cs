@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 
@@ -19,53 +20,51 @@ namespace gtavmm_metro.Models
             this.ModsDb = modsDbConection;
         }
 
-        public async Task<ScriptMod> CreateScriptMod(string Name, int orderIndex, string Description = null, bool IsEnabled = true)
+        public async Task<ScriptMod> CreateScriptMod(string name, int orderIndex, string description = null, bool isEnabled = true, bool createFolder = true)
         {
-            Random randgen = new Random(Guid.NewGuid().GetHashCode()); // https://stackoverflow.com/questions/1785744/how-do-i-seed-a-random-class-to-avoid-getting-duplicate-random-values
-            int randomId;
-            do
-            {
-                randomId = randgen.Next(100000000, 999999999);
-            } while (await this.GetScriptModById(randomId) != null);
-
             ScriptMod newScriptMod = new ScriptMod
             {
-                Id = randomId,
-                Name = Name,
-                Description = Description,
-                IsEnabled = IsEnabled,
+                Name = name,
+                Description = description,
+                IsEnabled = isEnabled,
                 OrderIndex = orderIndex
             };
 
-            if (Directory.Exists(Path.Combine(this.ModsRootFolder.FullName, Name)))
+            if (createFolder)
             {
-                int i = 1;
-                string numberAppendedDir = Path.Combine(this.ModsRootFolder.FullName, String.Format("{0} ({1})", newScriptMod.Name, i));
-                while (Directory.Exists(numberAppendedDir))
+                if (Directory.Exists(Path.Combine(this.ModsRootFolder.FullName, name)))
                 {
-                    i++;
-                    numberAppendedDir = Path.Combine(this.ModsRootFolder.FullName, String.Format("{0} ({1})", newScriptMod.Name, i));
-                }
+                    int i = 1;
+                    string numberAppendedDir = Path.Combine(this.ModsRootFolder.FullName, String.Format("{0} ({1})", newScriptMod.Name, i));
+                    while (Directory.Exists(numberAppendedDir))
+                    {
+                        i++;
+                        numberAppendedDir = Path.Combine(this.ModsRootFolder.FullName, String.Format("{0} ({1})", newScriptMod.Name, i));
+                    }
 
-                Directory.CreateDirectory(numberAppendedDir);
-                newScriptMod.Name = String.Format("{0} ({1})", newScriptMod.Name, i);
-            }
-            else
-            {
-                Directory.CreateDirectory(Path.Combine(this.ModsRootFolder.FullName, newScriptMod.Name));
+                    Directory.CreateDirectory(numberAppendedDir);
+                    newScriptMod.Name = String.Format("{0} ({1})", newScriptMod.Name, i);
+                }
+                else
+                {
+                    Directory.CreateDirectory(Path.Combine(this.ModsRootFolder.FullName, newScriptMod.Name));
+                }
             }
 
 
             await this.ModsDb.Connection.OpenAsync();
 
-            string sql = "INSERT into ScriptMod (id, name, description, isEnabled, orderIndex) VALUES (@id, @name, @description, @isEnabled, @orderIndex)";
+            string sql = "INSERT into ScriptMod (name, description, isEnabled, orderIndex) VALUES (@name, @description, @isEnabled, @orderIndex)";
             SQLiteCommand command = new SQLiteCommand(sql, this.ModsDb.Connection);
-            command.Parameters.AddWithValue("id", newScriptMod.Id);
             command.Parameters.AddWithValue("name", newScriptMod.Name);
             command.Parameters.AddWithValue("description", newScriptMod.Description);
             command.Parameters.AddWithValue("isEnabled", Convert.ToInt32(newScriptMod.IsEnabled));
             command.Parameters.AddWithValue("orderIndex", newScriptMod.OrderIndex);
             await command.ExecuteNonQueryAsync();
+
+            sql = "SELECT last_insert_rowid()";
+            command = new SQLiteCommand(sql, this.ModsDb.Connection);
+            newScriptMod.Id = (int)(long)(await command.ExecuteScalarAsync());
 
             this.ModsDb.Connection.Close();
 
@@ -91,7 +90,7 @@ namespace gtavmm_metro.Models
             }
             while (await reader.ReadAsync())
             {
-                int id = (int)reader["id"];
+                int id = (int)(long)reader["id"];
                 string name = (string)reader["name"];
                 string description = (string)reader["description"];
                 bool isEnabled = Convert.ToBoolean((int)reader["isEnabled"]);
@@ -119,9 +118,25 @@ namespace gtavmm_metro.Models
             this.ModsDb.Connection.Close();
 
 
+
             if (modsByIdWithNoFolders.Count != 0)
                 foreach (int scriptModId in modsByIdWithNoFolders)
                     await this.RemoveAndDeleteScriptMod(scriptModId, false);
+
+            DirectoryInfo[] allDirsInsideModsDir = this.ModsRootFolder.GetDirectories();
+            if (allDirsInsideModsDir.Length != allScriptMods.Count)
+            {
+                foreach(DirectoryInfo dir in allDirsInsideModsDir)
+                {
+                    bool found = allScriptMods.Any(modFolder => modFolder.Name == dir.Name);
+                    if (!found)
+                    {
+                        allScriptMods.Add(await this.CreateScriptMod(dir.Name, allScriptMods.Count - 1,
+                            "* This modification was not recognized. It could have been added outside of this app, or it was an existing modification which has been renamed. *",
+                                false, false));
+                    }
+                }
+            }
 
             return allScriptMods;
         }
@@ -143,7 +158,7 @@ namespace gtavmm_metro.Models
             }
             while (await reader.ReadAsync())
             {
-                resultScriptMod.Id = (int)reader["id"];
+                resultScriptMod.Id = (int)(long)reader["id"];
                 resultScriptMod.Name = (string)reader["name"];
                 resultScriptMod.Description = (string)reader["description"];
                 resultScriptMod.IsEnabled = Convert.ToBoolean((int)reader["isEnabled"]);

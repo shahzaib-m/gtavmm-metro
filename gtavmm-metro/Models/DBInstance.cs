@@ -14,7 +14,7 @@ namespace gtavmm_metro.Models
             this.Connection = new SQLiteConnection(String.Format(DbConnectionString, modsFolderRoot));
 
             this.VerifyScriptModTable();
-            // this.VerifyAssetModTable();  TODO confirm requirements of this table then implement
+            this.VerifyAssetModTable();
         }
 
         private async void VerifyScriptModTable()
@@ -43,14 +43,14 @@ namespace gtavmm_metro.Models
         {
             await this.Connection.OpenAsync();
 
-            string sql = "CREATE TABLE ScriptMod (id INT, name VARCHAR(30), description VARCHAR(600), isEnabled INT, orderIndex INT)";
+            string sql = @"CREATE TABLE ScriptMod (id INTEGER PRIMARY KEY, name VARCHAR(30), description VARCHAR(600), isEnabled INT, orderIndex INT)";
             SQLiteCommand command = new SQLiteCommand(sql, this.Connection);
             command.ExecuteNonQuery();
 
             this.Connection.Close();
         }
 
-        /*private async void VerifyAssetModTable()
+        private async void VerifyAssetModTable()
         {
             await this.Connection.OpenAsync();
 
@@ -64,7 +64,7 @@ namespace gtavmm_metro.Models
             if (!reader.HasRows)
             {
                 this.Connection.Close();
-                this.CreateScriptModTable();
+                this.CreateAssetModsTable();
             }
             else
             {
@@ -76,11 +76,11 @@ namespace gtavmm_metro.Models
         {
             await this.Connection.OpenAsync();
 
-            string sql = "CREATE TABLE AssetMod (id INT, name VARCHAR(30), description VARCHAR(600), isEnabled INT, orderIndex INT)";
+            string sql = "CREATE TABLE AssetMod (id INTEGER PRIMARY KEY, name VARCHAR(30), description VARCHAR(600), isEnabled INT, targetRPF VARCHAR(260), isUsableAssetMod INT, orderIndex INT)";
             SQLiteCommand command = new SQLiteCommand(sql, this.Connection);
             command.ExecuteNonQuery();
 
             this.Connection.Close();
-        }*/
+        }
     }
 }

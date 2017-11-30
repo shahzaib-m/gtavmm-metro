@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using System.Data.SQLite;
 using System.Text.RegularExpressions;
 
 using System.Windows;
@@ -44,18 +43,9 @@ namespace gtavmm_metro.Tabs
         {
             string chosenModName = (((FrameworkElement)sender).DataContext as ScriptMod).Name; // the sender ScriptMod object from the datagrid
 
-            try
+            if (Directory.Exists(Path.Combine(this.ModsRootFolder, chosenModName)))
             {
                 Process.Start(Path.Combine(this.ModsRootFolder, chosenModName));
-            }
-            catch (Exception ex)
-            {
-                if (ex is DirectoryNotFoundException)
-                {
-                    // TODO - handle this
-                }
-
-                throw;
             }
         }
 
@@ -168,12 +158,12 @@ namespace gtavmm_metro.Tabs
                 bool changeNameIsSuccess = await this.ScriptModAPI.UpdateScriptModName(editedScriptMod.Id, editedScriptMod.Name);
                 if (!changeNameIsSuccess)
                 {
-                    this.SetScriptModNameOldValue(editedScriptMod);
+                    editedScriptMod.Name = await this.ScriptModAPI.GetOldNameBeforeIllegalEdit(editedScriptMod.Id);
 
                     MetroWindow metroWindow = (Application.Current.MainWindow as MetroWindow);  // needed to access ShowMessageAsync() method in MetroWindow
 
                     string errorDialogTitle = "Unable to rename modification";
-                    string errorDialogMessage = "Unable to rename this modification. The folder and/or its files may be in use by an application (or alternatively the name has unknown invalid characters).";
+                    string errorDialogMessage = "Unable to rename this modification. The folder and/or its files may be in use by an application (or alternatively the name has unknown invalid characters or is too long).";
 
                     MessageDialogResult result = await metroWindow.ShowMessageAsync(errorDialogTitle, errorDialogMessage, MessageDialogStyle.Affirmative);
                 }
@@ -190,7 +180,8 @@ namespace gtavmm_metro.Tabs
             await this.ScriptModAPI.UpdateScriptModIsEnabled(editedScriptMod.Id, editedScriptMod.IsEnabled);
         }
 
-        // Bottom bar buttons
+        //// --- Bottom bar buttons
+        // Settings Button Behaviour
         private void ScriptModSettingsButton_Click(object sender, RoutedEventArgs e)
         {
             this.ScriptModSettingsChildWindow.IsOpen = true;
@@ -200,11 +191,13 @@ namespace gtavmm_metro.Tabs
             this.ScriptModSettingsChildWindow.IsOpen = false;
         }
 
+        // View Modifications Folder Behaviour
         private void ViewModsRootFolderButton_Click(object sender, RoutedEventArgs e)
         {
             Process.Start(this.ModsRootFolder);
         }
 
+        // Add New Script Modification Behaviour
         private async void AddNewScriptModButton_Click(object sender, RoutedEventArgs e)
         {
             ScriptMod newScriptMod = await this.ScriptModAPI.CreateScriptMod("New Mod Name", this.ScriptMods.Count, "New Mod Description", false);
@@ -224,7 +217,7 @@ namespace gtavmm_metro.Tabs
                 if (scriptModsFromDb == null)
                 {
                     this.ScriptMods = new ObservableCollection<ScriptMod>();
-                    this.ScriptMods.Add(await this.ScriptModAPI.CreateScriptMod("New Mod Name", 0, "New Mod Description", false));
+                    this.ScriptMods.Add(await this.ScriptModAPI.CreateScriptMod("Your mod name - Click to edit", 0, "Your mod's brief description to help you identify it (optional). Click to edit.", false));
                     // UI margins act odd when datagrid is empty and a new script mod is added for the first time manually. Adding one by default.
                 }
                 else
@@ -234,11 +227,6 @@ namespace gtavmm_metro.Tabs
 
                 this.ScriptModsDataGrid.ItemsSource = this.ScriptMods;
             });
-        }
-
-        private async void SetScriptModNameOldValue(ScriptMod scriptMod)
-        {
-            scriptMod.Name = await this.ScriptModAPI.GetOldNameBeforeIllegalEdit(scriptMod.Id);
         }
         #endregion
     }
