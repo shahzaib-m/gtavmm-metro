@@ -20,15 +20,12 @@ using gtavmm_metro.Properties;
 
 namespace gtavmm_metro.Tabs
 {
-    /// <summary>
-    /// Interaction logic for ScriptMods.xaml
-    /// </summary>
     public partial class ScriptModsUC : UserControl
     {
-        private ObservableCollection<ScriptMod> ScriptMods { get; set; }
-        private ScriptModAPI ScriptModAPI { get; set; }
-        public string ModsRootFolder { get; set; }
-        private bool FirstLoad { get; set; } = true;
+        public ObservableCollection<ScriptMod> ScriptMods { get; set; }
+        public ScriptModAPI ScriptModAPI { get; set; }
+        private string ModsRootFolder { get; set; }
+        private bool ModIndexRearrangeAllowed { get; set; } = true;
         private bool ScriptModsProgressRingIsActive { get; set; } = false;
 
         public ScriptModsUC()
@@ -105,30 +102,50 @@ namespace gtavmm_metro.Tabs
             }
         }
 
-        private void MoveScriptModUpButton_Click(object sender, RoutedEventArgs e)
+        private async void MoveScriptModUpButton_Click(object sender, RoutedEventArgs e)
         {
-            ScriptMod chosenScriptMod = ((FrameworkElement)sender).DataContext as ScriptMod;
-            if (this.ScriptMods.ElementAt(0).Id == chosenScriptMod.Id)
-                return;
+            if (this.ModIndexRearrangeAllowed)
+            {
+                this.ModIndexRearrangeAllowed = false;
 
-            int oldIndex = this.ScriptMods.IndexOf(chosenScriptMod);
-            int newIndex = oldIndex - 1;
+                ScriptMod chosenScriptMod = ((FrameworkElement)sender).DataContext as ScriptMod;
+                if (this.ScriptMods.ElementAt(0).Id == chosenScriptMod.Id)
+                {
+                    this.ModIndexRearrangeAllowed = true;
+                    return;
+                }
 
-            this.ScriptMods.Move(oldIndex, newIndex);
-            Task.Run(() => this.ScriptModAPI.UpdateScriptModOrderIndexes(this.ScriptMods));
+                int oldIndex = this.ScriptMods.IndexOf(chosenScriptMod);
+                int newIndex = oldIndex - 1;
+
+                this.ScriptMods.Move(oldIndex, newIndex);
+                await Task.Run(() => this.ScriptModAPI.UpdateScriptModOrderIndexes(this.ScriptMods));
+
+                this.ModIndexRearrangeAllowed = true;
+            }
         }
 
-        private void MoveScriptModDownButton_Click(object sender, RoutedEventArgs e)
+        private async void MoveScriptModDownButton_Click(object sender, RoutedEventArgs e)
         {
-            ScriptMod chosenScriptMod = ((FrameworkElement)sender).DataContext as ScriptMod;
-            if (this.ScriptMods.ElementAt(this.ScriptMods.Count - 1).Id == chosenScriptMod.Id)
-                return;
+            if (this.ModIndexRearrangeAllowed)
+            {
+                this.ModIndexRearrangeAllowed = false;
 
-            int oldIndex = this.ScriptMods.IndexOf(chosenScriptMod);
-            int newIndex = oldIndex + 1;
+                ScriptMod chosenScriptMod = ((FrameworkElement)sender).DataContext as ScriptMod;
+                if (this.ScriptMods.ElementAt(this.ScriptMods.Count - 1).Id == chosenScriptMod.Id)
+                {
+                    this.ModIndexRearrangeAllowed = true;
+                    return;
+                }
 
-            this.ScriptMods.Move(oldIndex, newIndex);
-            Task.Run(() => this.ScriptModAPI.UpdateScriptModOrderIndexes(this.ScriptMods));
+                int oldIndex = this.ScriptMods.IndexOf(chosenScriptMod);
+                int newIndex = oldIndex + 1;
+
+                this.ScriptMods.Move(oldIndex, newIndex);
+                await Task.Run(() => this.ScriptModAPI.UpdateScriptModOrderIndexes(this.ScriptMods));
+
+                this.ModIndexRearrangeAllowed = true;
+            }
         }
 
         private async void ScriptModsDataGrid_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
@@ -180,7 +197,7 @@ namespace gtavmm_metro.Tabs
             await this.ScriptModAPI.UpdateScriptModIsEnabled(editedScriptMod.Id, editedScriptMod.IsEnabled);
         }
 
-        //// --- Bottom bar buttons
+        #region Bottom bar buttons
         // Settings Button Behaviour
         private void ScriptModSettingsButton_Click(object sender, RoutedEventArgs e)
         {
@@ -204,25 +221,36 @@ namespace gtavmm_metro.Tabs
             this.ScriptMods.Add(newScriptMod);
         }
         #endregion
+        #endregion
 
         #region My Methods
         public async void LoadScriptMods(DBInstance modsDbConnection)
         {
             await this.Dispatcher.Invoke(async () =>
             {
-                this.ModsRootFolder = Settings.Default.ModsDirectory;
+                this.ModsRootFolder = Path.Combine(Settings.Default.ModsDirectory, "Script Mods");
                 this.ScriptModAPI = new ScriptModAPI(this.ModsRootFolder, modsDbConnection);
 
-                List<ScriptMod> scriptModsFromDb = await this.ScriptModAPI.GetAllScriptMods();
-                if (scriptModsFromDb == null)
+                if (!Directory.Exists(this.ModsRootFolder))
                 {
+                    Directory.CreateDirectory(this.ModsRootFolder);
                     this.ScriptMods = new ObservableCollection<ScriptMod>();
                     this.ScriptMods.Add(await this.ScriptModAPI.CreateScriptMod("Your mod name - Click to edit", 0, "Your mod's brief description to help you identify it (optional). Click to edit.", false));
                     // UI margins act odd when datagrid is empty and a new script mod is added for the first time manually. Adding one by default.
                 }
                 else
                 {
-                    this.ScriptMods = new ObservableCollection<ScriptMod>(scriptModsFromDb);
+                    List<ScriptMod> scriptModsFromDb = await this.ScriptModAPI.GetAllScriptMods();
+                    if (scriptModsFromDb == null)
+                    {
+                        this.ScriptMods = new ObservableCollection<ScriptMod>();
+                        this.ScriptMods.Add(await this.ScriptModAPI.CreateScriptMod("Your mod name - Click to edit", 0, "Your mod's brief description to help you identify it (optional). Click to edit.", false));
+                        // UI margins act odd when datagrid is empty and a new script mod is added for the first time manually. Adding one by default.
+                    }
+                    else
+                    {
+                        this.ScriptMods = new ObservableCollection<ScriptMod>(scriptModsFromDb);
+                    }
                 }
 
                 this.ScriptModsDataGrid.ItemsSource = this.ScriptMods;

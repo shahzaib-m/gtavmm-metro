@@ -1,9 +1,6 @@
-﻿using System;
-using System.Data.SQLite;
-
+﻿using System.IO;
 using System.Windows;
 using System.Windows.Input;
-using System.Threading.Tasks;
 
 using MahApps.Metro.Controls;
 
@@ -11,12 +8,8 @@ using gtavmm_metro.Models;
 using gtavmm_metro.Properties;
 using gtavmm_metro.Setup.Pages;
 
-
 namespace gtavmm_metro.Setup
 {
-    /// <summary>
-    /// Interaction logic for SetupMainWindow.xaml
-    /// </summary>
     public partial class SetupMainWindow : MetroWindow
     {
         public Welcome WelcomePage { get; set; }
@@ -24,30 +17,32 @@ namespace gtavmm_metro.Setup
         public ModsDirectory ModsDirectoryPage { get; set; }
 
         public SetupMainWindow()
-        { 
+        {
             InitializeComponent();
         }
 
-        private async void Setup_Loaded(object sender, RoutedEventArgs e)
+        private void Setup_Loaded(object sender, RoutedEventArgs e)
         {
-            await Task.Run(() => LoadUserControls());
+            this.LoadUserControls();
 
             this.SetupContainer.Content = WelcomePage;
         }
 
         private void LoadUserControls()
         {
-            this.Dispatcher.Invoke(() =>
-            {
-                this.WelcomePage = new Welcome(this);
-                this.GTAVDirectoryPage = new GTAVDirectory(this);
-                this.ModsDirectoryPage = new ModsDirectory(this);
-            });
+            this.WelcomePage = new Welcome(this);
+            this.GTAVDirectoryPage = new GTAVDirectory(this);
+            this.ModsDirectoryPage = new ModsDirectory(this);
         }
 
+        /// <summary>
+        /// Event to move around window (no border);
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Window_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            if (e.ChangedButton == MouseButton.Left) this.DragMove();
+            if (e.ChangedButton == MouseButton.Left) { this.DragMove(); }
         }
 
         public async void FinishSetup()
@@ -58,14 +53,16 @@ namespace gtavmm_metro.Setup
             Settings.Default.ModsDirectory = this.ModsDirectoryPage.ModsDirectoryConfirmedLocation.FullName;
             Settings.Default.Save();
 
-            ScriptModAPI scriptModAPI = new ScriptModAPI(this.ModsDirectoryPage.ModsDirectoryConfirmedLocation.FullName, new DBInstance(this.ModsDirectoryPage.ModsDirectoryConfirmedLocation.FullName));
+            DBInstance modsDbConnection = new DBInstance(this.ModsDirectoryPage.ModsDirectoryConfirmedLocation.FullName);
+            ScriptModAPI scriptModAPI = new ScriptModAPI(Path.Combine(this.ModsDirectoryPage.ModsDirectoryConfirmedLocation.FullName, "Script Mods"),
+                modsDbConnection);
             if (await scriptModAPI.GetAllScriptMods() == null)
             {
-                await scriptModAPI.CreateScriptMod("Script Hook V + ASI Loader", 0, "Script Hook V + ASI Loader © - not included, please download yourself. Required to load most modifications (NOT for GTA Online). Should be up-to-date as new GTAV updates are released to ensure compatibility and avoid crashes.", false);
-                await scriptModAPI.CreateScriptMod("OpenIV.ASI", 1, "OpenIV.ASI © - not included, please download yourself (usually included with OpenIV ©.) Required to load asset mods (NOT for GTA Online), the modified .rpf files that go inside the \"mods\" folder in the GTAV directory instead of the original files.", false);
+                await scriptModAPI.CreateScriptMod("Script Hook V + ASI Loader", 0, "Script Hook V + ASI Loader © - not included, please download yourself. Required to load most modifications. Should be up-to-date as new GTAV updates are released to ensure compatibility and avoid crashes.", false);
+                await scriptModAPI.CreateScriptMod("OpenIV.ASI", 1, "OpenIV.ASI © - not included, please download yourself (usually included with OpenIV ©.) Required to load asset mods, the modified .rpf files that go inside the \"mods\" folder in the GTAV directory.", false);
             }
 
-            MainWindow mainWindow = new MainWindow();
+            MainWindow mainWindow = new MainWindow(modsDbConnection);
             mainWindow.Show();
             this.Close();
         }

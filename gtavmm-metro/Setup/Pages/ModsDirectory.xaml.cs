@@ -10,9 +10,6 @@ using Microsoft.WindowsAPICodePack.Dialogs;
 
 namespace gtavmm_metro.Setup.Pages
 {
-    /// <summary>
-    /// Interaction logic for ModsDirectory.xaml
-    /// </summary>
     public partial class ModsDirectory : UserControl
     {
         private SetupMainWindow ParentWindow { get; set; }

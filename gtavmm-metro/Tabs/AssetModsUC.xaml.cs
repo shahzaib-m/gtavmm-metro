@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
 
 using System.Windows;
 using System.Windows.Controls;
@@ -20,16 +19,13 @@ using gtavmm_metro.Properties;
 
 namespace gtavmm_metro.Tabs
 {
-    /// <summary>
-    /// Interaction logic for AssetModsUC.xaml
-    /// </summary>
     public partial class AssetModsUC : UserControl
     {
-        private ObservableCollection<AssetMod> AssetMods { get; set; }
+        public ObservableCollection<AssetMod> AssetMods { get; set; }
         private ObservableCollection<string> TargetRPFList { get; set; }
         private AssetModAPI AssetModAPI { get; set; }
-        public string ModsRootFolder { get; set; }
-        private bool FirstLoad { get; set; } = true;
+        private string ModsRootFolder { get; set; }
+        private bool ModIndexRearrangeAllowed { get; set; } = true;
 
         public AssetModsUC()
         {
@@ -38,15 +34,16 @@ namespace gtavmm_metro.Tabs
         }
 
         #region UserControl Events
-        private void ViewAssetModFolder_Click(object sender, RoutedEventArgs e)
+        private void ViewAssetModInExplorerButton_Click(object sender, RoutedEventArgs e)
         {
-            string chosenModName = (((FrameworkElement)sender).DataContext as AssetMod).Name; // the sender AssetMod object from the datagrid
+            string chosenModTargetRPF = (((FrameworkElement)sender).DataContext as AssetMod).TargetRPF; // the sender AssetMod object from the datagrid
 
-            if (File.Exists(Path.Combine(this.ModsRootFolder, chosenModName + ".rpf")))
+            string targetRPFPath = Path.Combine(this.ModsRootFolder, chosenModTargetRPF.Substring(1));
+            if (File.Exists(targetRPFPath))
             {
                 Process explorerRPF = new Process();
                 explorerRPF.StartInfo.FileName = "explorer.exe";
-                explorerRPF.StartInfo.Arguments = String.Format("/select,\"{0}\"", Path.Combine(this.ModsRootFolder, chosenModName + ".rpf"));
+                explorerRPF.StartInfo.Arguments = String.Format("/select,\"{0}\"", targetRPFPath);
                 explorerRPF.Start();
             }
         }
@@ -55,6 +52,12 @@ namespace gtavmm_metro.Tabs
         {
             List<AssetMod> selectedAssetMods = this.AssetModsDataGrid.SelectedItems.Cast<AssetMod>().ToList();
             bool multiSelection = (selectedAssetMods.Count > 1);
+
+            if (!selectedAssetMods.First().IsUsableAssetMod)
+            {
+                this.AssetMods.Remove(selectedAssetMods.First());
+                return;
+            }
 
             string dialogTitle;
             string dialogMessage;
@@ -107,30 +110,50 @@ namespace gtavmm_metro.Tabs
             }
         }
 
-        private void MoveAssetModUpButton_Click(object sender, RoutedEventArgs e)
+        private async void MoveAssetModUpButton_Click(object sender, RoutedEventArgs e)
         {
-            AssetMod chosenAssetMod = ((FrameworkElement)sender).DataContext as AssetMod;
-            if (this.AssetMods.ElementAt(0).Id == chosenAssetMod.Id)
-                return;
+            if (this.ModIndexRearrangeAllowed)
+            {
+                this.ModIndexRearrangeAllowed = false;
 
-            int oldIndex = this.AssetMods.IndexOf(chosenAssetMod);
-            int newIndex = oldIndex - 1;
+                AssetMod chosenAssetMod = ((FrameworkElement)sender).DataContext as AssetMod;
+                if (this.AssetMods.ElementAt(0).Id == chosenAssetMod.Id)
+                {
+                    this.ModIndexRearrangeAllowed = true;
+                    return;
+                }
 
-            this.AssetMods.Move(oldIndex, newIndex);
-            Task.Run(() => this.AssetModAPI.UpdateAssetModOrderIndexes(this.AssetMods));
+                int oldIndex = this.AssetMods.IndexOf(chosenAssetMod);
+                int newIndex = oldIndex - 1;
+
+                this.AssetMods.Move(oldIndex, newIndex);
+                await Task.Run(() => this.AssetModAPI.UpdateAssetModOrderIndexes(this.AssetMods));
+
+                this.ModIndexRearrangeAllowed = true;
+            }
         }
 
-        private void MoveAssetModDownButton_Click(object sender, RoutedEventArgs e)
+        private async void MoveAssetModDownButton_Click(object sender, RoutedEventArgs e)
         {
-            AssetMod chosenAssetMod = ((FrameworkElement)sender).DataContext as AssetMod;
-            if (this.AssetMods.ElementAt(this.AssetMods.Count - 1).Id == chosenAssetMod.Id)
-                return;
+            if (this.ModIndexRearrangeAllowed)
+            {
+                this.ModIndexRearrangeAllowed = false;
 
-            int oldIndex = this.AssetMods.IndexOf(chosenAssetMod);
-            int newIndex = oldIndex + 1;
+                AssetMod chosenAssetMod = ((FrameworkElement)sender).DataContext as AssetMod;
+                if (this.AssetMods.ElementAt(this.AssetMods.Count - 1).Id == chosenAssetMod.Id)
+                {
+                    this.ModIndexRearrangeAllowed = true;
+                    return;
+                }
 
-            this.AssetMods.Move(oldIndex, newIndex);
-            Task.Run(() => this.AssetModAPI.UpdateAssetModOrderIndexes(this.AssetMods));
+                int oldIndex = this.AssetMods.IndexOf(chosenAssetMod);
+                int newIndex = oldIndex + 1;
+
+                this.AssetMods.Move(oldIndex, newIndex);
+                await Task.Run(() => this.AssetModAPI.UpdateAssetModOrderIndexes(this.AssetMods));
+
+                this.ModIndexRearrangeAllowed = true;
+            }
         }
 
         private async void AssetModsDataGrid_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
@@ -147,28 +170,8 @@ namespace gtavmm_metro.Tabs
                 }
                 else if (editedAssetMod.Name == await this.AssetModAPI.GetOldNameBeforeIllegalEdit(editedAssetMod.Id))
                     return;
-                else
-                {
-                    Regex invalidFileNameCharsRegex = new Regex("[" + Regex.Escape(new string(Path.GetInvalidFileNameChars())) + "]");
-                    if (invalidFileNameCharsRegex.IsMatch(editedAssetMod.Name))
-                    {
-                        editedAssetMod.Name = await this.AssetModAPI.GetOldNameBeforeIllegalEdit(editedAssetMod.Id);
-                        return;
-                    }
-                }
 
-                bool changeNameIsSuccess = await this.AssetModAPI.UpdateAssetModName(editedAssetMod.Id, editedAssetMod.Name);
-                if (!changeNameIsSuccess)
-                {
-                    editedAssetMod.Name = await this.AssetModAPI.GetOldNameBeforeIllegalEdit(editedAssetMod.Id);
-
-                    MetroWindow metroWindow = (Application.Current.MainWindow as MetroWindow);  // needed to access ShowMessageAsync() method in MetroWindow
-
-                    string errorDialogTitle = "Unable to rename modification package";
-                    string errorDialogMessage = "Unable to rename this modification package. The file may be in use by an application (or alternatively the name has unknown invalid characters or is too long).";
-
-                    await metroWindow.ShowMessageAsync(errorDialogTitle, errorDialogMessage, MessageDialogStyle.Affirmative);
-                }
+                await this.AssetModAPI.UpdateAssetModName(editedAssetMod.Id, editedAssetMod.Name);
             }
             else if (whichColumn == "Description")
             {
@@ -202,11 +205,11 @@ namespace gtavmm_metro.Tabs
             await this.AssetModAPI.UpdateAssetModIsEnabled(editedAssetMod.Id, editedAssetMod.IsEnabled);
         }
 
-        //// --- Bottom bar buttons
+        # region Bottom bar buttons
         // View Modifications Folder Behaviour
         private void ViewModsRootFolderButton_Click(object sender, RoutedEventArgs e)
         {
-            Process.Start(this.ModsRootFolder);
+            Process.Start(this.ModsRootFolder, "Asset Mods");
         }
 
         // Add New Asset Modification Behaviour (ChildWindow)
@@ -240,26 +243,13 @@ namespace gtavmm_metro.Tabs
             MetroWindow metroWindow = (Application.Current.MainWindow as MetroWindow);
             List<AssetMod> assetModsWithMatchingTargetRPF = new List<AssetMod>(
                 this.AssetMods.Where(assetMod => assetMod.TargetRPF == targetRPFString));
-            if (assetModsWithMatchingTargetRPF.Count == 1)
+            if (assetModsWithMatchingTargetRPF.Any())
             {
                 string dialogTitle = "Target RPF exists";
-                string dialogMessage = String.Format("An existing modification package ({0}) was found with this target RPF. Are you sure you want to continue creating a new mod with this target RPF?\n\n" +
-                    "You should use the existing modification package if you intend to add assets from another GTAV mod to this RPF, since adding a new modification package will only allow you to enable one of them (one modification per target RPF).",
+                string dialogMessage = String.Format("An existing modification package ({0}) was found with this target RPF. Please delete that modification if you'd like to add a new clean version of that RPF.",
                         assetModsWithMatchingTargetRPF[0].Name);
 
-                MetroDialogSettings dialogSettings = new MetroDialogSettings { AffirmativeButtonText = "Yes", NegativeButtonText = "No" };
-                MessageDialogResult result = await metroWindow.ShowMessageAsync(dialogTitle, dialogMessage, MessageDialogStyle.AffirmativeAndNegative, dialogSettings);
-                if (result == MessageDialogResult.Affirmative)
-                {
-                    ProgressDialogController controller = await metroWindow.ShowProgressAsync("Copying file", "Please wait...", false);
-                    controller.SetIndeterminate();
-
-                    this.AssetMods.Add(await Task.Run(() => this.AssetModAPI.CreateAssetMod("New Mod Package Name", targetRPFString,
-                        this.AssetMods.Count, "New Mod Package Description", false, true)));
-
-                    this.TargetRPFComboxBox.SelectedIndex = -1;
-                    await controller.CloseAsync();
-                }
+                await metroWindow.ShowMessageAsync(dialogTitle, dialogMessage, MessageDialogStyle.Affirmative);
             }
             else
             {
@@ -275,29 +265,42 @@ namespace gtavmm_metro.Tabs
         }
         // ---------------------------------------------------------------------------------------------------------------------------------
         #endregion
+        #endregion
 
         #region My Methods
         public async void LoadAssetMods(DBInstance modsDbConnection)
         {
             await this.Dispatcher.Invoke(async () =>
             {
-                this.ModsRootFolder = Settings.Default.ModsDirectory;
+                this.ModsRootFolder = Path.Combine(Settings.Default.ModsDirectory, "Asset Mods");
                 this.AssetModAPI = new AssetModAPI(this.ModsRootFolder, modsDbConnection, Settings.Default.GTAVDirectory);
-                //this.AssetModAPI.AssignStaticRPFValuesToModel(Settings.Default.GTAVDirectory);
-                this.TargetRPFList = new ObservableCollection<string>(this.AssetModAPI.GetAllRPFsInsideGTAVDirectory());
+
+                this.TargetRPFList = new ObservableCollection<string>(GTAV.GetAllRPFsInsideGTAVDirectory(Settings.Default.GTAVDirectory));
                 this.TargetRPFComboxBox.ItemsSource = this.TargetRPFList;
 
-                List<AssetMod> assetModsFromDb = await this.AssetModAPI.GetAllAssetMods();
-                if (assetModsFromDb == null)
+                if (!Directory.Exists(this.ModsRootFolder))
                 {
+                    Directory.CreateDirectory(this.ModsRootFolder);
+
                     this.AssetMods = new ObservableCollection<AssetMod>();
-                    this.AssetMods.Add(await this.AssetModAPI.CreateAssetMod("Example mod package",
-                       @"\update\sample.rpf", 0, "This is an example description of a mod package",
+                    this.AssetMods.Add(await this.AssetModAPI.CreateAssetMod("Example mod package (can delete)",
+                       @"\update\sample.rpf", 0, "This is an example description of a mod package - Not usable. Only here as an example.",
                         false, false));
                 }
                 else
                 {
-                    this.AssetMods = new ObservableCollection<AssetMod>(assetModsFromDb);
+                    List<AssetMod> assetModsFromDb = await this.AssetModAPI.GetAllAssetMods();
+                    if (assetModsFromDb == null)
+                    {
+                        this.AssetMods = new ObservableCollection<AssetMod>();
+                        this.AssetMods.Add(await this.AssetModAPI.CreateAssetMod("Example mod package (can delete)",
+                           @"\update\sample.rpf", 0, "This is an example description of a mod package - Not usable. Only here as an example",
+                            false, false));
+                    }
+                    else
+                    {
+                        this.AssetMods = new ObservableCollection<AssetMod>(assetModsFromDb);
+                    }
                 }
 
                 this.AssetModsDataGrid.ItemsSource = this.AssetMods;

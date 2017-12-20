@@ -6,6 +6,9 @@
              xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
              mc:Ignorable="d" 
              d:DesignHeight="664" d:DesignWidth="1064">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+    </UserControl.Resources>
     <Border CornerRadius="0" Margin="20 10 10 10" BorderBrush="Black" BorderThickness="1" x:Name="GTAVTabItemContainer">
         <Border.Effect>
             <DropShadowEffect />
@@ -51,11 +54,15 @@
                         </Grid.RowDefinitions>
 
                         <TextBlock FontWeight="Light" FontSize="23" Text="Script Mods" VerticalAlignment="Center"/>
-                        <ToggleButton Grid.Column="1" Margin="20 0" Width="100" FontSize="18" Content="Enabled" Style="{DynamicResource MetroFlatToggleButton}" 
-                                                  x:Name="ModsToggleButton_ScriptMods"/>
+                        <ToggleButton Grid.Column="1" Margin="20 0" Width="140" FontSize="18" Content="Disabled" Style="{DynamicResource MetroFlatToggleButton}" 
+                                      x:Name="ModsToggleButton_ScriptMods" Click="ModsToggleButton_ScriptMods_Click"/>
 
                         <TextBlock Margin="0 30" Grid.Row="1" FontWeight="Light" FontSize="23" Text="Asset Mods" VerticalAlignment="Center"/>
-                        <ToggleButton Margin="0 30" Grid.Row="1" Grid.Column="1" Width="100" FontSize="18" Content="Enabled" Style="{DynamicResource MetroFlatToggleButton}" />
+                        <ToggleButton Margin="0 30" Grid.Row="1" Grid.Column="1" Width="140" FontSize="18" Content="Disabled" Style="{DynamicResource MetroFlatToggleButton}"
+                                      IsEnabled="{Binding IsChecked, ElementName=ModsToggleButton_ScriptMods}"
+                                      x:Name="ModsToggleButton_AssetMods" Click="ModsToggleButton_AssetMods_Click">
+                            
+                        </ToggleButton>
                     </Grid>
                 </StackPanel>
             </GroupBox>
@@ -77,7 +84,8 @@
                         </Grid.RowDefinitions>
 
                         <TextBlock FontWeight="Light" FontSize="23" Text="Offline Mode" VerticalAlignment="Center"/>
-                        <ToggleButton Grid.Column="1" Margin="20 0" Width="100" FontSize="18" Content="Enabled" Style="{DynamicResource MetroFlatToggleButton}" />
+                        <ToggleButton Grid.Column="1" Margin="20 0" Width="140" FontSize="18" Content="Disabled" Style="{DynamicResource MetroFlatToggleButton}" 
+                                      x:Name="OptionsToggleButton_OfflineMode" Click="OptionsToggleButton_OfflineMode_Click"/>
                     </Grid>
                 </StackPanel>
             </GroupBox>
@@ -103,7 +111,8 @@
                     </StackPanel>
 
                     <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
-                        <Button Margin="10 10 10 10" Style="{StaticResource AccentedSquareButtonStyle}" Width="160">
+                        <Button Margin="10 10 10 10" Style="{StaticResource AccentedSquareButtonStyle}" Width="160"
+                                x:Name="GTAVLaunchButton" Click="GTAVLaunchButton_Click">
                             <Button.ToolTip>
                                 <StackPanel Orientation="Horizontal">
                                     <iconPacks:PackIconMaterial Kind="ArrowRightBold" Margin="0 5" />

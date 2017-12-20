@@ -43,8 +43,10 @@
 
         <DataGrid x:Name="ScriptModsDataGrid" CanUserAddRows="False" CanUserDeleteRows="False"
                           AutoGenerateColumns="False" FontSize="20" FontWeight="Light"
-                          ScrollViewer.CanContentScroll="False" Grid.Row="0" HeadersVisibility="None"
-                          Opacity="1.0" CellEditEnding="ScriptModsDataGrid_CellEditEnding">
+                          Grid.Row="0" HeadersVisibility="None"
+                          Opacity="1.0" CellEditEnding="ScriptModsDataGrid_CellEditEnding"
+                          EnableColumnVirtualization="True" EnableRowVirtualization="True"
+                          ItemsSource="{Binding Path=ScriptMods, IsAsync=True}">
             <!-- ScrollViewer.CanContentScroll="False" - smooth scrolling -->
             <DataGrid.Columns>
                 <DataGridTemplateColumn Header="Enabled">
@@ -136,8 +138,9 @@
                         <DataTemplate>
                             <StackPanel>
                                 <Button x:Name="MoveScriptModUpButton" Width="80" Height="30" BorderThickness="0"
-                                                Margin="10 0 10 0" Style="{StaticResource AccentedSquareButtonStyle}"
-                                                Click="MoveScriptModUpButton_Click">
+                                        Margin="10 0 10 0" Style="{StaticResource AccentedSquareButtonStyle}"
+                                        Click="MoveScriptModUpButton_Click"
+                                        IsEnabled="{Binding Source=ScriptModsUserControl, Path=AssetModsUserControl, UpdateSourceTrigger=PropertyChanged}">
                                     <Button.ToolTip>
                                         <StackPanel Orientation="Horizontal">
                                             <iconPacks:PackIconMaterial Kind="MenuUp" Margin="0 5" />
@@ -147,8 +150,8 @@
                                     <iconPacks:PackIconMaterial Kind="MenuUp" Width="20"/>
                                 </Button>
                                 <Button x:Name="MoveScriptModDownButton" Width="80" Height="30" BorderThickness="0"
-                                                Margin="10 0 10 0" Style="{StaticResource AccentedSquareButtonStyle}"
-                                                Click="MoveScriptModDownButton_Click">
+                                        Margin="10 0 10 0" Style="{StaticResource AccentedSquareButtonStyle}"
+                                        Click="MoveScriptModDownButton_Click">
                                     <Button.ToolTip>
                                         <StackPanel Orientation="Horizontal">
                                             <iconPacks:PackIconMaterial Kind="MenuDown" Margin="0 5" />

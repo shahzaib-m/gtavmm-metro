@@ -38,7 +38,6 @@ namespace gtavmm_metro.Models
                 this.Connection.Close();
             }
         }
-
         private async void CreateScriptModTable()
         {
             await this.Connection.OpenAsync();
@@ -71,7 +70,6 @@ namespace gtavmm_metro.Models
                 this.Connection.Close();
             }
         }
-
         private async void CreateAssetModsTable()
         {
             await this.Connection.OpenAsync();

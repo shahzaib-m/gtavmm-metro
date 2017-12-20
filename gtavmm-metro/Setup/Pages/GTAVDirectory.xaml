@@ -34,7 +34,7 @@
                 </Grid.RowDefinitions>
 
                 <TextBlock Text="Grand Theft Auto V Directory" FontWeight="Light" FontSize="20" Grid.Row="0" Margin="0 20 0 0"/>
-                <TextBox x:Name="GTAVDirectoryTextBlock" Grid.Row="1" Grid.Column="0" VerticalContentAlignment="Center" FontSize="13" IsReadOnly="True" Height="28"
+                <TextBox x:Name="GTAVDirectoryTextBlock" Grid.Row="1" Grid.Column="0" VerticalContentAlignment="Center" FontSize="13" IsReadOnly="True" Height="30"
                          Controls:TextBoxHelper.Watermark="Could not automatically detect GTAV's location. Select it manually..."/>
                 <Button Grid.Column="1" Grid.Row="1" Margin="10 0 0 0" x:Name="BrowseGTAVDirectory" Click="BrowseGTAVDirectory_Click">
                     <TextBlock Text="BROWSE" FontWeight="Light" FontSize="12" ToolTip="Select the folder where Grand Theft Auto V is located"/>

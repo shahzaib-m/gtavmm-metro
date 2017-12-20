@@ -3,9 +3,6 @@ using System.Windows.Controls;
 
 namespace gtavmm_metro.Setup.Pages
 {
-    /// <summary>
-    /// Interaction logic for Welcome.xaml
-    /// </summary>
     public partial class Welcome : UserControl
     {
         private SetupMainWindow ParentWindow { get; set; }

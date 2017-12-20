@@ -14,9 +14,6 @@ using gtavmm_metro.Models;
 
 namespace gtavmm_metro.Setup.Pages
 {
-    /// <summary>
-    /// Interaction logic for GTAVDirectory.xaml
-    /// </summary>
     public partial class GTAVDirectory : UserControl
     {
         private SetupMainWindow ParentWindow { get; set; }
@@ -44,7 +41,7 @@ namespace gtavmm_metro.Setup.Pages
             List<string> gtavDirectories;
             string gtavExePath;
 
-            gtavDirectories = GTAVSteam.GetExpectedLocationDirectories();
+            gtavDirectories = GTAV.GetExpectedLocationDirectories(GTAVDRM.Steam);
             foreach (string expectedSteamLocationDir in gtavDirectories)
             {
                 gtavExePath = Path.Combine(expectedSteamLocationDir, "GTA5.exe");
@@ -66,7 +63,7 @@ namespace gtavmm_metro.Setup.Pages
                 }
             }
 
-            gtavDirectories = GTAVRockstar.GetExpectedLocationDirectories();
+            gtavDirectories = GTAV.GetExpectedLocationDirectories(GTAVDRM.Rockstar);
             foreach (string expectedRockstarLocationDir in gtavDirectories)
             {
                 gtavExePath = Path.Combine(expectedRockstarLocationDir, "GTA5.exe");
@@ -93,7 +90,7 @@ namespace gtavmm_metro.Setup.Pages
         {
             string gtavDir = this.GTAVDirectoryConfirmedLocation.FullName;
 
-            string steamAttempt = Path.Combine(gtavDir, GTAVSteam.DRMIdentifierFile);
+            string steamAttempt = Path.Combine(gtavDir, GTAV.GetDRMIdentifier(GTAVDRM.Steam));
             if (File.Exists(steamAttempt))
             {
                 this.IsSteamDRM = true;
@@ -101,7 +98,7 @@ namespace gtavmm_metro.Setup.Pages
                 return;
             }
 
-            string rockstarAttempt = Path.Combine(gtavDir, GTAVRockstar.DRMIdentifierFile);
+            string rockstarAttempt = Path.Combine(gtavDir, GTAV.GetDRMIdentifier(GTAVDRM.Rockstar));
             if (File.Exists(rockstarAttempt))
             {
                 this.IsSteamDRM = false;

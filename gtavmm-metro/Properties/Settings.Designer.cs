@@ -70,5 +70,89 @@ namespace gtavmm_metro.Properties {
                 this["ModsDirectory"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool RememberLaunchSettings {
+            get {
+                return ((bool)(this["RememberLaunchSettings"]));
+            }
+            set {
+                this["RememberLaunchSettings"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool GTAV_Mods_ScriptMods_IsEnabled {
+            get {
+                return ((bool)(this["GTAV_Mods_ScriptMods_IsEnabled"]));
+            }
+            set {
+                this["GTAV_Mods_ScriptMods_IsEnabled"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool GTAV_Mods_AssetMods_IsEnabled {
+            get {
+                return ((bool)(this["GTAV_Mods_AssetMods_IsEnabled"]));
+            }
+            set {
+                this["GTAV_Mods_AssetMods_IsEnabled"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool GTAV_Options_OfflineMode_IsEnabled {
+            get {
+                return ((bool)(this["GTAV_Options_OfflineMode_IsEnabled"]));
+            }
+            set {
+                this["GTAV_Options_OfflineMode_IsEnabled"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool GTAO_Options_StraightIntoFreemode_IsEnabled {
+            get {
+                return ((bool)(this["GTAO_Options_StraightIntoFreemode_IsEnabled"]));
+            }
+            set {
+                this["GTAO_Options_StraightIntoFreemode_IsEnabled"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool IsScriptModsLoaded {
+            get {
+                return ((bool)(this["IsScriptModsLoaded"]));
+            }
+            set {
+                this["IsScriptModsLoaded"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool IsAssetModsLoaded {
+            get {
+                return ((bool)(this["IsAssetModsLoaded"]));
+            }
+            set {
+                this["IsAssetModsLoaded"] = value;
+            }
+        }
     }
 }

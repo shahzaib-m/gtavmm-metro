@@ -4,23 +4,20 @@ using gtavmm_metro.Tabs.HomeUCTabs;
 
 namespace gtavmm_metro.Tabs
 {
-    /// <summary>
-    /// Interaction logic for HomeUC.xaml
-    /// </summary>
     public partial class HomeUC : UserControl
     {
-        private StoryModeUC StoryModeUserControl;
-        private OnlineUC OnlineUserControl;
+        public StoryModeUC StoryModeUserControl;
+        public OnlineUC OnlineUserControl;
 
-        public HomeUC()
+        public HomeUC(ScriptModsUC scriptModsUC, AssetModsUC assetModsUC)
         {
             InitializeComponent();
-            this.AssignUCToTabs();
+            this.AssignUCToTabs(scriptModsUC, assetModsUC);
         }
 
-        private void AssignUCToTabs()
+        private void AssignUCToTabs(ScriptModsUC scriptModsUC, AssetModsUC assetModsUC)
         {
-            this.StoryModeUserControl = new StoryModeUC(this);
+            this.StoryModeUserControl = new StoryModeUC(this, scriptModsUC, assetModsUC);
             this.GTAVTabItem.Content = this.StoryModeUserControl;
 
             this.OnlineUserControl = new OnlineUC(this);

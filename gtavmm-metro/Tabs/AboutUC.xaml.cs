@@ -4,9 +4,6 @@ using System.Windows.Controls;
 
 namespace gtavmm_metro.Tabs
 {
-    /// <summary>
-    /// Interaction logic for AboutUC.xaml
-    /// </summary>
     public partial class AboutUC : UserControl
     {
         public string AppNameAndVer

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Threading.Tasks;
 
 using System.Windows;
@@ -14,9 +15,6 @@ using gtavmm_metro.Models;
 
 namespace gtavmm_metro
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : MetroWindow
     {
         private HomeUC HomeUserControl;
@@ -24,7 +22,7 @@ namespace gtavmm_metro
         private AssetModsUC AssetModsUserControl;
         private AboutUC AboutUserControl;
 
-        private DBInstance ModsDbConnection;
+        private DBInstance ModsDbConnection = null;
 
         public MainWindow()
         {
@@ -34,7 +32,15 @@ namespace gtavmm_metro
             Tuple<AppTheme, Accent> appStyle = ThemeManager.DetectAppStyle(Application.Current);        // temp
             this.Icon = new BitmapImage(new Uri(String.Format("pack://application:,,,/Assets/Icons/{0}.ico", appStyle.Item2.Name)));   // temp
         }
+        public MainWindow(DBInstance existingModsDbConnection)
+        {
+            InitializeComponent();
+            Application.Current.MainWindow = this;
+            this.ModsDbConnection = existingModsDbConnection;
 
+            Tuple<AppTheme, Accent> appStyle = ThemeManager.DetectAppStyle(Application.Current);        // temp
+            this.Icon = new BitmapImage(new Uri(String.Format("pack://application:,,,/Assets/Icons/{0}.ico", appStyle.Item2.Name)));   // temp
+        }
 
         #region MainWindow Events
         private async void MetroWindow_ContentRendered(object sender, EventArgs e)
@@ -42,7 +48,7 @@ namespace gtavmm_metro
             await this.Init();   // initialize once the window is rendered
         }
 
-        private void _this_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        private void _this_Closing(object sender, CancelEventArgs e)
         {
             // Cleanup, application is being closed, implement
             Settings.Default.Save();
@@ -50,18 +56,13 @@ namespace gtavmm_metro
         #endregion
 
         #region My Methods
-        /// <summary>
-        /// This method performs the initial tasks after the window is loaded and the user is presented with a ProgressRing.
-        /// </summary>
-        /// <returns></returns>
         private async Task Init()
         {
-            //await Task.Delay(1000);     // temp substitute for work delay
-            await this.CreatePersistentDbConnection();
-            await this.AssignUCToTabs();
-            await this.PreloadIntensiveTabs();
+            if (this.ModsDbConnection == null) { await this.CreatePersistentDbConnection(); }
+            this.AssignUCToTabs();
+            this.PreloadIntensiveTabs();
 
-            await this.UserInteractionStartNow();    // enable the UI for the user when tasks finished.
+            this.UserInteractionStartNow();    // enable the UI for the user when tasks finished.
         }
 
         private async Task CreatePersistentDbConnection()
@@ -72,58 +73,49 @@ namespace gtavmm_metro
         /// <summary>
         /// This method assigns the appropriate usercontrols for all the tabitems in this window.
         /// </summary>
-        private async Task AssignUCToTabs()
+        private void AssignUCToTabs()
         {
-            await Task.Run(() => this.Dispatcher.Invoke(() => // needed as window elements are being modified from a non-main thread
-            {
-                // Assigning ScriptMods UserControl to Script Mods tab
-                this.HomeUserControl = new HomeUC();
-                this.HomeTabItem.Content = this.HomeUserControl;
+            // Assigning ScriptMods UserControl to Script Mods tab
+            this.ScriptModsUserControl = new ScriptModsUC();
+            this.ScriptModsUserControl.LoadScriptMods(this.ModsDbConnection);
+            this.ScriptModsTabItem.Content = this.ScriptModsUserControl;
 
-                // Assigning ScriptMods UserControl to Script Mods tab
-                this.ScriptModsUserControl = new ScriptModsUC();
-                this.ScriptModsUserControl.LoadScriptMods(this.ModsDbConnection);
-                this.ScriptModsTabItem.Content = this.ScriptModsUserControl;
+            // Assigning AssetMods UserControl to Asset Mods tab
+            this.AssetModsUserControl = new AssetModsUC();
+            this.AssetModsUserControl.LoadAssetMods(this.ModsDbConnection);
+            this.AssetModsTabItem.Content = this.AssetModsUserControl;
 
-                // Assigning AssetMods UserControl to Asset Mods tab
-                this.AssetModsUserControl = new AssetModsUC();
-                this.AssetModsUserControl.LoadAssetMods(this.ModsDbConnection);
-                this.AssetModsTabItem.Content = this.AssetModsUserControl;
+            // Assigning Home UserControl to Home tab
+            this.HomeUserControl = new HomeUC(this.ScriptModsUserControl, this.AssetModsUserControl);
+            this.HomeTabItem.Content = this.HomeUserControl;
 
-                // Assigning About UserControl to About tab
-                this.AboutUserControl = new AboutUC();
-                this.AboutTabItem.Content = this.AboutUserControl;
-            }));
+            // Assigning About UserControl to About tab
+            this.AboutUserControl = new AboutUC();
+            this.AboutTabItem.Content = this.AboutUserControl;
         }
 
-        private async Task PreloadIntensiveTabs()
+        private void PreloadIntensiveTabs()
         {
-            await Task.Run(() => this.Dispatcher.Invoke(() =>
-            {
-                this.MainTabControl.SelectedIndex = 1;
-                this.MainTabControl.UpdateLayout();
+            this.MainTabControl.SelectedIndex = 1;
+            this.MainTabControl.UpdateLayout();
 
-                this.MainTabControl.SelectedIndex = 2;
-                this.MainTabControl.UpdateLayout();
+            this.MainTabControl.SelectedIndex = 2;
+            this.MainTabControl.UpdateLayout();
 
-                this.MainTabControl.SelectedIndex = 0;
-            }));
+            this.MainTabControl.SelectedIndex = 0;
         }
 
         /// <summary>
         /// This method should be called after all initial tasks are done and user interaction should now begin.
         /// </summary>
-        private async Task UserInteractionStartNow()
+        private void UserInteractionStartNow()
         {
-            await Task.Run(() => this.Dispatcher.Invoke(() =>    // needed as window elements are being modified from a non-main thread
-            {
-                this.MainTabControl.IsEnabled = true;
+            this.MainTabControl.IsEnabled = true;
 
-                DoubleAnimation smoothFadeIn = new DoubleAnimation(0.0, 1.0, new Duration(new TimeSpan(0, 0, 0, 0, 300)));
-                this.MainTabControl.BeginAnimation(OpacityProperty, smoothFadeIn);
+            DoubleAnimation smoothFadeIn = new DoubleAnimation(0.0, 1.0, new Duration(new TimeSpan(0, 0, 0, 0, 300)));
+            this.MainTabControl.BeginAnimation(OpacityProperty, smoothFadeIn);
 
-                this.MainProgressRing.IsActive = false;
-            }));
+            this.MainProgressRing.IsActive = false;
         }
         #endregion
     }

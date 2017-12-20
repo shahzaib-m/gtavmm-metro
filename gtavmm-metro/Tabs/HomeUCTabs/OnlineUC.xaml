@@ -49,7 +49,8 @@
                         </Grid.ColumnDefinitions>
 
                         <TextBlock FontWeight="Light" FontSize="23" Text="Straight to freemode" VerticalAlignment="Center"/>
-                        <ToggleButton Grid.Column="1" Margin="20 0" Width="100" FontSize="18" Content="Enabled" Style="{DynamicResource MetroFlatToggleButton}" />
+                        <ToggleButton Grid.Column="1" Margin="20 0" Width="140" FontSize="18" Content="Disabled" Style="{DynamicResource MetroFlatToggleButton}"
+                                      x:Name="OptionsToggleButton_StraightToFreemode" Click="OptionsToggleButton_StraightToFreemode_Click"/>
                     </Grid>
                 </StackPanel>
             </GroupBox>
@@ -75,7 +76,8 @@
                     </StackPanel>
 
                     <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
-                        <Button Margin="10 10 10 10" Style="{StaticResource AccentedSquareButtonStyle}" Width="160">
+                        <Button Margin="10 10 10 10" Style="{StaticResource AccentedSquareButtonStyle}" Width="160"
+                                x:Name="GTAOLaunchButton" Click="GTAOLaunchButton_Click">
                             <Button.ToolTip>
                                 <StackPanel Orientation="Horizontal">
                                     <iconPacks:PackIconMaterial Kind="ArrowRightBold" Margin="0 5" />
