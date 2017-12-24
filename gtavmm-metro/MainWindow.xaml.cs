@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Linq;
 using System.ComponentModel;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 using System.Windows;
 using System.Windows.Media.Imaging;
@@ -8,6 +10,7 @@ using System.Windows.Media.Animation;
 
 using MahApps.Metro;
 using MahApps.Metro.Controls;
+using MahApps.Metro.Controls.Dialogs;
 
 using gtavmm_metro.Tabs;
 using gtavmm_metro.Properties;
@@ -50,7 +53,7 @@ namespace gtavmm_metro
 
         private void _this_Closing(object sender, CancelEventArgs e)
         {
-            // Cleanup, application is being closed, implement
+            this.HomeUserControl.SaveState();
             Settings.Default.Save();
         }
         #endregion
@@ -61,6 +64,9 @@ namespace gtavmm_metro
             if (this.ModsDbConnection == null) { await this.CreatePersistentDbConnection(); }
             this.AssignUCToTabs();
             this.PreloadIntensiveTabs();
+
+            await this.CheckForInsertedScriptMods();
+            await this.CheckForInsertedAssetMods();
 
             this.UserInteractionStartNow();    // enable the UI for the user when tasks finished.
         }
@@ -103,6 +109,113 @@ namespace gtavmm_metro
             this.MainTabControl.UpdateLayout();
 
             this.MainTabControl.SelectedIndex = 0;
+        }
+
+        private async Task CheckForInsertedScriptMods()
+        {
+            IList<ScriptMod> insertedScriptMods = this.ScriptModsUserControl.ScriptMods.Where(scriptMod => scriptMod.IsInserted).ToList();
+            if (insertedScriptMods.Any())
+            {
+                MetroWindow metroWindow = (Application.Current.MainWindow as MetroWindow);
+
+                string dialogTitle = "Found inserted script modifications";
+                string dialogMessage = "Found script modifications that were inserted during a launch. These modifications could been left in GTAV's directory after this application exited/crashed while it was waiting for GTAV to exit. Attempt to move these files back to their relevant modifications? You cannot do this later.";
+
+                MessageDialogResult res = await metroWindow.ShowMessageAsync(dialogTitle, dialogMessage,
+                    MessageDialogStyle.AffirmativeAndNegative, new MetroDialogSettings { AffirmativeButtonText = "Yes", NegativeButtonText = "No" });
+                if (res == MessageDialogResult.Affirmative)
+                {
+                    string progressTitle = "Moving script modifications back";
+                    string progressMessage = "...";
+
+                    ProgressDialogController prog = await metroWindow.ShowProgressAsync(progressTitle, progressMessage);
+                    prog.SetIndeterminate();
+
+                    foreach (ScriptMod scriptMod in insertedScriptMods)
+                    {
+                        prog.SetMessage(scriptMod.Name + " - moving back...");
+                        bool currScriptModMoveBackSuccess = GTAV.MoveScriptModBack(scriptMod, Settings.Default.GTAVDirectory);
+                        if (!currScriptModMoveBackSuccess)
+                        {
+                            await metroWindow.ShowMessageAsync("Failed to move back script modification files",
+                                "Couldn't move back some files belonging to '" + scriptMod.Name + "' from GTAV directory" +
+                                " You may have to manually go to GTAV's folder to find these files and put them back in this modification.");
+                        }
+
+                        scriptMod.IsInserted = false;
+                        await this.ScriptModsUserControl.ScriptModAPI.UpdateScriptModIsInserted(scriptMod.Id, false);
+                    }
+
+                    await prog.CloseAsync();
+                }
+                else
+                {
+                    foreach (ScriptMod scriptMod in insertedScriptMods)
+                    {
+                        scriptMod.IsInserted = false;
+                        await this.ScriptModsUserControl.ScriptModAPI.UpdateScriptModIsInserted(scriptMod.Id, false);
+                    }
+                }
+            }
+        }
+        private async Task CheckForInsertedAssetMods()
+        {
+            IList<AssetMod> insertedAssetMods = this.AssetModsUserControl.AssetMods.Where(assetMod => assetMod.IsInserted && assetMod.IsUsableAssetMod).ToList();
+            if (insertedAssetMods.Any())
+            {
+                MetroWindow metroWindow = (Application.Current.MainWindow as MetroWindow);
+
+                string dialogTitle = "Found inserted asset modifications";
+                string dialogMessage = "Found asset mod packages that were inserted during a launch. These modifications could been left in GTAV's directory after this application exited/crashed while it was waiting for GTAV to exit. Attempt to move these asset mod packages back? You cannot do this later and the asset mods will be removed from this application.";
+
+                MessageDialogResult res = await metroWindow.ShowMessageAsync(dialogTitle, dialogMessage,
+                    MessageDialogStyle.AffirmativeAndNegative, new MetroDialogSettings { AffirmativeButtonText = "Yes", NegativeButtonText = "No" });
+                if (res == MessageDialogResult.Affirmative)
+                {
+                    string progressTitle = "Moving asset modifications back";
+                    string progressMessage = "...";
+
+                    ProgressDialogController prog = await metroWindow.ShowProgressAsync(progressTitle, progressMessage);
+                    prog.SetIndeterminate();
+
+                    foreach (AssetMod assetMod in insertedAssetMods)
+                    {
+                        prog.SetMessage(assetMod.Name + " - moving back...");
+                        bool currAssetModMoveBackSuccess = GTAV.MoveAssetModBack(assetMod, Settings.Default.GTAVDirectory);
+                        if (!currAssetModMoveBackSuccess)
+                        {
+                            await metroWindow.ShowMessageAsync("Failed to move back asset modification",
+                                "Couldn't automatically move back '" + assetMod.Name + "' (target: '" + assetMod.TargetRPF + "') from GTAV directory. It may not longer exist or some other error may have occured.");
+
+                            this.AssetModsUserControl.AssetMods.Remove(assetMod);
+                            await this.AssetModsUserControl.AssetModAPI.RemoveAndDeleteAssetMod(assetMod.Id, false);
+                        }
+                        else
+                        {
+                            assetMod.IsInserted = false;
+                            await this.AssetModsUserControl.AssetModAPI.UpdateAssetModIsInserted(assetMod.Id, false);
+                        }
+                    }
+
+                    prog.SetMessage("Deleting 'mods' folder inside GTAV directory...");
+                    bool delModsFolderInGTAVDirSuccess = await Task.Run(() => GTAV.DeleteModsFolderInGTAVDirectory(Settings.Default.GTAVDirectory));
+                    if (!delModsFolderInGTAVDirSuccess)
+                    {
+                        await this.Dispatcher.Invoke(async () => await metroWindow.ShowMessageAsync("Failed to delete 'mods' folder in GTAV directory",
+                            "Couldn't delete 'mods' folder inside GTAV directory. Some files are remaining and preventing deletion"));
+                    }
+
+                    await prog.CloseAsync();
+                }
+                else
+                {
+                    foreach(AssetMod assetMod in insertedAssetMods)
+                    {
+                        this.AssetModsUserControl.AssetMods.Remove(assetMod);
+                        await this.AssetModsUserControl.AssetModAPI.RemoveAndDeleteAssetMod(assetMod.Id, false);
+                    }
+                }
+            }
         }
 
         /// <summary>

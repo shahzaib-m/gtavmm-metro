@@ -23,7 +23,7 @@ namespace gtavmm_metro.Tabs
     {
         public ObservableCollection<AssetMod> AssetMods { get; set; }
         private ObservableCollection<string> TargetRPFList { get; set; }
-        private AssetModAPI AssetModAPI { get; set; }
+        public AssetModAPI AssetModAPI { get; set; }
         private string ModsRootFolder { get; set; }
         private bool ModIndexRearrangeAllowed { get; set; } = true;
 
@@ -284,7 +284,7 @@ namespace gtavmm_metro.Tabs
 
                     this.AssetMods = new ObservableCollection<AssetMod>();
                     this.AssetMods.Add(await this.AssetModAPI.CreateAssetMod("Example mod package (can delete)",
-                       @"\update\sample.rpf", 0, "This is an example description of a mod package - Not usable. Only here as an example.",
+                       @"\update\sample.rpf", 0, "This is an example description of a mod package.\nIt is not usable and is only here as an example.",
                         false, false));
                 }
                 else
@@ -294,7 +294,7 @@ namespace gtavmm_metro.Tabs
                     {
                         this.AssetMods = new ObservableCollection<AssetMod>();
                         this.AssetMods.Add(await this.AssetModAPI.CreateAssetMod("Example mod package (can delete)",
-                           @"\update\sample.rpf", 0, "This is an example description of a mod package - Not usable. Only here as an example",
+                           @"\update\sample.rpf", 0, "This is an example description of a mod package.\nIt is not usable and is only here as an example.",
                             false, false));
                     }
                     else

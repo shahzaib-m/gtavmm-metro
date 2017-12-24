@@ -12,7 +12,7 @@ namespace gtavmm_metro.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "15.3.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "15.5.0.0")]
     internal sealed partial class Settings : global::System.Configuration.ApplicationSettingsBase {
         
         private static Settings defaultInstance = ((Settings)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new Settings())));
@@ -74,84 +74,48 @@ namespace gtavmm_metro.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool RememberLaunchSettings {
+        public bool GTAVModsScriptMods_IsChecked {
             get {
-                return ((bool)(this["RememberLaunchSettings"]));
+                return ((bool)(this["GTAVModsScriptMods_IsChecked"]));
             }
             set {
-                this["RememberLaunchSettings"] = value;
+                this["GTAVModsScriptMods_IsChecked"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool GTAV_Mods_ScriptMods_IsEnabled {
+        public bool GTAVModsAssetMods_IsChecked {
             get {
-                return ((bool)(this["GTAV_Mods_ScriptMods_IsEnabled"]));
+                return ((bool)(this["GTAVModsAssetMods_IsChecked"]));
             }
             set {
-                this["GTAV_Mods_ScriptMods_IsEnabled"] = value;
+                this["GTAVModsAssetMods_IsChecked"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool GTAV_Mods_AssetMods_IsEnabled {
+        public bool GTAVOptionsOfflineMode_IsChecked {
             get {
-                return ((bool)(this["GTAV_Mods_AssetMods_IsEnabled"]));
+                return ((bool)(this["GTAVOptionsOfflineMode_IsChecked"]));
             }
             set {
-                this["GTAV_Mods_AssetMods_IsEnabled"] = value;
+                this["GTAVOptionsOfflineMode_IsChecked"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool GTAV_Options_OfflineMode_IsEnabled {
+        public bool GTAOOptionsStraightIntoFreemode_IsChecked {
             get {
-                return ((bool)(this["GTAV_Options_OfflineMode_IsEnabled"]));
+                return ((bool)(this["GTAOOptionsStraightIntoFreemode_IsChecked"]));
             }
             set {
-                this["GTAV_Options_OfflineMode_IsEnabled"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool GTAO_Options_StraightIntoFreemode_IsEnabled {
-            get {
-                return ((bool)(this["GTAO_Options_StraightIntoFreemode_IsEnabled"]));
-            }
-            set {
-                this["GTAO_Options_StraightIntoFreemode_IsEnabled"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool IsScriptModsLoaded {
-            get {
-                return ((bool)(this["IsScriptModsLoaded"]));
-            }
-            set {
-                this["IsScriptModsLoaded"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool IsAssetModsLoaded {
-            get {
-                return ((bool)(this["IsAssetModsLoaded"]));
-            }
-            set {
-                this["IsAssetModsLoaded"] = value;
+                this["GTAOOptionsStraightIntoFreemode_IsChecked"] = value;
             }
         }
     }

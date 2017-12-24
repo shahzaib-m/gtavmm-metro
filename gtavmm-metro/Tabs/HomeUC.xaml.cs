@@ -23,5 +23,11 @@ namespace gtavmm_metro.Tabs
             this.OnlineUserControl = new OnlineUC(this);
             this.GTAOnlineTabItem.Content = this.OnlineUserControl;
         }
+
+        public void SaveState()
+        {
+            this.StoryModeUserControl.SaveState();
+            this.OnlineUserControl.SaveState();
+        }
     }
 }

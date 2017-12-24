@@ -21,6 +21,13 @@ namespace gtavmm_metro.Tabs.HomeUCTabs
         {
             this.ParentWindow = parent;
             InitializeComponent();
+
+            // if user has asked for these states to be saved (in Settings?)
+            if (true)
+            {
+                this.OptionsToggleButton_StraightToFreemode.IsChecked = Settings.Default.GTAOOptionsStraightIntoFreemode_IsChecked;
+                this.OptionsToggleButton_StraightToFreemode_Click(this, null);
+            }
         }
 
         private void CollapseGTAOTabSection_Click(object sender, RoutedEventArgs e)
@@ -74,9 +81,13 @@ namespace gtavmm_metro.Tabs.HomeUCTabs
             bool launchSuccess = this.GTAV.StartGTAO(gameOptions);
             if (launchSuccess)
             {
-                this.GTAVLaunchProgress.SetTitle("Grand Theft Auto V Running");
-                this.GTAVLaunchProgress.SetMessage("Waiting for GTAV to exit...");
-                this.GTAVLaunchProgress.SetCancelable(false);
+                this.GTAV.GTAVProcessStarted += this.GTAVProcessStarted;
+
+                this.GTAVLaunchProgress.SetTitle("Waiting for Grand Theft Auto V to launch");
+                this.GTAVLaunchProgress.SetMessage("Waiting for Grand Theft Auto V to launch...");
+
+                this.GTAVLaunchProgress.SetCancelable(true);
+                this.GTAVLaunchProgress.Canceled += this.GTAVCancelWaitLaunch;
             }
             else
             {
@@ -85,6 +96,27 @@ namespace gtavmm_metro.Tabs.HomeUCTabs
             }
         }
 
+        private void GTAVProcessStarted(object sender, EventArgs e)
+        {
+            this.GTAV.GTAVProcessExited += this.GTAVProcessExited;
+            this.GTAVLaunchProgress.SetCancelable(false);
+
+            this.GTAVLaunchProgress.SetTitle("Grand Theft Auto V Running");
+            this.GTAVLaunchProgress.SetMessage("Waiting for GTAV to exit...");
+
+        }
+        private void GTAVCancelWaitLaunch(object sender, EventArgs e)
+        {
+            this.GTAVLaunchProgress.SetCancelable(false);
+            this.GTAV.GTAVProcessStarted -= this.GTAVProcessExited;
+            this.GTAV.GTAVProcessExited -= this.GTAVProcessExited;
+
+            this.GTAVLaunchProgress.SetTitle("Cancelling Grand Theft Auto V launch");
+            this.GTAVLaunchProgress.SetMessage("Cancelling GTAV launch and cleaning up...");
+
+            this.GTAV.CancelGTALaunch();
+            this.GTAVProcessExited(this, null);
+        }
         private async void GTAVProcessExited(object sender, EventArgs e)
         {
             MetroWindow metroWindow = null;
@@ -101,6 +133,11 @@ namespace gtavmm_metro.Tabs.HomeUCTabs
             }
 
             await this.GTAVLaunchProgress.CloseAsync();
+        }
+
+        public void SaveState()
+        {
+            Settings.Default.GTAOOptionsStraightIntoFreemode_IsChecked = (bool)this.OptionsToggleButton_StraightToFreemode.IsChecked;
         }
     }
 }

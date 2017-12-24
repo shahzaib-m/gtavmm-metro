@@ -15,6 +15,7 @@ namespace gtavmm_metro.Models
         public string Name { get; set; }
         public string Description { get; set; }
         public bool IsEnabled { get; set; }
+        public bool IsInserted { get; set; }
         public string TargetRPF { get; set; }
         public bool IsUsableAssetMod { get; set; }
         public int OrderIndex { get; set; }
@@ -41,6 +42,7 @@ namespace gtavmm_metro.Models
                 Name = name,
                 Description = description,
                 IsEnabled = isEnabled,
+                IsInserted = false,
                 TargetRPF = targetRPF,
                 IsUsableAssetMod = isUsableAssetMod,
                 OrderIndex = orderIndex
@@ -58,12 +60,13 @@ namespace gtavmm_metro.Models
 
                 await this.ModsDb.Connection.OpenAsync();
 
-                string sql = "INSERT into AssetMod (name, description, isEnabled, targetRPF, isUsableAssetMod, orderIndex) VALUES (@name, @description, @isEnabled, @targetRPF, @isUsableAssetMod, @orderIndex)";
+                string sql = "INSERT into AssetMod (name, description, isEnabled, isInserted, targetRPF, isUsableAssetMod, orderIndex) VALUES (@name, @description, @isEnabled, @isInserted, @targetRPF, @isUsableAssetMod, @orderIndex)";
                 SQLiteCommand command = new SQLiteCommand(sql, this.ModsDb.Connection);
 
                 command.Parameters.AddWithValue("name", newAssetMod.Name);
                 command.Parameters.AddWithValue("description", newAssetMod.Description);
                 command.Parameters.AddWithValue("isEnabled", Convert.ToInt32(newAssetMod.IsEnabled));
+                command.Parameters.AddWithValue("isInserted", Convert.ToInt32(newAssetMod.IsInserted));
                 command.Parameters.AddWithValue("targetRPF", newAssetMod.TargetRPF);
                 command.Parameters.AddWithValue("isUsableAssetMod", Convert.ToInt32(newAssetMod.IsUsableAssetMod));
                 command.Parameters.AddWithValue("orderIndex", newAssetMod.OrderIndex);
@@ -101,13 +104,14 @@ namespace gtavmm_metro.Models
                 string name = (string)reader["name"];
                 string description = (string)reader["description"];
                 bool isEnabled = Convert.ToBoolean((int)reader["isEnabled"]);
+                bool IsInserted = Convert.ToBoolean((int)reader["isInserted"]);
                 string targetRPF = (string)reader["targetRPF"];
                 bool isUsableAssetMod = Convert.ToBoolean((int)reader["isUsableAssetMod"]);
                 int orderIndex = (int)reader["orderIndex"];
 
 
                 string fullModPackagePath = Path.Combine(this.ModsRootFolder.FullName, targetRPF.Substring(1));
-                if (!File.Exists(fullModPackagePath) && isUsableAssetMod)
+                if (!File.Exists(fullModPackagePath) && isUsableAssetMod && !IsInserted)
                 {
                     modsByIdWithNoFiles.Add(id);
                 }
@@ -120,6 +124,7 @@ namespace gtavmm_metro.Models
                         Name = name,
                         Description = description,
                         IsEnabled = isEnabled,
+                        IsInserted = IsInserted,
                         TargetRPF = targetRPF,
                         IsUsableAssetMod = isUsableAssetMod,
                         OrderIndex = orderIndex
@@ -158,6 +163,7 @@ namespace gtavmm_metro.Models
                 resultAssetMod.Name = (string)reader["name"];
                 resultAssetMod.Description = (string)reader["description"];
                 resultAssetMod.IsEnabled = Convert.ToBoolean((int)reader["isEnabled"]);
+                resultAssetMod.IsInserted = Convert.ToBoolean((int)reader["isInserted"]);
                 resultAssetMod.TargetRPF = (string)reader["targetRPF"];
                 resultAssetMod.IsUsableAssetMod = Convert.ToBoolean((int)reader["isUsableAssetMod"]);
             }
@@ -190,7 +196,6 @@ namespace gtavmm_metro.Models
 
             this.ModsDb.Connection.Close();
         }
-
         public async Task UpdateAssetModDescription(int assetModId, string newDescription)
         {
             await this.ModsDb.Connection.OpenAsync();
@@ -203,7 +208,6 @@ namespace gtavmm_metro.Models
 
             this.ModsDb.Connection.Close();
         }
-
         public async Task UpdateAssetModIsEnabled(int assetModId, bool newIsEnabled)
         {
             await this.ModsDb.Connection.OpenAsync();
@@ -216,7 +220,18 @@ namespace gtavmm_metro.Models
 
             this.ModsDb.Connection.Close();
         }
+        public async Task UpdateAssetModIsInserted(int assetModId, bool newIsInserted)
+        {
+            await this.ModsDb.Connection.OpenAsync();
 
+            string sql = "UPDATE AssetMod SET isInserted=@isInserted WHERE id=@id";
+            SQLiteCommand command = new SQLiteCommand(sql, this.ModsDb.Connection);
+            command.Parameters.AddWithValue("isInserted", Convert.ToInt32(newIsInserted));
+            command.Parameters.AddWithValue("id", assetModId);
+            await command.ExecuteNonQueryAsync();
+
+            this.ModsDb.Connection.Close();
+        }
         public async Task UpdateAssetModTargetRPF(int assetModId, string newTargetRPF)
         {
             await this.ModsDb.Connection.OpenAsync();
@@ -229,7 +244,6 @@ namespace gtavmm_metro.Models
 
             this.ModsDb.Connection.Close();
         }
-
         public async Task UpdateAssetModIsUsableAssetMod(int assetModId, bool newIsUsableAssetMod)
         {
             await this.ModsDb.Connection.OpenAsync();
@@ -242,7 +256,6 @@ namespace gtavmm_metro.Models
 
             this.ModsDb.Connection.Close();
         }
-
         private async Task UpdateAssetModOrderIndex(int assetModId, int newIndex)
         {
             await this.ModsDb.Connection.OpenAsync();
@@ -254,7 +267,6 @@ namespace gtavmm_metro.Models
             await command.ExecuteNonQueryAsync();
             this.ModsDb.Connection.Close();
         }
-
         public async void UpdateAssetModOrderIndexes(IList<AssetMod> assetMods)
         {
             for (int i = 0; i < assetMods.Count; i++)
@@ -308,15 +320,15 @@ namespace gtavmm_metro.Models
         /// <param name="currentDir"></param>
         private void DeleteParentDirIfCurrentDirNoFiles(DirectoryInfo currentDir)
         {
+            if (currentDir.FullName == this.ModsRootFolder.FullName) { return; }
+
             bool subDirsWithFilesFound = false;
             foreach(DirectoryInfo dir in currentDir.GetDirectories("*", SearchOption.AllDirectories))
             {
                 if (dir.EnumerateFiles().Any()) { subDirsWithFilesFound = true; }
             }
-
             if (currentDir.EnumerateFiles().Any() || subDirsWithFilesFound) { return; }
-            if (currentDir.FullName == this.ModsRootFolder.FullName) { return; }
-
+            
             DirectoryInfo parentDir = currentDir.Parent;
             currentDir.Delete(true);
 

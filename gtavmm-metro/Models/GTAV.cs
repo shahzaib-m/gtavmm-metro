@@ -41,10 +41,8 @@ namespace gtavmm_metro.Models
 
         private Process GTAVProcess;
         private Timer GTAVLauncherDiscoveryTimer;
+        public event EventHandler GTAVProcessStarted;
         public event EventHandler GTAVProcessExited;
-
-        private List<ScriptModContent> InsertedScriptMods = new List<ScriptModContent>();
-        private List<AssetMod> InsertedAssetMods = new List<AssetMod>();
 
         public GTAV(string gamePath, GTAVMode gameMode, GTAVDRM targetDRM)
         {
@@ -120,36 +118,56 @@ namespace gtavmm_metro.Models
             return true;
         }
 
-        public bool InsertScriptMods(IList<ScriptMod> enabledScriptMods)
+        public bool InsertScriptMod(ScriptMod scriptMod)
         {
+            scriptMod.FilesWithPath = new List<string>();
+
             string modsPath = Path.Combine(Settings.Default.ModsDirectory, "Script Mods");
+            string scriptModDir = scriptMod.Name;
+            DirectoryInfo fullModificationPath = new DirectoryInfo(Path.Combine(modsPath, scriptModDir));
 
-            foreach (ScriptMod scriptMod in enabledScriptMods.Reverse()) // modifications with lower GUI index pushed to end of list,
-                                                                         // higher priority file replace
+            FileInfo[] allModFiles = fullModificationPath.GetFiles("*", SearchOption.AllDirectories);
+            foreach (FileInfo modFile in allModFiles)
             {
-                string scriptModDir = scriptMod.Name;
-                DirectoryInfo fullModificationPath = new DirectoryInfo(Path.Combine(modsPath, scriptModDir));
+                string fullPath = modFile.FullName;
+                string relativePathWithFile = fullPath.Split(new[] { fullModificationPath + @"\" },
+                    StringSplitOptions.RemoveEmptyEntries)[0];
+                scriptMod.FilesWithPath.Add(relativePathWithFile);
 
-                List<string> modFileRelativeNames = new List<string>();
-                FileInfo[] allModFiles = fullModificationPath.GetFiles("*", SearchOption.AllDirectories);
-                foreach (FileInfo modFile in allModFiles)
+                string relativePathWithoutFile = Path.GetDirectoryName(relativePathWithFile);
+                if (!String.IsNullOrWhiteSpace(relativePathWithoutFile))
+                { Directory.CreateDirectory(Path.Combine(this.GamePath, relativePathWithoutFile)); }
+
+                try
                 {
-                    string fullPath = modFile.FullName;
-                    string relativePathWithFile = fullPath.Split(new[] { fullModificationPath + @"\" },
-                        StringSplitOptions.RemoveEmptyEntries)[0];
-                    modFileRelativeNames.Add(relativePathWithFile);
+                    string destinationPath = Path.Combine(this.GamePath, relativePathWithFile);
+                    if (File.Exists(destinationPath)) { File.Delete(destinationPath); }
 
-                    string relativePathWithoutFile = Path.GetDirectoryName(relativePathWithFile);
-                    if (!String.IsNullOrWhiteSpace(relativePathWithoutFile))
-                    { Directory.CreateDirectory(Path.Combine(this.GamePath, relativePathWithoutFile)); }
+                    File.Move(fullPath, destinationPath);
+                }
+                catch (Exception ex)
+                {
+                    if (ex is IOException || ex is UnauthorizedAccessException || ex is PathTooLongException) { return false; }
 
-                    try
-                    {
-                        string destinationPath = Path.Combine(this.GamePath, relativePathWithFile);
-                        if (File.Exists(destinationPath)) { File.Delete(destinationPath); }
+                    throw;
+                }
+            }
 
-                        File.Move(fullPath, destinationPath);
-                    }
+            return true;
+        }
+        /// <summary>
+        /// Move all script modifications back to the relevant owner modification.
+        /// </summary>
+        public bool MoveScriptModBack(ScriptMod scriptMod)
+        {
+            string modRootFullPath = Path.Combine(Settings.Default.ModsDirectory, "Script Mods", scriptMod.Name);
+
+            foreach (string modFilePath in scriptMod.FilesWithPath)
+            {
+                string fileFullPath = Path.Combine(this.GamePath, modFilePath);
+                if (File.Exists(fileFullPath))
+                {
+                    try { File.Move(Path.Combine(this.GamePath, modFilePath), Path.Combine(modRootFullPath, modFilePath)); }
                     catch (Exception ex)
                     {
                         if (ex is IOException || ex is UnauthorizedAccessException || ex is PathTooLongException) { return false; }
@@ -157,28 +175,20 @@ namespace gtavmm_metro.Models
                         throw;
                     }
                 }
-
-                this.InsertedScriptMods.Add(new ScriptModContent
-                {
-                    ScriptMod = scriptMod,
-                    FilesWithPaths = modFileRelativeNames
-                });
             }
 
             return true;
         }
-        /// <summary>
-        /// Move all script modifications back, return a fileinfo list of unknown files remaining
-        /// </summary>
-        public bool MoveScriptModsBack()
+        public static bool MoveScriptModBack(ScriptMod scriptMod, string gamePath)
         {
-            foreach (ScriptModContent scriptModContent in this.InsertedScriptMods)
-            {
-                string modRootFullPath = Path.Combine(Settings.Default.ModsDirectory, "Script Mods", scriptModContent.ScriptMod.Name);
+            string modRootFullPath = Path.Combine(Settings.Default.ModsDirectory, "Script Mods", scriptMod.Name);
 
-                foreach (string modFilePath in scriptModContent.FilesWithPaths)
+            foreach (string modFilePath in scriptMod.FilesWithPath)
+            {
+                string fileFullPath = Path.Combine(gamePath, modFilePath);
+                if (File.Exists(fileFullPath))
                 {
-                    try { File.Move(Path.Combine(this.GamePath, modFilePath), Path.Combine(modRootFullPath, modFilePath)); }
+                    try { File.Move(Path.Combine(gamePath, modFilePath), Path.Combine(modRootFullPath, modFilePath)); }
                     catch (Exception ex)
                     {
                         if (ex is IOException || ex is UnauthorizedAccessException || ex is PathTooLongException) { return false; }
@@ -247,63 +257,112 @@ namespace gtavmm_metro.Models
             return unknownLeftoverFolders;
         }
 
-        public bool InsertAssetMods(IList<AssetMod> enabledAssetMods)
+        public bool InsertAssetMod(AssetMod assetMod)
         {
             string modsPath = Path.Combine(Settings.Default.ModsDirectory, "Asset Mods");
 
             Directory.CreateDirectory(Path.Combine(this.GamePath, "mods"));
-            foreach (AssetMod assetMod in enabledAssetMods)
+
+            string targetRelativePath = assetMod.TargetRPF;
+            targetRelativePath = targetRelativePath.Substring(1);   // substring the prefix slash out for Path.Combine()
+
+            string relativePathWithoutFile = Path.GetDirectoryName(targetRelativePath);
+            if (!String.IsNullOrWhiteSpace(relativePathWithoutFile))
+            { Directory.CreateDirectory(Path.Combine(this.GamePath, "mods", relativePathWithoutFile)); }
+
+            string targetFullPath = Path.Combine(this.GamePath, "mods", targetRelativePath);
+            try
             {
-                string targetRelativePath = assetMod.TargetRPF;
-                targetRelativePath = targetRelativePath.Substring(1);   // substring the prefix slash out for Path.Combine()
+                if (File.Exists(targetFullPath)) { File.Delete(targetFullPath); }
 
-                string relativePathWithoutFile = Path.GetDirectoryName(targetRelativePath);
-                if (!String.IsNullOrWhiteSpace(relativePathWithoutFile))
-                { Directory.CreateDirectory(Path.Combine(this.GamePath, "mods", relativePathWithoutFile)); }
+                File.Move(Path.Combine(Settings.Default.ModsDirectory, "Asset Mods", targetRelativePath), targetFullPath);
+            }
+            catch (Exception ex)
+            {
+                if (ex is IOException || ex is UnauthorizedAccessException || ex is PathTooLongException) { return false; }
 
-                string targetFullPath = Path.Combine(this.GamePath, "mods", targetRelativePath);
-                try
-                {
-                    if (File.Exists(targetFullPath)) { File.Delete(targetFullPath); }
-
-                    File.Move(Path.Combine(Settings.Default.ModsDirectory, "Asset Mods", targetRelativePath), targetFullPath);
-                }
-                catch (Exception ex)
-                {
-                    if (ex is IOException || ex is UnauthorizedAccessException || ex is PathTooLongException) { return false; }
-
-                    throw;
-                }
-
-                this.InsertedAssetMods.Add(assetMod);
+                throw;
             }
 
             return true;
         }
-        public bool MoveAssetModsBack()
+        public bool MoveAssetModBack(AssetMod assetMod)
         {
             string modRootFullPath = Path.Combine(Settings.Default.ModsDirectory, "Asset Mods");
 
-            foreach (AssetMod assetMod in this.InsertedAssetMods)
-            {
-                try { File.Move(Path.Combine(this.GamePath, "mods", assetMod.TargetRPF.Substring(1)),
-                    Path.Combine(modRootFullPath, assetMod.TargetRPF.Substring(1))); }
-                catch (Exception ex)
-                {
-                    if (ex is IOException || ex is UnauthorizedAccessException || ex is PathTooLongException) { return false; }
+            string fullRpfPath = Path.Combine(this.GamePath, "mods", assetMod.TargetRPF.Substring(1));
+            if (!File.Exists(fullRpfPath)) { return false; }
 
-                    throw;
-                }
+            try
+            {
+                File.Move(fullRpfPath, Path.Combine(modRootFullPath, assetMod.TargetRPF.Substring(1)));
+            }
+            catch (Exception ex)
+            {
+                if (ex is IOException || ex is UnauthorizedAccessException || ex is PathTooLongException) { return false; }
+
+                throw;
+            }
+
+            return true;
+        }
+        public static bool MoveAssetModBack(AssetMod assetMod, string gamePath)
+        {
+            string modRootFullPath = Path.Combine(Settings.Default.ModsDirectory, "Asset Mods");
+
+            string fullRpfPath = Path.Combine(gamePath, "mods", assetMod.TargetRPF.Substring(1));
+            if (!File.Exists(fullRpfPath)) { return false; }
+
+            try
+            {
+                File.Move(fullRpfPath, Path.Combine(modRootFullPath, assetMod.TargetRPF.Substring(1)));
+            }
+            catch (Exception ex)
+            {
+                if (ex is IOException || ex is UnauthorizedAccessException || ex is PathTooLongException) { return false; }
+
+                throw;
             }
 
             return true;
         }
         public bool DeleteModsFolderInGTAVDirectory()
         {
+            string targetPath = Path.Combine(this.GamePath, "mods");
+            if (!Directory.Exists(targetPath)) { return true; }
+
             string modsFolderInGTAVDirPath = Path.Combine(this.GamePath, "mods");
             if (!Directory.EnumerateFiles(modsFolderInGTAVDirPath).Any())
             {
-                Directory.Delete(modsFolderInGTAVDirPath, true);
+                try { Directory.Delete(modsFolderInGTAVDirPath, true); }
+                catch (Exception ex)
+                {
+                    if (ex is UnauthorizedAccessException || ex is IOException) { return false; }
+
+                    throw;
+                }
+                
+                return true;
+            }
+
+            return false;
+        }
+        public static bool DeleteModsFolderInGTAVDirectory(string gamePath)
+        {
+            string targetPath = Path.Combine(gamePath, "mods");
+            if (!Directory.Exists(targetPath)) { return true; }
+
+            string modsFolderInGTAVDirPath = Path.Combine(gamePath, "mods");
+            if (!Directory.EnumerateFiles(modsFolderInGTAVDirPath).Any())
+            {
+                try { Directory.Delete(modsFolderInGTAVDirPath, true); }
+                catch (Exception ex)
+                {
+                    if (ex is UnauthorizedAccessException || ex is IOException) { return false; }
+
+                    throw;
+                }
+
                 return true;
             }
 
@@ -323,6 +382,12 @@ namespace gtavmm_metro.Models
             if (!procLaunchResult) { return false; }
 
             return true;
+        }
+
+        public void CancelGTALaunch()
+        {
+            if (this.GTAVLauncherDiscoveryTimer != null) { this.GTAVLauncherDiscoveryTimer.Dispose(); }
+            this.GTAVProcess = null;
         }
 
         private bool StartGTAVProcess()
@@ -360,6 +425,7 @@ namespace gtavmm_metro.Models
             if (gtavProcs.Length != 0)
             {
                 this.GTAVLauncherDiscoveryTimer.Dispose();
+                this.GTAVProcessStarted(this, null);
 
                 this.GTAVProcess = gtavProcs.First();
                 this.GTAVProcess.EnableRaisingEvents = true;
@@ -439,13 +505,26 @@ namespace gtavmm_metro.Models
         public static List<string> GetAllRPFsInsideGTAVDirectory(string GTAVPath)
         {
             DirectoryInfo directory = new DirectoryInfo(GTAVPath);
-            FileInfo[] allRPFs = directory.GetFiles("*.rpf", SearchOption.AllDirectories);
+            FileInfo[] allRPFTopLevel = directory.GetFiles("*.rpf", SearchOption.TopDirectoryOnly);
 
             List<string> RPFNames = new List<string>();
-            foreach (FileInfo RPF in allRPFs)
+            foreach (FileInfo RPF in allRPFTopLevel)
             {
                 string fullPath = RPF.FullName;
                 RPFNames.Add(fullPath.Split(new string[] { Settings.Default.GTAVDirectory }, StringSplitOptions.RemoveEmptyEntries)[0]);
+            }
+
+            DirectoryInfo[] allSubDirs = directory.GetDirectories("*", SearchOption.TopDirectoryOnly);
+            foreach(DirectoryInfo subDir in allSubDirs)
+            {
+                if (subDir.Name.ToLower() == "mods") { continue; }
+
+                FileInfo[] allRPFWithinSubDirRecursive = subDir.GetFiles("*.rpf", SearchOption.AllDirectories);
+                foreach(FileInfo RPF in allRPFWithinSubDirRecursive)
+                {
+                    string fullPath = RPF.FullName;
+                    RPFNames.Add(fullPath.Split(new string[] { Settings.Default.GTAVDirectory }, StringSplitOptions.RemoveEmptyEntries)[0]);
+                }
             }
 
             return RPFNames;

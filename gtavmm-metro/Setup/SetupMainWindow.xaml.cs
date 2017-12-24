@@ -58,8 +58,8 @@ namespace gtavmm_metro.Setup
                 modsDbConnection);
             if (await scriptModAPI.GetAllScriptMods() == null)
             {
-                await scriptModAPI.CreateScriptMod("Script Hook V + ASI Loader", 0, "Script Hook V + ASI Loader © - not included, please download yourself. Required to load most modifications. Should be up-to-date as new GTAV updates are released to ensure compatibility and avoid crashes.", false);
-                await scriptModAPI.CreateScriptMod("OpenIV.ASI", 1, "OpenIV.ASI © - not included, please download yourself (usually included with OpenIV ©.) Required to load asset mods, the modified .rpf files that go inside the \"mods\" folder in the GTAV directory.", false);
+                await scriptModAPI.CreateScriptMod("Script Hook V + ASI Loader", 0, "Script Hook V + ASI Loader © - not included, please download yourself.\nRequired to load most modifications. Should be up-to-date as new GTAV updates are released to ensure compatibility and avoid crashes.", false);
+                await scriptModAPI.CreateScriptMod("OpenIV.ASI", 1, "OpenIV.ASI © - not included, please download yourself (usually included with OpenIV ©.)\nRequired to load asset mods, the modified .rpf files that go inside the \"mods\" folder in the GTAV directory.", false);
             }
 
             MainWindow mainWindow = new MainWindow(modsDbConnection);

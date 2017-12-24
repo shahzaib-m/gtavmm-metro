@@ -98,6 +98,7 @@
                             <Setter Property="Margin" Value="5 20 20 20" />
                             <!-- limit description text maxlength if needed -->
                             <Setter Property="MaxLength" Value="600" />
+                            <Setter Property="AcceptsReturn" Value="True"/>
                         </Style>
                     </DataGridTextColumn.EditingElementStyle>
                 </DataGridTextColumn>

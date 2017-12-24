@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using System.Data.Common;
 using System.Data.SQLite;
 
+using Newtonsoft.Json;
+
 namespace gtavmm_metro.Models
 {
     public class ScriptMod
@@ -15,7 +17,18 @@ namespace gtavmm_metro.Models
         public string Name { get; set; }
         public string Description { get; set; }
         public bool IsEnabled { get; set; }
+        public bool IsInserted { get; set; }
+        public IList<string> FilesWithPath { get; set; }
         public int OrderIndex { get; set; }
+
+        public static string FilesWithPathListToJson(IList<string> FilesWithPathList)
+        {
+            return JsonConvert.SerializeObject(FilesWithPathList, Formatting.None);
+        }
+        public static IList<string> FilesWithPathJsonToList(string FilesWithPathJson)
+        {
+            return JsonConvert.DeserializeObject<IList<string>>(FilesWithPathJson);
+        }
     }
 
     public class ScriptModAPI
@@ -36,6 +49,7 @@ namespace gtavmm_metro.Models
                 Name = name,
                 Description = description,
                 IsEnabled = isEnabled,
+                IsInserted = false,
                 OrderIndex = orderIndex
             };
 
@@ -63,11 +77,12 @@ namespace gtavmm_metro.Models
 
             await this.ModsDb.Connection.OpenAsync();
 
-            string sql = "INSERT into ScriptMod (name, description, isEnabled, orderIndex) VALUES (@name, @description, @isEnabled, @orderIndex)";
+            string sql = "INSERT into ScriptMod (name, description, isEnabled, isInserted, orderIndex) VALUES (@name, @description, @isEnabled, @isInserted, @orderIndex)";
             SQLiteCommand command = new SQLiteCommand(sql, this.ModsDb.Connection);
             command.Parameters.AddWithValue("name", newScriptMod.Name);
             command.Parameters.AddWithValue("description", newScriptMod.Description);
             command.Parameters.AddWithValue("isEnabled", Convert.ToInt32(newScriptMod.IsEnabled));
+            command.Parameters.AddWithValue("isInserted", Convert.ToInt32(newScriptMod.IsInserted));
             command.Parameters.AddWithValue("orderIndex", newScriptMod.OrderIndex);
             await command.ExecuteNonQueryAsync();
 
@@ -103,7 +118,13 @@ namespace gtavmm_metro.Models
                 string name = (string)reader["name"];
                 string description = (string)reader["description"];
                 bool isEnabled = Convert.ToBoolean((int)reader["isEnabled"]);
+                bool isInserted = Convert.ToBoolean((int)reader["isInserted"]);
                 int orderIndex = (int)reader["orderIndex"];
+                List<string> filesWithPath = null;
+                if (reader["filesWithPath"] is string filesWithPathJson)
+                {
+                    filesWithPath = JsonConvert.DeserializeObject<List<string>>(filesWithPathJson);
+                }
 
 
                 if (!Directory.Exists(Path.Combine(this.ModsRootFolder.FullName, name)))
@@ -119,6 +140,8 @@ namespace gtavmm_metro.Models
                         Name = name,
                         Description = description,
                         IsEnabled = isEnabled,
+                        IsInserted = isInserted,
+                        FilesWithPath = filesWithPath,
                         OrderIndex = orderIndex
                     });
                 }
@@ -171,6 +194,14 @@ namespace gtavmm_metro.Models
                 resultScriptMod.Name = (string)reader["name"];
                 resultScriptMod.Description = (string)reader["description"];
                 resultScriptMod.IsEnabled = Convert.ToBoolean((int)reader["isEnabled"]);
+                resultScriptMod.IsInserted = Convert.ToBoolean((int)reader["isInserted"]);
+
+                List<string> filesWithPath = null;
+                if (reader["filesWithPath"] is string filesWithPathJson)
+                {
+                    filesWithPath = JsonConvert.DeserializeObject<List<string>>(filesWithPathJson);
+                }
+                resultScriptMod.FilesWithPath = filesWithPath;
             }
 
             this.ModsDb.Connection.Close();
@@ -215,7 +246,6 @@ namespace gtavmm_metro.Models
 
             return true;
         }
-
         public async Task UpdateScriptModDescription(int scriptModId, string newDescription)
         {
             await this.ModsDb.Connection.OpenAsync();
@@ -228,7 +258,6 @@ namespace gtavmm_metro.Models
 
             this.ModsDb.Connection.Close();
         }
-
         public async Task UpdateScriptModIsEnabled(int scriptModId, bool newIsEnabled)
         {
             await this.ModsDb.Connection.OpenAsync();
@@ -241,7 +270,30 @@ namespace gtavmm_metro.Models
 
             this.ModsDb.Connection.Close();
         }
+        public async Task UpdateScriptModIsInserted(int scriptModId, bool newIsInserted)
+        {
+            await this.ModsDb.Connection.OpenAsync();
 
+            string sql = "UPDATE ScriptMod SET isInserted=@isInserted WHERE id=@id";
+            SQLiteCommand command = new SQLiteCommand(sql, this.ModsDb.Connection);
+            command.Parameters.AddWithValue("isInserted", Convert.ToInt32(newIsInserted));
+            command.Parameters.AddWithValue("id", scriptModId);
+            await command.ExecuteNonQueryAsync();
+
+            this.ModsDb.Connection.Close();
+        }
+        public async Task UpdateScriptModFilesWithPath(int scriptModId, IList<string> newFilesWithPath)
+        {
+            await this.ModsDb.Connection.OpenAsync();
+
+            string sql = "UPDATE ScriptMod SET filesWithPath=@filesWithPath WHERE id=@id";
+            SQLiteCommand command = new SQLiteCommand(sql, this.ModsDb.Connection);
+            command.Parameters.AddWithValue("filesWithPath", ScriptMod.FilesWithPathListToJson(newFilesWithPath));
+            command.Parameters.AddWithValue("id", scriptModId);
+            await command.ExecuteNonQueryAsync();
+
+            this.ModsDb.Connection.Close();
+        }
         private async Task UpdateScriptModOrderIndex(int scriptModId, int newIndex)
         {
             await this.ModsDb.Connection.OpenAsync();
@@ -253,7 +305,6 @@ namespace gtavmm_metro.Models
             await command.ExecuteNonQueryAsync();
             this.ModsDb.Connection.Close();
         }
-
         public async void UpdateScriptModOrderIndexes(IList<ScriptMod> scriptMods)
         {
             for (int i = 0; i < scriptMods.Count; i++)
@@ -298,11 +349,5 @@ namespace gtavmm_metro.Models
 
             return true;
         }
-    }
-
-    public class ScriptModContent
-    {
-        public ScriptMod ScriptMod { get; set; }
-        public List<string> FilesWithPaths { get; set; }
     }
 }

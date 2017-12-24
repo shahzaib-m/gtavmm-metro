@@ -42,7 +42,15 @@ namespace gtavmm_metro.Models
         {
             await this.Connection.OpenAsync();
 
-            string sql = @"CREATE TABLE ScriptMod (id INTEGER PRIMARY KEY, name VARCHAR(30), description VARCHAR(600), isEnabled INT, orderIndex INT)";
+            string sql = @"CREATE TABLE ScriptMod (
+                            id INTEGER PRIMARY KEY,
+                            name VARCHAR(30),
+                            description VARCHAR(600),
+                            isEnabled INT NOT NULL,
+                            isInserted INT NOT NULL,
+                            filesWithPath VARCHAR,
+                            orderIndex INT NOT NULL
+                         );";
             SQLiteCommand command = new SQLiteCommand(sql, this.Connection);
             command.ExecuteNonQuery();
 
@@ -74,7 +82,16 @@ namespace gtavmm_metro.Models
         {
             await this.Connection.OpenAsync();
 
-            string sql = "CREATE TABLE AssetMod (id INTEGER PRIMARY KEY, name VARCHAR(30), description VARCHAR(600), isEnabled INT, targetRPF VARCHAR(260), isUsableAssetMod INT, orderIndex INT)";
+            string sql = @"CREATE TABLE AssetMod (
+                            id INTEGER PRIMARY KEY,
+                            name VARCHAR(30),
+                            description VARCHAR(600),
+                            isEnabled INT NOT NULL,
+                            isInserted INT NOT NULL,
+                            targetRPF VARCHAR(260),
+                            isUsableAssetMod INT NOT NULL,
+                            orderIndex INT NOT NULL
+                         );";
             SQLiteCommand command = new SQLiteCommand(sql, this.Connection);
             command.ExecuteNonQuery();
 
