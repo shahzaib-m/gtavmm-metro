@@ -109,6 +109,7 @@ namespace gtavmm_metro.Tabs.HomeUCTabs
             GTAVDRM targetDRM = Settings.Default.IsSteamDRM ? GTAVDRM.Steam : GTAVDRM.Rockstar;
 
             this.GTAV = new GTAV(gamePath, GTAVMode.Offline, targetDRM);
+            this.GTAV.GTAVExited += this.GTAVProcessExited;
 
             if (this.ModsToggleButton_ScriptMods.IsChecked == true)
             {
@@ -208,7 +209,7 @@ namespace gtavmm_metro.Tabs.HomeUCTabs
             bool launchSuccess = this.GTAV.StartGTAV(gameOptions);
             if (launchSuccess)
             {
-                this.GTAV.GTAVProcessStarted += this.GTAVProcessStarted;
+                this.GTAV.GTAVStarted += this.GTAVProcessStarted;
 
                 this.GTAVLaunchProgress.SetTitle("Waiting for Grand Theft Auto V to launch");
                 this.GTAVLaunchProgress.SetMessage("Waiting for Grand Theft Auto V to launch...");
@@ -226,7 +227,7 @@ namespace gtavmm_metro.Tabs.HomeUCTabs
 
         private void GTAVProcessStarted(object sender, EventArgs e)
         {
-            this.GTAV.GTAVProcessExited += this.GTAVProcessExited;
+            this.GTAV.GTAVExited += this.GTAVProcessExited;
             this.GTAVLaunchProgress.SetCancelable(false);
 
             this.GTAVLaunchProgress.SetTitle("Grand Theft Auto V Running");
@@ -236,7 +237,9 @@ namespace gtavmm_metro.Tabs.HomeUCTabs
         private void GTAVCancelWaitLaunch(object sender, EventArgs e)
         {
             this.GTAVLaunchProgress.SetCancelable(false);
-            
+            this.GTAV.GTAVStarted -= this.GTAVProcessExited;
+            this.GTAV.GTAVExited -= this.GTAVProcessExited;
+
             this.GTAVLaunchProgress.SetTitle("Cancelling Grand Theft Auto V launch");
             this.GTAVLaunchProgress.SetMessage("Cancelling GTAV launch and cleaning up...");
 

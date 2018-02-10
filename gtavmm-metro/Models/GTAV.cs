@@ -1,11 +1,11 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Timers;
 using System.Diagnostics;
 using System.ComponentModel;
 using System.Collections.Generic;
 
-using System.Threading;
 using System.Threading.Tasks;
 
 using System.Windows;
@@ -39,10 +39,10 @@ namespace gtavmm_metro.Models
         private GTAVDRM TargetDRM;
         private GTAVMode GameMode;
 
-        private Process GTAVProcess;
+        private Process GTAVLauncherProcess;
         private Timer GTAVLauncherDiscoveryTimer;
-        public event EventHandler GTAVProcessStarted;
-        public event EventHandler GTAVProcessExited;
+        public event EventHandler GTAVStarted;
+        public event EventHandler GTAVExited;
 
         public GTAV(string gamePath, GTAVMode gameMode, GTAVDRM targetDRM)
         {
@@ -386,8 +386,9 @@ namespace gtavmm_metro.Models
 
         public void CancelGTALaunch()
         {
-            if (this.GTAVLauncherDiscoveryTimer != null) { this.GTAVLauncherDiscoveryTimer.Dispose(); }
-            this.GTAVProcess = null;
+            this.GTAVLauncherDiscoveryTimer.Stop();
+            this.GTAVLauncherDiscoveryTimer.Enabled = false;
+            this.GTAVLauncherDiscoveryTimer = null;
         }
 
         private bool StartGTAVProcess()
@@ -400,10 +401,7 @@ namespace gtavmm_metro.Models
                 else { initialProc.StartInfo.FileName = Path.Combine(this.GamePath, GTAVRockstarEntryExe); }
 
                 initialProc.EnableRaisingEvents = true;
-                initialProc.Exited += ((sender, e) =>
-                {
-                    this.GTAVLauncherDiscoveryTimer = new Timer(AssignGTAVLauncherProcessTimer, null, 0, 100);
-                });
+                initialProc.Exited += (sender, e) => this.SetupGTAVLauncherProcessTimer();
 
                 initialProc.Start();
             }
@@ -419,17 +417,29 @@ namespace gtavmm_metro.Models
 
             return true;
         }
-        private void AssignGTAVLauncherProcessTimer(object state)
+        private void SetupGTAVLauncherProcessTimer()
+        {
+            this.GTAVLauncherDiscoveryTimer = new Timer();
+            this.GTAVLauncherDiscoveryTimer.Elapsed += GTAVLauncherProcessTimerElapsed;
+            this.GTAVLauncherDiscoveryTimer.Interval = 500;
+            this.GTAVLauncherDiscoveryTimer.AutoReset = false;
+            this.GTAVLauncherDiscoveryTimer.Enabled = true;
+        }
+        private void GTAVLauncherProcessTimerElapsed(object sender, EventArgs e)
         {
             Process[] gtavProcs = Process.GetProcessesByName("GTAVLauncher");
             if (gtavProcs.Length != 0)
             {
-                this.GTAVLauncherDiscoveryTimer.Dispose();
-                this.GTAVProcessStarted(this, null);
+                this.GTAVLauncherProcess = gtavProcs.First();
+                this.GTAVLauncherProcess.EnableRaisingEvents = true;
+                this.GTAVLauncherProcess.Exited += this.GTAVExited;
 
-                this.GTAVProcess = gtavProcs.First();
-                this.GTAVProcess.EnableRaisingEvents = true;
-                this.GTAVProcess.Exited += this.GTAVProcessExited;
+                if (this.GTAVStarted != null)
+                    this.GTAVStarted(this, null);
+            }
+            else
+            {
+                this.GTAVLauncherDiscoveryTimer.Start();
             }
         }
 
