@@ -1,4 +1,6 @@
-﻿using System.Windows;
+﻿using System.Threading;
+
+using System.Windows;
 using System.Windows.Threading;
 
 using MahApps.Metro.Controls;
@@ -11,6 +13,37 @@ namespace gtavmm_metro
 {
     public partial class App : Application
     {
+        private Mutex AppInstanceMutex = null;
+
+        /// <summary>
+        /// Before startup, create instance Mutex and check if it already exists.
+        /// </summary>
+        /// <param name="e"></param>
+        protected override void OnStartup(StartupEventArgs e)
+        {
+            bool isNewInstance = true;
+            AppInstanceMutex = new Mutex(true, "GTAVModManagerMetroMutex", out isNewInstance);
+            if (!isNewInstance)
+            {
+                AppInstanceMutex = null;
+                MessageBox.Show("GTAV Mod Manager Metro is already running.", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
+                Current.Shutdown();
+            }
+
+            base.OnStartup(e);
+        }
+        /// <summary>
+        /// Before exit, if Mutex exists then release it.
+        /// </summary>
+        /// <param name="e"></param>
+        protected override void OnExit(ExitEventArgs e)
+        {
+            if (AppInstanceMutex != null)
+                AppInstanceMutex.ReleaseMutex();
+
+            base.OnExit(e);
+        }
+
         private void gtavmm_metro_Startup(object sender, StartupEventArgs e)
         {
             if (Settings.Default.IsFirstLaunch)
