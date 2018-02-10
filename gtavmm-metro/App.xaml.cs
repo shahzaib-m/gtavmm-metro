@@ -20,7 +20,30 @@ namespace gtavmm_metro
             }
             else
             {
-                MainWindow mainWindow = new MainWindow();
+                MainWindow mainWindow = null;
+
+                if (e.Args.Length != 0)
+                {
+                    bool updateFail = false;
+                    bool cleanupFail = false;
+
+                    for (int i = 0; i < e.Args.Length; i++)
+                    {
+                        switch (e.Args[i])
+                        {
+                            case "--updateFail":
+                                updateFail = true;
+                                break;
+                            case "--cleanupFail":
+                                cleanupFail = true;
+                                break;
+                        }
+
+                        MainWindow = new MainWindow(updateFail, cleanupFail);
+                    }
+                }
+                else { mainWindow = new MainWindow(); }
+
                 Current.MainWindow = mainWindow;
                 mainWindow.Show();
             }

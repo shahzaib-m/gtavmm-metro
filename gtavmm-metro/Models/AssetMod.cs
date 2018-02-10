@@ -267,7 +267,7 @@ namespace gtavmm_metro.Models
             await command.ExecuteNonQueryAsync();
             this.ModsDb.Connection.Close();
         }
-        public async void UpdateAssetModOrderIndexes(IList<AssetMod> assetMods)
+        public async Task UpdateAssetModOrderIndexes(IList<AssetMod> assetMods)
         {
             for (int i = 0; i < assetMods.Count; i++)
             {

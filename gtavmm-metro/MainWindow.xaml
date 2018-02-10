@@ -4,7 +4,6 @@
                       xmlns:Controls="http://metro.mahapps.com/winfx/xaml/controls"
                       xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
                       Title="GTAV Mod Manager Metro"
-                      x:Name="_this"
                       
                       Height="670"
                       MinHeight="670"
@@ -19,6 +18,20 @@
                       
                       ContentRendered="MetroWindow_ContentRendered"
                       Closing="_this_Closing">
+    <Controls:MetroWindow.RightWindowCommands>
+        <Controls:WindowCommands ShowLastSeparator="True">
+            <Button x:Name="UpdateButton" IsEnabled="False" Opacity="0.0" Click="UpdateButton_Click">
+                <StackPanel Orientation="Horizontal">
+                    <iconPacks:PackIconMaterial x:Name="UpdateIcon" VerticalAlignment="Center" />
+                    <TextBlock Margin="7 0 0 0" x:Name="UpdateTextBlock" VerticalAlignment="Center"/>
+                </StackPanel>
+                <Button.ToolTip>
+                    <TextBlock FontWeight="Light" Text="An update is available" />
+                </Button.ToolTip>
+            </Button>
+        </Controls:WindowCommands>
+    </Controls:MetroWindow.RightWindowCommands>
+    
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*" MaxHeight="60"/>

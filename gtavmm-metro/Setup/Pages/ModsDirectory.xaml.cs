@@ -63,9 +63,9 @@ namespace gtavmm_metro.Setup.Pages
             this.ParentWindow.SetupContainer.Content = this.ParentWindow.GTAVDirectoryPage;
         }
 
-        private void Finish_Click(object sender, RoutedEventArgs e)
+        private async void Finish_Click(object sender, RoutedEventArgs e)
         {
-            this.ParentWindow.FinishSetup();
+            await this.ParentWindow.FinishSetup();
         }
     }
 }

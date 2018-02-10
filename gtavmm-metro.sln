@@ -1,9 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26730.16
+VisualStudioVersion = 15.0.27130.2020
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "gtavmm-metro", "gtavmm-metro\gtavmm-metro.csproj", "{0F56EDA9-CF7F-4C49-A67B-3FCD434D4902}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "gtavmm-metro.Common", "gtavmm-metro.Common\gtavmm-metro.Common.csproj", "{D269A4E9-2C45-48B7-9890-A4E5114B3AB2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "gtavmm-metro.Updater", "gtavmm-metro.Updater\gtavmm-metro.Updater.csproj", "{818393AF-EDE4-4995-81F3-4097FAEBF671}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +19,14 @@ Global
 		{0F56EDA9-CF7F-4C49-A67B-3FCD434D4902}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0F56EDA9-CF7F-4C49-A67B-3FCD434D4902}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0F56EDA9-CF7F-4C49-A67B-3FCD434D4902}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D269A4E9-2C45-48B7-9890-A4E5114B3AB2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D269A4E9-2C45-48B7-9890-A4E5114B3AB2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D269A4E9-2C45-48B7-9890-A4E5114B3AB2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D269A4E9-2C45-48B7-9890-A4E5114B3AB2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{818393AF-EDE4-4995-81F3-4097FAEBF671}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{818393AF-EDE4-4995-81F3-4097FAEBF671}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{818393AF-EDE4-4995-81F3-4097FAEBF671}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{818393AF-EDE4-4995-81F3-4097FAEBF671}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

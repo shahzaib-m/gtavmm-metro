@@ -305,7 +305,7 @@ namespace gtavmm_metro.Models
             await command.ExecuteNonQueryAsync();
             this.ModsDb.Connection.Close();
         }
-        public async void UpdateScriptModOrderIndexes(IList<ScriptMod> scriptMods)
+        public async Task UpdateScriptModOrderIndexes(IList<ScriptMod> scriptMods)
         {
             for (int i = 0; i < scriptMods.Count; i++)
             {

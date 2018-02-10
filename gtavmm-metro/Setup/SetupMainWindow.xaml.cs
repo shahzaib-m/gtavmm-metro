@@ -1,4 +1,6 @@
 ﻿using System.IO;
+using System.Threading.Tasks;
+
 using System.Windows;
 using System.Windows.Input;
 
@@ -45,7 +47,7 @@ namespace gtavmm_metro.Setup
             if (e.ChangedButton == MouseButton.Left) { this.DragMove(); }
         }
 
-        public async void FinishSetup()
+        public async Task FinishSetup()
         {
             Settings.Default.IsFirstLaunch = false;
             Settings.Default.GTAVDirectory = this.GTAVDirectoryPage.GTAVDirectoryConfirmedLocation.FullName;

@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Threading.Tasks;
+
 using System.Data.Common;
 using System.Data.SQLite;
 
@@ -12,12 +14,15 @@ namespace gtavmm_metro.Models
         public DBInstance(string modsFolderRoot)
         {
             this.Connection = new SQLiteConnection(String.Format(DbConnectionString, modsFolderRoot));
-
-            this.VerifyScriptModTable();
-            this.VerifyAssetModTable();
         }
 
-        private async void VerifyScriptModTable()
+        private async Task Init()
+        {
+            await this.VerifyScriptModTable();
+            await this.VerifyAssetModTable();
+        }
+
+        private async Task VerifyScriptModTable()
         {
             await this.Connection.OpenAsync();
 
@@ -31,14 +36,14 @@ namespace gtavmm_metro.Models
             if (!reader.HasRows)
             {
                 this.Connection.Close();
-                this.CreateScriptModTable();
+                await this.CreateScriptModTable();
             }
             else
             {
                 this.Connection.Close();
             }
         }
-        private async void CreateScriptModTable()
+        private async Task CreateScriptModTable()
         {
             await this.Connection.OpenAsync();
 
@@ -57,7 +62,7 @@ namespace gtavmm_metro.Models
             this.Connection.Close();
         }
 
-        private async void VerifyAssetModTable()
+        private async Task VerifyAssetModTable()
         {
             await this.Connection.OpenAsync();
 
@@ -71,14 +76,14 @@ namespace gtavmm_metro.Models
             if (!reader.HasRows)
             {
                 this.Connection.Close();
-                this.CreateAssetModsTable();
+                await this.CreateAssetModsTable();
             }
             else
             {
                 this.Connection.Close();
             }
         }
-        private async void CreateAssetModsTable()
+        private async Task CreateAssetModsTable()
         {
             await this.Connection.OpenAsync();
 

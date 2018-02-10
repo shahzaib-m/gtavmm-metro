@@ -268,7 +268,7 @@ namespace gtavmm_metro.Tabs
         #endregion
 
         #region My Methods
-        public async void LoadAssetMods(DBInstance modsDbConnection)
+        public async Task LoadAssetMods(DBInstance modsDbConnection)
         {
             await this.Dispatcher.Invoke(async () =>
             {

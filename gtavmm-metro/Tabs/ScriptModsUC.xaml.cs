@@ -224,7 +224,7 @@ namespace gtavmm_metro.Tabs
         #endregion
 
         #region My Methods
-        public async void LoadScriptMods(DBInstance modsDbConnection)
+        public async Task LoadScriptMods(DBInstance modsDbConnection)
         {
             await this.Dispatcher.Invoke(async () =>
             {
