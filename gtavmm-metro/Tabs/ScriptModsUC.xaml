@@ -201,7 +201,7 @@
                         </Button.ToolTip>
                     </Button>
                     <Button Content="{iconPacks:PackIconMaterial Plus, Width=25, Height=25}"
-                        Style="{DynamicResource MetroCircleButtonStyle}" Margin="10 0 30 0" Width="60" Height="60"
+                        Style="{DynamicResource MetroCircleButtonStyle}" Margin="10 0 15 0" Width="60" Height="60"
                         x:Name="AddNewScriptModButton" Click="AddNewScriptModButton_Click">
                         <Button.ToolTip>
                             <StackPanel Orientation="Horizontal">

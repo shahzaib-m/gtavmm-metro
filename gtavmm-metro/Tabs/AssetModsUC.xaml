@@ -218,9 +218,13 @@
 
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Grid.Column="0" Grid.ColumnSpan="2" VerticalAlignment="Center"
                             Margin="15 0 0 0">
-                    <TextBlock FontSize="17" FontWeight="Light">
-                        Note: ASI Loader (dinput8.dll) and OpenIV.asi are needed for these custom modification packages to load. <LineBreak />
-                        ASI Loader and OpenIV.asi can be found with with OpenIV (© OpenIV.com). You can then add these as a single or a seperate Script Mod.
+                    <Button Style="{DynamicResource MetroCircleButtonStyle}" Opacity="1.0" x:Name="AssetModInfoButton"
+                            Width="50" Height="50" Content="{iconPacks:PackIconMaterial Information, Width=48, Height=48}"
+                            MouseEnter="AssetModInfoButton_MouseEnter" MouseLeave="AssetModInfoButton_MouseLeave" Click="AssetModInfoButton_Click">
+                    </Button>
+                    <TextBlock FontSize="17" FontWeight="Light" Margin="10 1 0 0" x:Name="AssetModInfoTextblock" Opacity="0.0">
+                        ASI Loader (dinput8.dll) and OpenIV.asi are required for these custom packages to load.<LineBreak />
+                        You can then add these as a single 'Script Mod', or seperately. Click for more information.
                     </TextBlock>
                 </StackPanel>
 
@@ -236,7 +240,7 @@
                         </Button.ToolTip>
                     </Button>
                     <Button Content="{iconPacks:PackIconMaterial Plus, Width=25, Height=25}"
-                        Style="{DynamicResource MetroCircleButtonStyle}" Margin="10 0 30 0" Width="60" Height="60"
+                        Style="{DynamicResource MetroCircleButtonStyle}" Margin="10 0 15 0" Width="60" Height="60"
                         x:Name="AddNewAssetModButton" Click="AddNewAssetModButton_Click">
                         <Button.ToolTip>
                             <StackPanel Orientation="Horizontal">

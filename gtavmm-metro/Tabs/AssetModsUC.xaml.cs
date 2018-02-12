@@ -4,6 +4,7 @@ using System.Linq;
 
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media.Animation;
 
 using System.Diagnostics;
 using System.Threading.Tasks;
@@ -206,6 +207,26 @@ namespace gtavmm_metro.Tabs
         }
 
         # region Bottom bar buttons
+        private void AssetModInfoButton_MouseEnter(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            DoubleAnimation fadeAssetInfoTextIn = new DoubleAnimation(0.0, 1.0, new Duration(new TimeSpan(0, 0, 0, 0, 500)));
+            this.AssetModInfoTextblock.BeginAnimation(OpacityProperty, fadeAssetInfoTextIn);
+        }
+        private void AssetModInfoButton_MouseLeave(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            DoubleAnimation fadeAssetInfoTextOut = new DoubleAnimation(1.0, 0.0, new Duration(new TimeSpan(0, 0, 0, 0, 500)));
+            this.AssetModInfoTextblock.BeginAnimation(OpacityProperty, fadeAssetInfoTextOut);
+        }
+        private void AssetModInfoButton_Click(object sender, RoutedEventArgs e)
+        {
+            MetroWindow metroWindow = Application.Current.MainWindow as MetroWindow;
+            metroWindow.ShowMessageAsync("Asset Mod Information",
+                "These packages require 'OpenIV.asi' to load, which can be found with OpenIV (© OpenIV.com)." +
+                " ASI Loader (dinput8.dll) is also required, which can also be found with OpenIV or, alternatively, with ScriptHookV (both are the same, choose any).\n\n" +
+                "Add these files as a single 'Script Mod' or seperately, and ensure they are enabled. Your modified .rpf packages may not load otherwise (when launching GTAV Story with Asset Mods).\n\n" +
+                "This mod manager uses the 'mods' folder functionality of OpenIV.asi and leaves your original .rpf files untouched.");
+        }
+
         // View Modifications Folder Behaviour
         private void ViewModsRootFolderButton_Click(object sender, RoutedEventArgs e)
         {

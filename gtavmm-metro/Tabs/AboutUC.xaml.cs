@@ -114,7 +114,6 @@ namespace gtavmm_metro.Tabs
             );
 
             Process.Start(updaterProcess);
-            Application.Current.Shutdown();
         }
     }
 }
