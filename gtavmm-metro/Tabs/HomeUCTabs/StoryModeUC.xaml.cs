@@ -133,7 +133,11 @@ namespace gtavmm_metro.Tabs.HomeUCTabs
                                 MessageDialogStyle.AffirmativeAndNegative, new MetroDialogSettings { AffirmativeButtonText = "Yes", NegativeButtonText = "No" });
                             if (res == MessageDialogResult.Negative)
                             {
-                                await this.MoveAssetModsBack();
+                                await this.MoveScriptModsBack();
+
+                                if (this.GTAV.HasBackedUpExistingFiles)
+                                    this.RestoreBackedUpFiles();
+
                                 await this.GTAVLaunchProgress.CloseAsync();
                                 return;
                             }
@@ -173,6 +177,10 @@ namespace gtavmm_metro.Tabs.HomeUCTabs
                             {
                                 await this.MoveScriptModsBack();
                                 await this.MoveAssetModsBack();
+
+                                if (this.GTAV.HasBackedUpExistingFiles)
+                                    this.RestoreBackedUpFiles();
+
                                 await this.GTAVLaunchProgress.CloseAsync();
                                 return;
                             }
@@ -257,6 +265,9 @@ namespace gtavmm_metro.Tabs.HomeUCTabs
             if (this.IsScriptModsInserted) { await this.MoveScriptModsBack(); this.IsScriptModsInserted = false; };
             if (this.IsAssetModsInserted) { await this.MoveAssetModsBack(); this.IsAssetModsInserted = false; }
 
+            if (this.GTAV.HasBackedUpExistingFiles)
+                this.RestoreBackedUpFiles();
+
             await this.GTAVLaunchProgress.CloseAsync();
         }
 
@@ -297,7 +308,6 @@ namespace gtavmm_metro.Tabs.HomeUCTabs
                 await this.ScriptModsUserControl.ScriptModAPI.UpdateScriptModIsInserted(scriptMod.Id, false);
             }
             this.InsertedScriptMods.Clear();
-            
 
             this.GTAVLaunchProgress.SetMessage("Deleting remaining non-game folders with no files...");
             await this.GTAV.DeleteRemainingRootFoldersWithNoFiles();
@@ -371,7 +381,24 @@ namespace gtavmm_metro.Tabs.HomeUCTabs
             if (!delModsFolderInGTAVDirSuccess)
             {
                 await this.Dispatcher.Invoke(async () => await metroWindow.ShowMessageAsync("Failed to delete 'mods' folder in GTAV directory",
-                    "Couldn't delete 'mods' folder inside GTAV directory. Some files are remaining and preventing deletion"));
+                    "Couldn't delete 'mods' folder inside GTAV directory. Some files are remaining and preventing deletion."));
+            }
+        }
+        private async void RestoreBackedUpFiles()
+        {
+            if (this.GTAV.HasBackedUpExistingFiles)
+            {
+                this.GTAVLaunchProgress.SetTitle("Restoring backed up files");
+                this.GTAVLaunchProgress.SetMessage("...");
+
+                bool success = this.GTAV.RestoreBackedUpExistingFiles();
+                if (!success)
+                {
+                    await this.Dispatcher.Invoke(async () => await (Application.Current.MainWindow as MetroWindow).ShowMessageAsync(
+                        "Unable to restore backed up files",
+                        "Unable to rename some files which had a backup extension (" + GTAV.BackupFileExtension + ") appended to them. These files were backed up since a script/asset modification was about to replace them."
+                    ));
+                }
             }
         }
 

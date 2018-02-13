@@ -35,12 +35,19 @@ namespace gtavmm_metro.Models
         private static readonly string GTAVSteamProtocolURL = "steam://run/271590";
         private static readonly string GTAVRockstarEntryExe = "PlayGTAV.exe";
 
+        public static string BackupFileExtension { get { return ".gtavmm-bak"; } }
+
         private string GamePath;
         private GTAVDRM TargetDRM;
         private GTAVMode GameMode;
 
+        private List<FileInfo> AllInsertedFiles = new List<FileInfo>();
+        private List<FileInfo> AllBackedUpFiles = new List<FileInfo>();
+        public bool HasBackedUpExistingFiles { get { return this.AllBackedUpFiles.Count != 0; } }
+
         private Process GTAVLauncherProcess;
         private Timer GTAVLauncherDiscoveryTimer;
+
         public event EventHandler GTAVStarted;
         public event EventHandler GTAVExited;
 
@@ -141,9 +148,22 @@ namespace gtavmm_metro.Models
                 try
                 {
                     string destinationPath = Path.Combine(this.GamePath, relativePathWithFile);
-                    if (File.Exists(destinationPath)) { File.Delete(destinationPath); }
+                    if (!this.AllInsertedFiles.Any(x => x.FullName == destinationPath))
+                    {
+                        if (File.Exists(destinationPath))
+                        {
+                            string backupFilePath = destinationPath + BackupFileExtension;
 
-                    File.Move(fullPath, destinationPath);
+                            if (File.Exists(backupFilePath))
+                                File.Delete(backupFilePath);
+
+                            File.Move(destinationPath, backupFilePath);
+                            this.AllBackedUpFiles.Add(new FileInfo(backupFilePath));
+                        }
+
+                        File.Move(fullPath, destinationPath);
+                        this.AllInsertedFiles.Add(new FileInfo(destinationPath));
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -210,7 +230,7 @@ namespace gtavmm_metro.Models
                 {
                     if (!coreGameFolders.Contains(new DirectoryInfo(directory).Name))
                     {
-                        bool hasNoFiles = !Directory.EnumerateFiles(directory).Any();
+                        bool hasNoFiles = !Directory.EnumerateFiles(directory, "*", SearchOption.AllDirectories).Any();
                         if (hasNoFiles) { Directory.Delete(directory, true); }
                     }
                 }
@@ -227,7 +247,7 @@ namespace gtavmm_metro.Models
                 {
                     FileInfo fileInfo = new FileInfo(file);
 
-                    if (!coreGameFiles.Contains(fileInfo.Name))
+                    if (!coreGameFiles.Contains(fileInfo.Name) && !fileInfo.Name.EndsWith(BackupFileExtension))
                     {
                         unknownLeftoverFiles.Add(fileInfo);
                     }
@@ -256,6 +276,25 @@ namespace gtavmm_metro.Models
 
             return unknownLeftoverFolders;
         }
+        public bool RestoreBackedUpExistingFiles()
+        {
+            try
+            {
+                foreach (FileInfo file in this.AllBackedUpFiles)
+                {
+                    int lengthWithoutBakExt = file.FullName.Length - BackupFileExtension.Length;
+                    file.MoveTo(file.FullName.Substring(0, lengthWithoutBakExt));
+                }
+            }
+            catch (Exception ex)
+            {
+                if (ex is IOException || ex is UnauthorizedAccessException || ex is PathTooLongException) { return false; }
+
+                throw;
+            }
+
+            return true;
+        }
 
         public bool InsertAssetMod(AssetMod assetMod)
         {
@@ -273,9 +312,22 @@ namespace gtavmm_metro.Models
             string targetFullPath = Path.Combine(this.GamePath, "mods", targetRelativePath);
             try
             {
-                if (File.Exists(targetFullPath)) { File.Delete(targetFullPath); }
+                if (!this.AllInsertedFiles.Any(x => x.FullName == targetFullPath))
+                {
+                    if (File.Exists(targetFullPath))
+                    {
+                        string backupFilePath = targetFullPath + BackupFileExtension;
 
-                File.Move(Path.Combine(Settings.Default.ModsDirectory, "Asset Mods", targetRelativePath), targetFullPath);
+                        if (File.Exists(backupFilePath))
+                            File.Delete(backupFilePath);
+
+                        File.Move(targetFullPath, backupFilePath);
+                        this.AllBackedUpFiles.Add(new FileInfo(backupFilePath));
+                    }
+
+                    File.Move(Path.Combine(Settings.Default.ModsDirectory, "Asset Mods", targetRelativePath), targetFullPath);
+                    this.AllInsertedFiles.Add(new FileInfo(targetFullPath));
+                }
             }
             catch (Exception ex)
             {
@@ -332,7 +384,7 @@ namespace gtavmm_metro.Models
             if (!Directory.Exists(targetPath)) { return true; }
 
             string modsFolderInGTAVDirPath = Path.Combine(this.GamePath, "mods");
-            if (!Directory.EnumerateFiles(modsFolderInGTAVDirPath).Any())
+            if (!Directory.EnumerateFiles(modsFolderInGTAVDirPath, "*", SearchOption.AllDirectories).Any())
             {
                 try { Directory.Delete(modsFolderInGTAVDirPath, true); }
                 catch (Exception ex)
@@ -341,7 +393,7 @@ namespace gtavmm_metro.Models
 
                     throw;
                 }
-                
+
                 return true;
             }
 
@@ -353,7 +405,7 @@ namespace gtavmm_metro.Models
             if (!Directory.Exists(targetPath)) { return true; }
 
             string modsFolderInGTAVDirPath = Path.Combine(gamePath, "mods");
-            if (!Directory.EnumerateFiles(modsFolderInGTAVDirPath).Any())
+            if (!Directory.EnumerateFiles(modsFolderInGTAVDirPath, "*", SearchOption.AllDirectories).Any())
             {
                 try { Directory.Delete(modsFolderInGTAVDirPath, true); }
                 catch (Exception ex)
@@ -525,12 +577,12 @@ namespace gtavmm_metro.Models
             }
 
             DirectoryInfo[] allSubDirs = directory.GetDirectories("*", SearchOption.TopDirectoryOnly);
-            foreach(DirectoryInfo subDir in allSubDirs)
+            foreach (DirectoryInfo subDir in allSubDirs)
             {
                 if (subDir.Name.ToLower() == "mods") { continue; }
 
                 FileInfo[] allRPFWithinSubDirRecursive = subDir.GetFiles("*.rpf", SearchOption.AllDirectories);
-                foreach(FileInfo RPF in allRPFWithinSubDirRecursive)
+                foreach (FileInfo RPF in allRPFWithinSubDirRecursive)
                 {
                     string fullPath = RPF.FullName;
                     RPFNames.Add(fullPath.Split(new string[] { Settings.Default.GTAVDirectory }, StringSplitOptions.RemoveEmptyEntries)[0]);
