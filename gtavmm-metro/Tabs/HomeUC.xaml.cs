@@ -17,17 +17,18 @@ namespace gtavmm_metro.Tabs
 
         private void AssignUCToTabs(ScriptModsUC scriptModsUC, AssetModsUC assetModsUC)
         {
-            this.StoryModeUserControl = new StoryModeUC(this, scriptModsUC, assetModsUC);
+            this.StoryModeUserControl = new StoryModeUC(scriptModsUC, assetModsUC);
             this.GTAVTabItem.Content = this.StoryModeUserControl;
+            this.StoryModeUserControl.TabCollapseRequested += (s, e) => CollapseTab();
 
-            this.OnlineUserControl = new OnlineUC(this);
+            this.OnlineUserControl = new OnlineUC();
             this.GTAOnlineTabItem.Content = this.OnlineUserControl;
+            this.OnlineUserControl.TabCollapseRequested += (s, e) => CollapseTab();
         }
 
-        public void SaveState()
+        private void CollapseTab()
         {
-            this.StoryModeUserControl.SaveState();
-            this.OnlineUserControl.SaveState();
+            this.BlankTabItem.IsSelected = true;
         }
     }
 }

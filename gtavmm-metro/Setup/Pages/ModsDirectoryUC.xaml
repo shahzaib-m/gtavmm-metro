@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="gtavmm_metro.Setup.Pages.ModsDirectory"
+﻿<UserControl x:Class="gtavmm_metro.Setup.Pages.ModsDirectoryUC"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 

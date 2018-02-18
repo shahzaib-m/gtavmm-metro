@@ -235,7 +235,7 @@ namespace gtavmm_metro.Tabs
                 {
                     Directory.CreateDirectory(this.ModsRootFolder);
                     this.ScriptMods = new ObservableCollection<ScriptMod>();
-                    this.ScriptMods.Add(await this.ScriptModAPI.CreateScriptMod("Your mod name - Click to edit", 0, "Your mod's brief description to help you identify it (optional). Click to edit.", false));
+                    this.ScriptMods.Add(await this.ScriptModAPI.CreateScriptMod("Your mod name - Click to edit", 0, "Your mod's brief description to help you identify it (optional).\nClick to edit.\n'Enter' key to create a new line.\n'Ctrl+Enter'/click anywhere else to confirm.", false));
                     // UI margins act odd when datagrid is empty and a new script mod is added for the first time manually. Adding one by default.
                 }
                 else
@@ -244,7 +244,7 @@ namespace gtavmm_metro.Tabs
                     if (scriptModsFromDb == null)
                     {
                         this.ScriptMods = new ObservableCollection<ScriptMod>();
-                        this.ScriptMods.Add(await this.ScriptModAPI.CreateScriptMod("Your mod name - Click to edit", 0, "Your mod's brief description to help you identify it (optional). Click to edit.", false));
+                        this.ScriptMods.Add(await this.ScriptModAPI.CreateScriptMod("Your mod name - Click to edit", 0, "Your mod's brief description to help you identify it (optional).\nClick to edit.\n'Enter' key to create a new line.\n'Ctrl + Enter'/click anywhere else to confirm.", false));
                         // UI margins act odd when datagrid is empty and a new script mod is added for the first time manually. Adding one by default.
                     }
                     else

@@ -71,7 +71,6 @@ namespace gtavmm_metro
 
         private void _this_Closing(object sender, CancelEventArgs e)
         {
-            this.HomeUserControl.SaveState();
             Settings.Default.Save();
         }
 
@@ -89,7 +88,13 @@ namespace gtavmm_metro
 
         private async Task Init()
         {
-            if (this.ModsDbConnection == null) { this.ModsDbConnection = new DBInstance(Settings.Default.ModsDirectory); }
+            // prereqs (dir checks) TODO
+
+            if (this.ModsDbConnection == null)
+            {
+                this.ModsDbConnection = new DBInstance(Settings.Default.ModsDirectory);
+                await this.ModsDbConnection.VerifyTablesState();
+            }
             this.UpdateHandler = new UpdateHandler(Utils.GetExecutingAssemblyVersion(),
                 Utils.GetExecutingAssemblyDirectory().FullName);
 
@@ -234,7 +239,7 @@ namespace gtavmm_metro
                     if (!delModsFolderInGTAVDirSuccess)
                     {
                         await this.Dispatcher.Invoke(async () => await this.ShowMessageAsync("Failed to delete 'mods' folder in GTAV directory",
-                            "Couldn't delete 'mods' folder inside GTAV directory. Some files are remaining and preventing deletion"));
+                            "Couldn't delete 'mods' folder inside GTAV directory. Some files are remaining and preventing deletion."));
                     }
 
                     await prog.CloseAsync();

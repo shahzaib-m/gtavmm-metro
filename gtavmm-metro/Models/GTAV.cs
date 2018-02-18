@@ -157,11 +157,11 @@ namespace gtavmm_metro.Models
                             if (File.Exists(backupFilePath))
                                 File.Delete(backupFilePath);
 
-                            File.Move(destinationPath, backupFilePath);
+                            Utils.MoveFile(destinationPath, backupFilePath);
                             this.AllBackedUpFiles.Add(new FileInfo(backupFilePath));
                         }
 
-                        File.Move(fullPath, destinationPath);
+                        Utils.MoveFile(fullPath, destinationPath);
                         this.AllInsertedFiles.Add(new FileInfo(destinationPath));
                     }
                 }
@@ -187,7 +187,7 @@ namespace gtavmm_metro.Models
                 string fileFullPath = Path.Combine(this.GamePath, modFilePath);
                 if (File.Exists(fileFullPath))
                 {
-                    try { File.Move(Path.Combine(this.GamePath, modFilePath), Path.Combine(modRootFullPath, modFilePath)); }
+                    try { Utils.MoveFile(Path.Combine(this.GamePath, modFilePath), Path.Combine(modRootFullPath, modFilePath)); }
                     catch (Exception ex)
                     {
                         if (ex is IOException || ex is UnauthorizedAccessException || ex is PathTooLongException) { return false; }
@@ -208,7 +208,7 @@ namespace gtavmm_metro.Models
                 string fileFullPath = Path.Combine(gamePath, modFilePath);
                 if (File.Exists(fileFullPath))
                 {
-                    try { File.Move(Path.Combine(gamePath, modFilePath), Path.Combine(modRootFullPath, modFilePath)); }
+                    try { Utils.MoveFile(Path.Combine(gamePath, modFilePath), Path.Combine(modRootFullPath, modFilePath)); }
                     catch (Exception ex)
                     {
                         if (ex is IOException || ex is UnauthorizedAccessException || ex is PathTooLongException) { return false; }
@@ -321,11 +321,11 @@ namespace gtavmm_metro.Models
                         if (File.Exists(backupFilePath))
                             File.Delete(backupFilePath);
 
-                        File.Move(targetFullPath, backupFilePath);
+                        Utils.MoveFile(targetFullPath, backupFilePath);
                         this.AllBackedUpFiles.Add(new FileInfo(backupFilePath));
                     }
 
-                    File.Move(Path.Combine(Settings.Default.ModsDirectory, "Asset Mods", targetRelativePath), targetFullPath);
+                    Utils.MoveFile (Path.Combine(Settings.Default.ModsDirectory, "Asset Mods", targetRelativePath), targetFullPath);
                     this.AllInsertedFiles.Add(new FileInfo(targetFullPath));
                 }
             }
@@ -347,7 +347,7 @@ namespace gtavmm_metro.Models
 
             try
             {
-                File.Move(fullRpfPath, Path.Combine(modRootFullPath, assetMod.TargetRPF.Substring(1)));
+                Utils.MoveFile(fullRpfPath, Path.Combine(modRootFullPath, assetMod.TargetRPF.Substring(1)));
             }
             catch (Exception ex)
             {
@@ -367,7 +367,7 @@ namespace gtavmm_metro.Models
 
             try
             {
-                File.Move(fullRpfPath, Path.Combine(modRootFullPath, assetMod.TargetRPF.Substring(1)));
+                Utils.MoveFile(fullRpfPath, Path.Combine(modRootFullPath, assetMod.TargetRPF.Substring(1)));
             }
             catch (Exception ex)
             {
@@ -438,9 +438,12 @@ namespace gtavmm_metro.Models
 
         public void CancelGTALaunch()
         {
-            this.GTAVLauncherDiscoveryTimer.Stop();
-            this.GTAVLauncherDiscoveryTimer.Enabled = false;
-            this.GTAVLauncherDiscoveryTimer = null;
+            if (this.GTAVLauncherDiscoveryTimer != null)
+            {
+                this.GTAVLauncherDiscoveryTimer.Stop();
+                this.GTAVLauncherDiscoveryTimer.Enabled = false;
+                this.GTAVLauncherDiscoveryTimer = null;
+            }
         }
 
         private bool StartGTAVProcess()

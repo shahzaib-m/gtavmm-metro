@@ -140,14 +140,14 @@
     <Compile Include="Models\AssetMod.cs" />
     <Compile Include="Models\DBInstance.cs" />
     <Compile Include="Models\GTAV.cs" />
-    <Compile Include="Setup\Pages\GTAVDirectory.xaml.cs">
-      <DependentUpon>GTAVDirectory.xaml</DependentUpon>
+    <Compile Include="Setup\Pages\GTAVDirectoryUC.xaml.cs">
+      <DependentUpon>GTAVDirectoryUC.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Setup\Pages\ModsDirectory.xaml.cs">
-      <DependentUpon>ModsDirectory.xaml</DependentUpon>
+    <Compile Include="Setup\Pages\ModsDirectoryUC.xaml.cs">
+      <DependentUpon>ModsDirectoryUC.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Setup\Pages\Welcome.xaml.cs">
-      <DependentUpon>Welcome.xaml</DependentUpon>
+    <Compile Include="Setup\Pages\WelcomeUC.xaml.cs">
+      <DependentUpon>WelcomeUC.xaml</DependentUpon>
     </Compile>
     <Compile Include="Setup\SetupMainWindow.xaml.cs">
       <DependentUpon>SetupMainWindow.xaml</DependentUpon>
@@ -183,15 +183,15 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="Setup\Pages\GTAVDirectory.xaml">
+    <Page Include="Setup\Pages\GTAVDirectoryUC.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Setup\Pages\ModsDirectory.xaml">
+    <Page Include="Setup\Pages\ModsDirectoryUC.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Setup\Pages\Welcome.xaml">
+    <Page Include="Setup\Pages\WelcomeUC.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

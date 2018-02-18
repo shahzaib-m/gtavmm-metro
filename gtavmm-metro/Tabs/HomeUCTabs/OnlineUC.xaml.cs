@@ -12,38 +12,37 @@ namespace gtavmm_metro.Tabs.HomeUCTabs
 {
     public partial class OnlineUC : UserControl
     {
-        private HomeUC ParentWindow;
+        public event EventHandler TabCollapseRequested;
 
         private GTAV GTAV;
         private ProgressDialogController GTAVLaunchProgress;
 
-        public OnlineUC(HomeUC parent)
+        public OnlineUC()
         {
-            this.ParentWindow = parent;
             InitializeComponent();
 
-            // if user has asked for these states to be saved (in Settings?)
-            if (true)
-            {
-                this.OptionsToggleButton_StraightToFreemode.IsChecked = Settings.Default.GTAOOptionsStraightIntoFreemode_IsChecked;
-                this.OptionsToggleButton_StraightToFreemode_Click(this, null);
-            }
+            this.LoadStateSettings();
         }
 
-        private void CollapseGTAOTabSection_Click(object sender, RoutedEventArgs e)
+        private void LoadStateSettings()
         {
-            this.ParentWindow.BlankTabItem.IsSelected = true;
+            this.OptionsToggleButton_StraightToFreemode.IsChecked = Settings.Default.GTAOOptionsStraightIntoFreemode_IsChecked;
+            this.OptionsToggleButton_StraightToFreemode_Click(this, null);
         }
+
+        private void CollapseGTAOTabSection_Click(object sender, RoutedEventArgs e) => TabCollapseRequested?.Invoke(this, null);
 
         private void OptionsToggleButton_StraightToFreemode_Click(object sender, RoutedEventArgs e)
         {
             if (this.OptionsToggleButton_StraightToFreemode.IsChecked == true)
             {
                 OptionsToggleButton_StraightToFreemode.Content = "Enabled";
+                Settings.Default.GTAOOptionsStraightIntoFreemode_IsChecked = true;
             }
             else
             {
                 this.OptionsToggleButton_StraightToFreemode.Content = "Disabled";
+                Settings.Default.GTAOOptionsStraightIntoFreemode_IsChecked = false;
             }
         }
 
@@ -133,11 +132,6 @@ namespace gtavmm_metro.Tabs.HomeUCTabs
             }
 
             await this.GTAVLaunchProgress.CloseAsync();
-        }
-
-        public void SaveState()
-        {
-            Settings.Default.GTAOOptionsStraightIntoFreemode_IsChecked = (bool)this.OptionsToggleButton_StraightToFreemode.IsChecked;
         }
     }
 }

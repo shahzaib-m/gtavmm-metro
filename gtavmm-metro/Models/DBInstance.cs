@@ -16,7 +16,7 @@ namespace gtavmm_metro.Models
             this.Connection = new SQLiteConnection(String.Format(DbConnectionString, modsFolderRoot));
         }
 
-        private async Task Init()
+        public async Task VerifyTablesState()
         {
             await this.VerifyScriptModTable();
             await this.VerifyAssetModTable();
@@ -31,11 +31,11 @@ namespace gtavmm_metro.Models
             command.Parameters.AddWithValue("type", "table");
             command.Parameters.AddWithValue("name", "ScriptMod");
 
-            ScriptMod resultScriptMod = new ScriptMod();
             DbDataReader reader = await command.ExecuteReaderAsync();
             if (!reader.HasRows)
             {
                 this.Connection.Close();
+                
                 await this.CreateScriptModTable();
             }
             else
@@ -71,7 +71,6 @@ namespace gtavmm_metro.Models
             command.Parameters.AddWithValue("type", "table");
             command.Parameters.AddWithValue("name", "AssetMod");
 
-            ScriptMod resultScriptMod = new ScriptMod();
             DbDataReader reader = await command.ExecuteReaderAsync();
             if (!reader.HasRows)
             {

@@ -10,14 +10,15 @@ using Microsoft.WindowsAPICodePack.Dialogs;
 
 namespace gtavmm_metro.Setup.Pages
 {
-    public partial class ModsDirectory : UserControl
+    public partial class ModsDirectoryUC : UserControl
     {
-        private SetupMainWindow ParentWindow { get; set; }
+        public event EventHandler GoBackRequested;
+        public event EventHandler FinishSetupRequested;
+
         public DirectoryInfo ModsDirectoryConfirmedLocation { get; set; }
 
-        public ModsDirectory(SetupMainWindow parent)
+        public ModsDirectoryUC()
         {
-            this.ParentWindow = parent;
             InitializeComponent();
         }
 
@@ -58,14 +59,7 @@ namespace gtavmm_metro.Setup.Pages
             return !Directory.EnumerateFileSystemEntries(path).Any();
         }
 
-        private void GoBack_Click(object sender, RoutedEventArgs e)
-        {
-            this.ParentWindow.SetupContainer.Content = this.ParentWindow.GTAVDirectoryPage;
-        }
-
-        private async void Finish_Click(object sender, RoutedEventArgs e)
-        {
-            await this.ParentWindow.FinishSetup();
-        }
+        private void GoBack_Click(object sender, RoutedEventArgs e) => GoBackRequested?.Invoke(this, null);
+        private void Finish_Click(object sender, RoutedEventArgs e) => FinishSetupRequested?.Invoke(this, null);
     }
 }

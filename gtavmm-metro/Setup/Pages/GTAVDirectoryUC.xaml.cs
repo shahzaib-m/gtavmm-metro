@@ -1,12 +1,11 @@
 ﻿using System;
 using System.IO;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 using System.Windows;
-using System.Windows.Controls;
-
 using System.Windows.Media;
-using System.Collections.Generic;
+using System.Windows.Controls;
 
 using Microsoft.WindowsAPICodePack.Dialogs;
 
@@ -14,16 +13,18 @@ using gtavmm_metro.Models;
 
 namespace gtavmm_metro.Setup.Pages
 {
-    public partial class GTAVDirectory : UserControl
+    public partial class GTAVDirectoryUC : UserControl
     {
-        private SetupMainWindow ParentWindow { get; set; }
+        public event EventHandler GoBackRequested;
+        public event EventHandler GoForwardRequested;
+
         public DirectoryInfo GTAVDirectoryConfirmedLocation { get; set; }
         public bool IsSteamDRM { get; set; }
+
         private bool FirstLoad = true;
 
-        public GTAVDirectory(SetupMainWindow parent)
+        public GTAVDirectoryUC()
         {
-            this.ParentWindow = parent;
             InitializeComponent();
         }
 
@@ -149,14 +150,7 @@ namespace gtavmm_metro.Setup.Pages
             }
         }
 
-        private void GoBack_Click(object sender, RoutedEventArgs e)
-        {
-            this.ParentWindow.SetupContainer.Content = this.ParentWindow.WelcomePage;
-        }
-
-        private void GoForward_Click(object sender, RoutedEventArgs e)
-        {
-           this.ParentWindow.SetupContainer.Content = this.ParentWindow.ModsDirectoryPage;
-        }
+        private void GoBack_Click(object sender, RoutedEventArgs e) => GoBackRequested?.Invoke(this, null);
+        private void GoForward_Click(object sender, RoutedEventArgs e) => GoForwardRequested?.Invoke(this, null);
     }
 }

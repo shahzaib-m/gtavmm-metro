@@ -17,7 +17,8 @@ namespace gtavmm_metro.Tabs.HomeUCTabs
 {
     public partial class StoryModeUC : UserControl
     {
-        private HomeUC ParentWindow;
+        public event EventHandler TabCollapseRequested;
+
         private ScriptModsUC ScriptModsUserControl;
         private AssetModsUC AssetModsUserControl;
 
@@ -29,48 +30,46 @@ namespace gtavmm_metro.Tabs.HomeUCTabs
         private bool IsAssetModsInserted = false;
         private List<AssetMod> InsertedAssetMods = new List<AssetMod>();
 
-        public StoryModeUC(HomeUC parent, ScriptModsUC scriptModsUC, AssetModsUC assetModsUC)
+        public StoryModeUC(ScriptModsUC scriptModsUC, AssetModsUC assetModsUC)
         {
-            this.ParentWindow = parent;
             this.ScriptModsUserControl = scriptModsUC;
             this.AssetModsUserControl = assetModsUC;
 
             InitializeComponent();
             this.DataContext = this;
 
-            // if user has asked for these states to be saved (in Settings?)
-            if (true)
-            {
-                this.ModsToggleButton_ScriptMods.IsChecked = Settings.Default.GTAVModsScriptMods_IsChecked;
-                this.ModsToggleButton_ScriptMods_Click(this, null);
-
-                this.ModsToggleButton_AssetMods.IsChecked = Settings.Default.GTAVModsAssetMods_IsChecked;
-                this.ModsToggleButton_AssetMods_Click(this, null);
-            }
-            if (true)
-            {
-                this.OptionsToggleButton_OfflineMode.IsChecked = Settings.Default.GTAVOptionsOfflineMode_IsChecked;
-                this.OptionsToggleButton_OfflineMode_Click(this, null);
-            }
-            //
+            this.LoadStateSettings();
         }
 
-        private void CollapseGTAVTabSection_Click(object sender, RoutedEventArgs e)
+        private void LoadStateSettings()
         {
-            this.ParentWindow.BlankTabItem.IsSelected = true;
+            this.ModsToggleButton_ScriptMods.IsChecked = Settings.Default.GTAVModsScriptMods_IsChecked;
+            this.ModsToggleButton_ScriptMods_Click(this, null);
+
+            this.ModsToggleButton_AssetMods.IsChecked = Settings.Default.GTAVModsAssetMods_IsChecked;
+            this.ModsToggleButton_AssetMods_Click(this, null);
+
+            this.OptionsToggleButton_OfflineMode.IsChecked = Settings.Default.GTAVOptionsOfflineMode_IsChecked;
+            this.OptionsToggleButton_OfflineMode_Click(this, null);
         }
+
+        private void CollapseGTAVTabSection_Click(object sender, RoutedEventArgs e) => TabCollapseRequested?.Invoke(this, null);
 
         private void ModsToggleButton_ScriptMods_Click(object sender, RoutedEventArgs e)
         {
             if (ModsToggleButton_ScriptMods.IsChecked == true)
             {
                 ModsToggleButton_ScriptMods.Content = "Enabled";
+                Settings.Default.GTAVModsScriptMods_IsChecked = true;
             }
             else
             {
                 ModsToggleButton_ScriptMods.Content = "Disabled";
                 ModsToggleButton_AssetMods.Content = "Disabled";
+
                 ModsToggleButton_AssetMods.IsChecked = false;
+                Settings.Default.GTAVModsScriptMods_IsChecked = false;
+                Settings.Default.GTAVModsAssetMods_IsChecked = false;
             }
         }
 
@@ -79,10 +78,12 @@ namespace gtavmm_metro.Tabs.HomeUCTabs
             if (ModsToggleButton_AssetMods.IsChecked == true)
             {
                 ModsToggleButton_AssetMods.Content = "Enabled";
+                Settings.Default.GTAVModsAssetMods_IsChecked = true;
             }
             else
             {
                 ModsToggleButton_AssetMods.Content = "Disabled";
+                Settings.Default.GTAVModsAssetMods_IsChecked = false;
             }
         }
 
@@ -91,10 +92,12 @@ namespace gtavmm_metro.Tabs.HomeUCTabs
             if (OptionsToggleButton_OfflineMode.IsChecked == true)
             {
                 OptionsToggleButton_OfflineMode.Content = "Enabled";
+                Settings.Default.GTAVOptionsOfflineMode_IsChecked = true;
             }
             else
             {
                 OptionsToggleButton_OfflineMode.Content = "Disabled";
+                Settings.Default.GTAVOptionsOfflineMode_IsChecked = false;
             }
         }
 
@@ -121,8 +124,8 @@ namespace gtavmm_metro.Tabs.HomeUCTabs
                     this.GTAVLaunchProgress.SetTitle("Inserting script mods");
                     this.GTAVLaunchProgress.SetMessage("...");
 
-                    foreach(ScriptMod scriptMod in enabledScriptMods.Reverse()) // modifications with lower GUI index pushed to end of list,
-                                                                                // higher priority file replace
+                    foreach (ScriptMod scriptMod in enabledScriptMods.Reverse()) // modifications with lower GUI index pushed to end of list,
+                                                                                 // higher priority file replace
                     {
                         this.GTAVLaunchProgress.SetMessage(scriptMod.Name + " - inserting...");
                         bool currScriptModInsertSuccess = await Task.Run(() => this.GTAV.InsertScriptMod(scriptMod));
@@ -164,7 +167,7 @@ namespace gtavmm_metro.Tabs.HomeUCTabs
                     this.GTAVLaunchProgress.SetTitle("Inserting asset mods");
                     this.GTAVLaunchProgress.SetMessage("...");
 
-                    foreach(AssetMod assetMod in enabledAssetMods)
+                    foreach (AssetMod assetMod in enabledAssetMods)
                     {
                         this.GTAVLaunchProgress.SetMessage(assetMod.Name + " - inserting");
                         bool currAssetModInsertSuccess = await Task.Run(() => this.GTAV.InsertAssetMod(assetMod));
@@ -240,7 +243,7 @@ namespace gtavmm_metro.Tabs.HomeUCTabs
 
             this.GTAVLaunchProgress.SetTitle("Grand Theft Auto V Running");
             this.GTAVLaunchProgress.SetMessage("Waiting for GTAV to exit...");
-            
+
         }
         private void GTAVCancelWaitLaunch(object sender, EventArgs e)
         {
@@ -325,10 +328,22 @@ namespace gtavmm_metro.Tabs.HomeUCTabs
                     false);
                 this.Dispatcher.Invoke(() => this.ScriptModsUserControl.ScriptMods.Add(scriptModForUnknownFolders));
 
-                foreach (DirectoryInfo dir in unknownFolders)
+                try
                 {
-                    Directory.Move(dir.FullName,
-                        Path.Combine(Settings.Default.ModsDirectory, "Script Mods", scriptModForUnknownFolders.Name, dir.Name));
+                    foreach (DirectoryInfo dir in unknownFolders)
+                    {
+                        string unknownFolderFullDest = Path.Combine(Settings.Default.ModsDirectory, "Script Mods",
+                            scriptModForUnknownFolders.Name, dir.Name);
+                        Directory.CreateDirectory(unknownFolderFullDest);
+
+                        Utils.CopyDirectoryWithContents(dir.FullName, unknownFolderFullDest);
+                        Directory.Delete(dir.FullName, true);
+                    }
+                }
+                catch (Exception)
+                {
+                    await this.Dispatcher.Invoke(async () => await metroWindow.ShowMessageAsync("Error",
+                        "Unable to move some unknown non-game and non-modification folders in GTAV directory."));
                 }
             }
 
@@ -341,14 +356,14 @@ namespace gtavmm_metro.Tabs.HomeUCTabs
                 ScriptMod scriptModForUnknownFiles = await this.ScriptModsUserControl.ScriptModAPI.CreateScriptMod(
                     "Leftover Mod Files - Review",
                     this.ScriptModsUserControl.ScriptMods.Count - 1,
-                    "* The files inside this modification are leftover (non-game) files after GTAV Story with script mods was launched. " +
-                        "They have been preserved for review as they may contain files generated by a modification that you would like to keep (by moving these files to the belonging modification). *",
+                    "The files inside this modification are leftover (non-game) files after GTAV Story with script mods was launched.\n" +
+                        "They have been preserved for review as they may contain files generated by a modification that you would like to keep (by moving these files to the belonging modification).",
                     false);
                 this.Dispatcher.Invoke(() => this.ScriptModsUserControl.ScriptMods.Add(scriptModForUnknownFiles));
 
                 foreach (FileInfo file in unknownFiles)
                 {
-                    File.Move(file.FullName,
+                    Utils.MoveFile(file.FullName,
                         Path.Combine(Settings.Default.ModsDirectory, "Script Mods", scriptModForUnknownFiles.Name, file.Name));
                 }
             }
@@ -361,7 +376,7 @@ namespace gtavmm_metro.Tabs.HomeUCTabs
             this.GTAVLaunchProgress.SetTitle("Moving asset modifications back");
             this.GTAVLaunchProgress.SetMessage("...");
 
-            foreach(AssetMod assetMod in this.InsertedAssetMods)
+            foreach (AssetMod assetMod in this.InsertedAssetMods)
             {
                 this.GTAVLaunchProgress.SetMessage(assetMod.Name + " - moving back...");
                 bool currAssetModMoveBackSuccess = await Task.Run(() => this.GTAV.MoveAssetModBack(assetMod));
@@ -400,13 +415,6 @@ namespace gtavmm_metro.Tabs.HomeUCTabs
                     ));
                 }
             }
-        }
-
-        public void SaveState()
-        {
-            Settings.Default.GTAVModsScriptMods_IsChecked = (bool)this.ModsToggleButton_ScriptMods.IsChecked;
-            Settings.Default.GTAVModsAssetMods_IsChecked = (bool)this.ModsToggleButton_AssetMods.IsChecked;
-            Settings.Default.GTAVOptionsOfflineMode_IsChecked = (bool)this.OptionsToggleButton_OfflineMode.IsChecked;
         }
     }
 }
