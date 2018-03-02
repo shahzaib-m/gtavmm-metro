@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using System.Data.Common;
 using System.Data.SQLite;
 
+using gtavmm_metro.AppSettings;
+
 namespace gtavmm_metro.Models
 {
     public class AssetMod
@@ -25,13 +27,11 @@ namespace gtavmm_metro.Models
     {
         private DirectoryInfo ModsRootFolder;
         private DBInstance ModsDb;
-        private string GTAVPath;
 
-        public AssetModAPI(string ModsRootFolder, DBInstance modsDbConection, string gtaVPath)
+        public AssetModAPI(string ModsRootFolder, DBInstance modsDbConection)
         {
             this.ModsRootFolder = new DirectoryInfo(ModsRootFolder);
             this.ModsDb = modsDbConection;
-            this.GTAVPath = gtaVPath;
         }
 
         public async Task<AssetMod> CreateAssetMod(string name, string targetRPF, int orderIndex,
@@ -55,7 +55,7 @@ namespace gtavmm_metro.Models
                 { Directory.CreateDirectory(Path.Combine(this.ModsRootFolder.FullName, relativePathWithoutFile)); }
 
                 string fullModPackagePath = Path.Combine(this.ModsRootFolder.FullName, targetRPF.Substring(1));
-                File.Copy(Path.Combine(this.GTAVPath, targetRPF.Substring(1)), fullModPackagePath);
+                File.Copy(Path.Combine(SettingsHandler.GTAVDirectory, targetRPF.Substring(1)), fullModPackagePath);
 
 
                 await this.ModsDb.Connection.OpenAsync();

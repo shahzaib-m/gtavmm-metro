@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Resources;
 
-using gtavmm_metro.Properties;
+using gtavmm_metro.AppSettings;
 
 namespace gtavmm_metro.Models
 {
@@ -129,7 +129,7 @@ namespace gtavmm_metro.Models
         {
             scriptMod.FilesWithPath = new List<string>();
 
-            string modsPath = Path.Combine(Settings.Default.ModsDirectory, "Script Mods");
+            string modsPath = Path.Combine(SettingsHandler.ModsDirectory, "Script Mods");
             string scriptModDir = scriptMod.Name;
             DirectoryInfo fullModificationPath = new DirectoryInfo(Path.Combine(modsPath, scriptModDir));
 
@@ -157,11 +157,11 @@ namespace gtavmm_metro.Models
                             if (File.Exists(backupFilePath))
                                 File.Delete(backupFilePath);
 
-                            Utils.MoveFile(destinationPath, backupFilePath);
+                            File.Move(destinationPath, backupFilePath);
                             this.AllBackedUpFiles.Add(new FileInfo(backupFilePath));
                         }
 
-                        Utils.MoveFile(fullPath, destinationPath);
+                        File.Move(fullPath, destinationPath);
                         this.AllInsertedFiles.Add(new FileInfo(destinationPath));
                     }
                 }
@@ -180,14 +180,14 @@ namespace gtavmm_metro.Models
         /// </summary>
         public bool MoveScriptModBack(ScriptMod scriptMod)
         {
-            string modRootFullPath = Path.Combine(Settings.Default.ModsDirectory, "Script Mods", scriptMod.Name);
+            string modRootFullPath = Path.Combine(SettingsHandler.ModsDirectory, "Script Mods", scriptMod.Name);
 
             foreach (string modFilePath in scriptMod.FilesWithPath)
             {
                 string fileFullPath = Path.Combine(this.GamePath, modFilePath);
                 if (File.Exists(fileFullPath))
                 {
-                    try { Utils.MoveFile(Path.Combine(this.GamePath, modFilePath), Path.Combine(modRootFullPath, modFilePath)); }
+                    try { File.Move(Path.Combine(this.GamePath, modFilePath), Path.Combine(modRootFullPath, modFilePath)); }
                     catch (Exception ex)
                     {
                         if (ex is IOException || ex is UnauthorizedAccessException || ex is PathTooLongException) { return false; }
@@ -201,14 +201,14 @@ namespace gtavmm_metro.Models
         }
         public static bool MoveScriptModBack(ScriptMod scriptMod, string gamePath)
         {
-            string modRootFullPath = Path.Combine(Settings.Default.ModsDirectory, "Script Mods", scriptMod.Name);
+            string modRootFullPath = Path.Combine(SettingsHandler.ModsDirectory, "Script Mods", scriptMod.Name);
 
             foreach (string modFilePath in scriptMod.FilesWithPath)
             {
                 string fileFullPath = Path.Combine(gamePath, modFilePath);
                 if (File.Exists(fileFullPath))
                 {
-                    try { Utils.MoveFile(Path.Combine(gamePath, modFilePath), Path.Combine(modRootFullPath, modFilePath)); }
+                    try { File.Move(Path.Combine(gamePath, modFilePath), Path.Combine(modRootFullPath, modFilePath)); }
                     catch (Exception ex)
                     {
                         if (ex is IOException || ex is UnauthorizedAccessException || ex is PathTooLongException) { return false; }
@@ -296,11 +296,30 @@ namespace gtavmm_metro.Models
             return true;
         }
 
+        public bool CreateDirectoryForAssetMods()
+        {
+            try
+            {
+                string directory = Path.Combine(this.GamePath, "mods");
+
+                if (Directory.Exists(directory))
+                    return true;
+
+                Directory.CreateDirectory(Path.Combine(this.GamePath, "mods"));
+            }
+            catch (Exception ex)
+            {
+                if (ex is IOException || ex is UnauthorizedAccessException || ex is PathTooLongException) { return false; }
+
+                throw;
+            }
+
+            return true;
+        }
+
         public bool InsertAssetMod(AssetMod assetMod)
         {
-            string modsPath = Path.Combine(Settings.Default.ModsDirectory, "Asset Mods");
-
-            Directory.CreateDirectory(Path.Combine(this.GamePath, "mods"));
+            string modsPath = Path.Combine(SettingsHandler.ModsDirectory, "Asset Mods");
 
             string targetRelativePath = assetMod.TargetRPF;
             targetRelativePath = targetRelativePath.Substring(1);   // substring the prefix slash out for Path.Combine()
@@ -321,11 +340,11 @@ namespace gtavmm_metro.Models
                         if (File.Exists(backupFilePath))
                             File.Delete(backupFilePath);
 
-                        Utils.MoveFile(targetFullPath, backupFilePath);
+                        File.Move(targetFullPath, backupFilePath);
                         this.AllBackedUpFiles.Add(new FileInfo(backupFilePath));
                     }
 
-                    Utils.MoveFile (Path.Combine(Settings.Default.ModsDirectory, "Asset Mods", targetRelativePath), targetFullPath);
+                    File.Move(Path.Combine(SettingsHandler.ModsDirectory, "Asset Mods", targetRelativePath), targetFullPath);
                     this.AllInsertedFiles.Add(new FileInfo(targetFullPath));
                 }
             }
@@ -340,14 +359,14 @@ namespace gtavmm_metro.Models
         }
         public bool MoveAssetModBack(AssetMod assetMod)
         {
-            string modRootFullPath = Path.Combine(Settings.Default.ModsDirectory, "Asset Mods");
+            string modRootFullPath = Path.Combine(SettingsHandler.ModsDirectory, "Asset Mods");
 
             string fullRpfPath = Path.Combine(this.GamePath, "mods", assetMod.TargetRPF.Substring(1));
             if (!File.Exists(fullRpfPath)) { return false; }
 
             try
             {
-                Utils.MoveFile(fullRpfPath, Path.Combine(modRootFullPath, assetMod.TargetRPF.Substring(1)));
+                File.Move(fullRpfPath, Path.Combine(modRootFullPath, assetMod.TargetRPF.Substring(1)));
             }
             catch (Exception ex)
             {
@@ -360,14 +379,14 @@ namespace gtavmm_metro.Models
         }
         public static bool MoveAssetModBack(AssetMod assetMod, string gamePath)
         {
-            string modRootFullPath = Path.Combine(Settings.Default.ModsDirectory, "Asset Mods");
+            string modRootFullPath = Path.Combine(SettingsHandler.ModsDirectory, "Asset Mods");
 
             string fullRpfPath = Path.Combine(gamePath, "mods", assetMod.TargetRPF.Substring(1));
             if (!File.Exists(fullRpfPath)) { return false; }
 
             try
             {
-                Utils.MoveFile(fullRpfPath, Path.Combine(modRootFullPath, assetMod.TargetRPF.Substring(1)));
+                File.Move(fullRpfPath, Path.Combine(modRootFullPath, assetMod.TargetRPF.Substring(1)));
             }
             catch (Exception ex)
             {
@@ -576,7 +595,7 @@ namespace gtavmm_metro.Models
             foreach (FileInfo RPF in allRPFTopLevel)
             {
                 string fullPath = RPF.FullName;
-                RPFNames.Add(fullPath.Split(new string[] { Settings.Default.GTAVDirectory }, StringSplitOptions.RemoveEmptyEntries)[0]);
+                RPFNames.Add(fullPath.Split(new string[] { SettingsHandler.GTAVDirectory }, StringSplitOptions.RemoveEmptyEntries)[0]);
             }
 
             DirectoryInfo[] allSubDirs = directory.GetDirectories("*", SearchOption.TopDirectoryOnly);
@@ -588,7 +607,7 @@ namespace gtavmm_metro.Models
                 foreach (FileInfo RPF in allRPFWithinSubDirRecursive)
                 {
                     string fullPath = RPF.FullName;
-                    RPFNames.Add(fullPath.Split(new string[] { Settings.Default.GTAVDirectory }, StringSplitOptions.RemoveEmptyEntries)[0]);
+                    RPFNames.Add(fullPath.Split(new string[] { SettingsHandler.GTAVDirectory }, StringSplitOptions.RemoveEmptyEntries)[0]);
                 }
             }
 

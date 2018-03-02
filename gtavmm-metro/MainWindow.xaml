@@ -52,7 +52,7 @@
             <TabItem x:Name="AssetModsTabItem" Header="Asset Mods" Padding="10 10 5 10" HorizontalAlignment="Right">
 
             </TabItem>
-            <TabItem Header="Settings" Padding="10 10 5 10" HorizontalAlignment="Right">
+            <TabItem x:Name="SettingsTabItem" Header="Settings" Padding="10 10 5 10" HorizontalAlignment="Right">
 
             </TabItem>
             <TabItem x:Name="AboutTabItem" Header="About" Padding="10 10 5 10" HorizontalAlignment="Right">

@@ -8,16 +8,16 @@ using System.Windows.Controls;
 using MahApps.Metro.Controls;
 
 using gtavmm_metro.Models;
-using gtavmm_metro.Properties;
 using gtavmm_metro.Setup.Pages;
+using gtavmm_metro.AppSettings;
 
 namespace gtavmm_metro.Setup
 {
     public partial class SetupMainWindow : MetroWindow
     {
-        public WelcomeUC WelcomePage { get; set; }
-        public GTAVDirectoryUC GTAVDirectoryPage { get; set; }
-        public ModsDirectoryUC ModsDirectoryPage { get; set; }
+        private WelcomeUC WelcomePage;
+        private GTAVDirectoryUC GTAVDirectoryPage;
+        private ModsDirectoryUC ModsDirectoryPage;
 
         public SetupMainWindow()
         {
@@ -84,11 +84,11 @@ namespace gtavmm_metro.Setup
 
         public async Task FinishSetup()
         {
-            Settings.Default.IsFirstLaunch = false;
-            Settings.Default.GTAVDirectory = this.GTAVDirectoryPage.GTAVDirectoryConfirmedLocation.FullName;
-            Settings.Default.IsSteamDRM = this.GTAVDirectoryPage.IsSteamDRM;
-            Settings.Default.ModsDirectory = this.ModsDirectoryPage.ModsDirectoryConfirmedLocation.FullName;
-            Settings.Default.Save();
+            SettingsHandler.IsFirstLaunch = false;
+            SettingsHandler.GTAVDirectory = this.GTAVDirectoryPage.GTAVDirectoryConfirmedLocation.FullName;
+            SettingsHandler.IsSteamDRM = this.GTAVDirectoryPage.IsSteamDRM;
+            SettingsHandler.ModsDirectory = this.ModsDirectoryPage.ModsDirectoryConfirmedLocation.FullName;
+            SettingsHandler.SaveAllSettings();
 
             DBInstance modsDbConnection = new DBInstance(this.ModsDirectoryPage.ModsDirectoryConfirmedLocation.FullName);
             await modsDbConnection.VerifyTablesState();

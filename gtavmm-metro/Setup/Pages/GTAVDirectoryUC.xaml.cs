@@ -54,10 +54,12 @@ namespace gtavmm_metro.Setup.Pages
                         this.GTAVDirectoryConfirmedLocation = new DirectoryInfo(expectedSteamLocationDir);
                         this.GTAVDirectoryTextBlock.BorderBrush = Brushes.Green;
 
-                        this.AttemptAutoDetectGTADRM();
-                        this.DRMChooserPanel.IsEnabled = true;
+                        if (this.AttemptAutoDetectGTADRM())
+                        {
+                            this.GoForward.IsEnabled = true;
+                        }
 
-                        this.GoForward.IsEnabled = true;
+                        this.DRMChooserPanel.IsEnabled = true;
                     });
 
                     return;
@@ -76,10 +78,12 @@ namespace gtavmm_metro.Setup.Pages
                         this.GTAVDirectoryConfirmedLocation = new DirectoryInfo(expectedRockstarLocationDir);
                         this.GTAVDirectoryTextBlock.BorderBrush = Brushes.Green;
 
-                        this.AttemptAutoDetectGTADRM();
-                        this.DRMChooserPanel.IsEnabled = true;
+                        if (this.AttemptAutoDetectGTADRM())
+                        {
+                            this.GoForward.IsEnabled = true;
+                        }
 
-                        this.GoForward.IsEnabled = true;
+                        this.DRMChooserPanel.IsEnabled = true;
                     });
 
                     return;
@@ -87,7 +91,7 @@ namespace gtavmm_metro.Setup.Pages
             }
         }
 
-        private void AttemptAutoDetectGTADRM()
+        private bool AttemptAutoDetectGTADRM()
         {
             string gtavDir = this.GTAVDirectoryConfirmedLocation.FullName;
 
@@ -96,7 +100,7 @@ namespace gtavmm_metro.Setup.Pages
             {
                 this.IsSteamDRM = true;
                 this.SteamDRM_Radio.IsChecked = true;
-                return;
+                return true;
             }
 
             string rockstarAttempt = Path.Combine(gtavDir, GTAV.GetDRMIdentifier(GTAVDRM.Rockstar));
@@ -104,13 +108,13 @@ namespace gtavmm_metro.Setup.Pages
             {
                 this.IsSteamDRM = false;
                 this.RockstarDRM_Radio.IsChecked = true;
-                return;
+                return true;
             }
 
             this.IsSteamDRM = false;
             this.SteamDRM_Radio.IsChecked = false;
             this.RockstarDRM_Radio.IsChecked = false;
-            return;
+            return false;
         }
 
         private void BrowseGTAVDirectory_Click(object sender, RoutedEventArgs e)
@@ -134,10 +138,16 @@ namespace gtavmm_metro.Setup.Pages
                         this.GTAVDirectoryTextBlock.BorderBrush = Brushes.Green;
                         this.GTAVDirectoryConfirmedLocation = new DirectoryInfo(folderSelectDialog.FileName);
 
-                        this.AttemptAutoDetectGTADRM();
-                        this.DRMChooserPanel.IsEnabled = true;
+                        if (this.AttemptAutoDetectGTADRM())
+                        {
+                            this.GoForward.IsEnabled = true;
+                        }
+                        else
+                        {
+                            this.GoForward.IsEnabled = false;
+                        }
 
-                        this.GoForward.IsEnabled = true;
+                        this.DRMChooserPanel.IsEnabled = true;
                     }
                     else
                     {
@@ -149,6 +159,8 @@ namespace gtavmm_metro.Setup.Pages
                 }
             }
         }
+
+        private void ManualDRMChoose_Click(object sender, RoutedEventArgs e) => this.GoForward.IsEnabled = true;
 
         private void GoBack_Click(object sender, RoutedEventArgs e) => GoBackRequested?.Invoke(this, null);
         private void GoForward_Click(object sender, RoutedEventArgs e) => GoForwardRequested?.Invoke(this, null);

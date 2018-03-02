@@ -16,7 +16,7 @@ using MahApps.Metro.Controls;
 using MahApps.Metro.Controls.Dialogs;
 
 using gtavmm_metro.Models;
-using gtavmm_metro.Properties;
+using gtavmm_metro.AppSettings;
 
 namespace gtavmm_metro.Tabs
 {
@@ -293,11 +293,17 @@ namespace gtavmm_metro.Tabs
         {
             await this.Dispatcher.Invoke(async () =>
             {
-                this.ModsRootFolder = Path.Combine(Settings.Default.ModsDirectory, "Asset Mods");
-                this.AssetModAPI = new AssetModAPI(this.ModsRootFolder, modsDbConnection, Settings.Default.GTAVDirectory);
+                this.ModsRootFolder = Path.Combine(SettingsHandler.ModsDirectory, "Asset Mods");
+                this.AssetModAPI = new AssetModAPI(this.ModsRootFolder, modsDbConnection);
 
-                this.TargetRPFList = new ObservableCollection<string>(GTAV.GetAllRPFsInsideGTAVDirectory(Settings.Default.GTAVDirectory));
+                this.TargetRPFList = new ObservableCollection<string>(GTAV.GetAllRPFsInsideGTAVDirectory(SettingsHandler.GTAVDirectory));
                 this.TargetRPFComboxBox.ItemsSource = this.TargetRPFList;
+
+                SettingsHandler.GTAVDirectoryChanged += (s, e) =>
+                {
+                    this.TargetRPFList = new ObservableCollection<string>(GTAV.GetAllRPFsInsideGTAVDirectory(SettingsHandler.GTAVDirectory));
+                    this.TargetRPFComboxBox.ItemsSource = this.TargetRPFList;
+                };
 
                 if (!Directory.Exists(this.ModsRootFolder))
                 {

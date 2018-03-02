@@ -55,7 +55,7 @@
                 <TextBlock Text="Grand Theft Auto V DRM/Copy" FontWeight="Light" FontSize="20" Grid.Row="0" Margin="0 60 0 0"/>
                 <StackPanel Grid.Row="0" Margin="0 110 0 20" Orientation="Horizontal" HorizontalAlignment="Center" Grid.ColumnSpan="2"
                             x:Name="DRMChooserPanel" IsEnabled="False">
-                    <RadioButton x:Name="SteamDRM_Radio">
+                    <RadioButton x:Name="SteamDRM_Radio" Click="ManualDRMChoose_Click">
                         <RadioButton.ToolTip>
                             <TextBlock>Select this if you have the <Bold>Steam</Bold> copy of Grand Theft Auto V</TextBlock>
                         </RadioButton.ToolTip>
@@ -66,7 +66,7 @@
                             </StackPanel>
                         </Label>
                     </RadioButton>
-                    <RadioButton Margin="10 0 0 0" Name="RockstarDRM_Radio">
+                    <RadioButton Margin="10 0 0 0" Name="RockstarDRM_Radio" Click="ManualDRMChoose_Click">
                         <RadioButton.ToolTip>
                             <TextBlock>Select this if you have the <Bold>Rockstar Warehouse</Bold> copy of Grand Theft Auto V</TextBlock>
                         </RadioButton.ToolTip>

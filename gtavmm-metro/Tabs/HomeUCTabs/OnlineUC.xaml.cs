@@ -6,7 +6,7 @@ using MahApps.Metro.Controls;
 using MahApps.Metro.Controls.Dialogs;
 
 using gtavmm_metro.Models;
-using gtavmm_metro.Properties;
+using gtavmm_metro.AppSettings;
 
 namespace gtavmm_metro.Tabs.HomeUCTabs
 {
@@ -26,7 +26,7 @@ namespace gtavmm_metro.Tabs.HomeUCTabs
 
         private void LoadStateSettings()
         {
-            this.OptionsToggleButton_StraightToFreemode.IsChecked = Settings.Default.GTAOOptionsStraightIntoFreemode_IsChecked;
+            this.OptionsToggleButton_StraightToFreemode.IsChecked = SettingsHandler.GTAOOptionsStraightIntoFreemode_IsChecked;
             this.OptionsToggleButton_StraightToFreemode_Click(this, null);
         }
 
@@ -37,12 +37,12 @@ namespace gtavmm_metro.Tabs.HomeUCTabs
             if (this.OptionsToggleButton_StraightToFreemode.IsChecked == true)
             {
                 OptionsToggleButton_StraightToFreemode.Content = "Enabled";
-                Settings.Default.GTAOOptionsStraightIntoFreemode_IsChecked = true;
+                SettingsHandler.GTAOOptionsStraightIntoFreemode_IsChecked = true;
             }
             else
             {
                 this.OptionsToggleButton_StraightToFreemode.Content = "Disabled";
-                Settings.Default.GTAOOptionsStraightIntoFreemode_IsChecked = false;
+                SettingsHandler.GTAOOptionsStraightIntoFreemode_IsChecked = false;
             }
         }
 
@@ -52,8 +52,8 @@ namespace gtavmm_metro.Tabs.HomeUCTabs
             this.GTAVLaunchProgress = await metroWindow.ShowProgressAsync("Launching Grand Theft Auto V", "Launching GTA Online with selected options. Please wait...", true);
             this.GTAVLaunchProgress.SetIndeterminate();
 
-            string gamePath = Settings.Default.GTAVDirectory;
-            GTAVDRM targetDRM = Settings.Default.IsSteamDRM ? GTAVDRM.Steam : GTAVDRM.Rockstar;
+            string gamePath = SettingsHandler.GTAVDirectory;
+            GTAVDRM targetDRM = SettingsHandler.IsSteamDRM ? GTAVDRM.Steam : GTAVDRM.Rockstar;
 
             this.GTAV = new GTAV(gamePath, GTAVMode.Online, targetDRM);
             this.GTAV.GTAVExited += this.GTAVProcessExited;
@@ -91,7 +91,7 @@ namespace gtavmm_metro.Tabs.HomeUCTabs
             else
             {
                 await this.GTAVLaunchProgress.CloseAsync();
-                await metroWindow.ShowMessageAsync("Failed to launch Grand Theft Auto V", "Couldn't launch GTA Online.", MessageDialogStyle.Affirmative);
+                await metroWindow.ShowMessageAsync("Failed to launch Grand Theft Auto V", "Couldn't launch GTA Online. Please double check GTAV's directory/copy under Settings.", MessageDialogStyle.Affirmative);
             }
         }
 

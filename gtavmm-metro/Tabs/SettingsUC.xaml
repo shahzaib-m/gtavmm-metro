@@ -1,0 +1,117 @@
+﻿<UserControl x:Class="gtavmm_metro.Tabs.SettingsUC"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+             xmlns:Controls="http://metro.mahapps.com/winfx/xaml/controls"
+             mc:Ignorable="d" 
+             d:DesignHeight="670" d:DesignWidth="1220">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel>
+            <StackPanel Margin="30 20 0 40" >
+                <TextBlock Text="Application Settings" FontSize="40" FontWeight="Light" Margin="0 2 0 0"/>
+                <TextBlock Text="View and change application settings" FontSize="20" FontWeight="Light" Margin="1 8"/>
+            </StackPanel>
+
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <WrapPanel Orientation="Horizontal" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2">
+                    <StackPanel Margin="30 0">
+                        <TextBlock Text="Grand Theft Auto V Directory and Copy" FontWeight="Light" FontSize="30" Margin="0 20 0 0"/>
+                        <StackPanel Orientation="Horizontal" Margin="0 20 0 0">
+                            <TextBox x:Name="GTAVDirectoryTextBox" VerticalContentAlignment="Center" FontSize="13" IsReadOnly="True" Height="30" Width="700"
+                                     Focusable="False"/>
+                            <Button Margin="10 0 0 0" x:Name="ChangeGTAVDirectoryButton" Width="130"
+                                    Click="ChangeGTAVDirectoryButton_Click" ToolTip="Specify a different location for Grand Theft Auto V">
+                                <TextBlock Text="CHANGE" FontWeight="Light" FontSize="12"/>
+                            </Button>
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal" Margin="10 20">
+                            <RadioButton x:Name="SteamDRM_Radio" Click="SteamDRM_Radio_Click">
+                                <RadioButton.ToolTip>
+                                    <TextBlock>Select this if you have the <Bold>Steam</Bold> copy of Grand Theft Auto V</TextBlock>
+                                </RadioButton.ToolTip>
+                                <Label>
+                                    <StackPanel Orientation="Horizontal">
+                                        <iconPacks:PackIconMaterial Kind="Steam" Width="30" Height="30" />
+                                        <TextBlock Text="Steam" FontWeight="Normal" FontSize="18" Width="80" Margin="10 0 0 0"/>
+                                    </StackPanel>
+                                </Label>
+                            </RadioButton>
+                            <RadioButton Margin="10 0 0 0" Name="RockstarDRM_Radio" Click="RockstarDRM_Radio_Click">
+                                <RadioButton.ToolTip>
+                                    <TextBlock>Select this if you have the <Bold>Rockstar Warehouse</Bold> copy of Grand Theft Auto V</TextBlock>
+                                </RadioButton.ToolTip>
+                                <Label>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Image Source="pack://application:,,,/Assets/Logos/Rockstar_Games_Logo.svg.png" Width="30" Height="30" RenderOptions.BitmapScalingMode="HighQuality"/>
+                                        <TextBlock Text="Rockstar" FontWeight="Normal" FontSize="18" Width="80" Margin="10 0 0 0"/>
+                                    </StackPanel>
+                                </Label>
+                            </RadioButton>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <StackPanel Margin="30 0">
+                        <TextBlock Text="Modifications Directory" FontWeight="Light" FontSize="30" Margin="0 20 0 0"/>
+                        <StackPanel Orientation="Horizontal" Margin="0 20 0 0">
+                            <TextBox x:Name="ModificationsDirectoryTextBox" VerticalContentAlignment="Center" FontSize="13" IsReadOnly="True" Height="30" Width="700" 
+                                     Focusable="False"/>
+                            <Button Margin="10 0 0 0" x:Name="ChangeModsificationsDirectoryButton" Width="130" ToolTip="Specify a different location for your Script/Asset mods">
+                                <TextBlock Text="CHANGE" FontWeight="Light" FontSize="12" />
+                            </Button>
+                        </StackPanel>
+                    </StackPanel>
+                </WrapPanel>
+
+                <StackPanel Margin="30 40" Grid.Row="1" Grid.Column="0">
+                    <TextBlock Text="Theme and Accent" FontWeight="Light" FontSize="30" Margin="0 20 0 0"/>
+                    <Grid Margin="0 20" x:Name="AppThemeAndAccentControlsGrid">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="160"/>
+                            <ColumnDefinition Width="140"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <StackPanel Grid.Column="0">
+                            <RadioButton x:Name="AppThemeLight_Radio" Click="AppThemeLight_Radio_Click">
+                                <RadioButton.ToolTip>
+                                    <TextBlock>Change app theme to <Bold>Light</Bold></TextBlock>
+                                </RadioButton.ToolTip>
+                                <Label>
+                                    <TextBlock Text="Light" FontSize="18" VerticalAlignment="Center" FontWeight="Normal"/>
+                                </Label>
+                            </RadioButton>
+                            <RadioButton x:Name="AppThemeDark_Radio" Margin="0 5" Click="AppThemeDark_Radio_Click">
+                                <RadioButton.ToolTip>
+                                    <TextBlock>Change app theme to <Bold>Dark</Bold></TextBlock>
+                                </RadioButton.ToolTip>
+                                <Label>
+                                    <TextBlock Text="Dark" FontSize="18" VerticalAlignment="Center" FontWeight="Normal"/>
+                                </Label>
+                            </RadioButton>
+                        </StackPanel>
+
+                        <Controls:SplitButton Grid.Column="1" Height="70" Width="140" VerticalAlignment="Top" x:Name="AccentSplitButton"
+                                              Click="AccentSplitButton_Click" SelectionChanged="AccentSplitButton_SelectionChanged"
+                                              ToolTip="Change app accent">
+                            <Controls:SplitButton.Icon>
+                                <iconPacks:PackIconEntypo Kind="Colours" Margin="0 0 5 0" Width="45" Height="45"
+                                                          Foreground="{DynamicResource AccentColorBrush}"/>
+                            </Controls:SplitButton.Icon>
+                        </Controls:SplitButton>
+                    </Grid>
+                </StackPanel>
+            </Grid>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

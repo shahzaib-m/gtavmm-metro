@@ -16,7 +16,7 @@ using MahApps.Metro.Controls;
 using MahApps.Metro.Controls.Dialogs;
 
 using gtavmm_metro.Models;
-using gtavmm_metro.Properties;
+using gtavmm_metro.AppSettings;
 
 namespace gtavmm_metro.Tabs
 {
@@ -228,7 +228,7 @@ namespace gtavmm_metro.Tabs
         {
             await this.Dispatcher.Invoke(async () =>
             {
-                this.ModsRootFolder = Path.Combine(Settings.Default.ModsDirectory, "Script Mods");
+                this.ModsRootFolder = Path.Combine(SettingsHandler.ModsDirectory, "Script Mods");
                 this.ScriptModAPI = new ScriptModAPI(this.ModsRootFolder, modsDbConnection);
 
                 if (!Directory.Exists(this.ModsRootFolder))

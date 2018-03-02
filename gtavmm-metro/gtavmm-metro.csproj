@@ -83,6 +83,9 @@
     <Reference Include="MahApps.Metro, Version=1.5.0.23, Culture=neutral, PublicKeyToken=f4fb5a3c4d1e5b4f, processorArchitecture=MSIL">
       <HintPath>..\packages\MahApps.Metro.1.5.0\lib\net45\MahApps.Metro.dll</HintPath>
     </Reference>
+    <Reference Include="MahApps.Metro.IconPacks.Entypo, Version=2.0.0.31, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\MahApps.Metro.IconPacks.Entypo.2.0.0\lib\net45\MahApps.Metro.IconPacks.Entypo.dll</HintPath>
+    </Reference>
     <Reference Include="MahApps.Metro.IconPacks.Material, Version=1.9.1.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\MahApps.Metro.IconPacks.Material.1.9.1\lib\net45\MahApps.Metro.IconPacks.Material.dll</HintPath>
     </Reference>
@@ -140,6 +143,8 @@
     <Compile Include="Models\AssetMod.cs" />
     <Compile Include="Models\DBInstance.cs" />
     <Compile Include="Models\GTAV.cs" />
+    <Compile Include="AppSettings\SettingsHandler.cs" />
+    <Compile Include="AppSettings\Appearance.cs" />
     <Compile Include="Setup\Pages\GTAVDirectoryUC.xaml.cs">
       <DependentUpon>GTAVDirectoryUC.xaml</DependentUpon>
     </Compile>
@@ -151,6 +156,9 @@
     </Compile>
     <Compile Include="Setup\SetupMainWindow.xaml.cs">
       <DependentUpon>SetupMainWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Tabs\SettingsUC.xaml.cs">
+      <DependentUpon>SettingsUC.xaml</DependentUpon>
     </Compile>
     <Compile Include="Tabs\AboutUC.xaml.cs">
       <DependentUpon>AboutUC.xaml</DependentUpon>
@@ -199,6 +207,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Tabs\SettingsUC.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Tabs\AboutUC.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -243,7 +255,9 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <None Include="App.config" />
+    <None Include="App.config">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="packages.config">
       <SubType>Designer</SubType>
     </None>

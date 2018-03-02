@@ -7,7 +7,7 @@ using MahApps.Metro.Controls;
 using MahApps.Metro.Controls.Dialogs;
 
 using gtavmm_metro.Setup;
-using gtavmm_metro.Properties;
+using gtavmm_metro.AppSettings;
 
 namespace gtavmm_metro
 {
@@ -46,7 +46,7 @@ namespace gtavmm_metro
 
         private void gtavmm_metro_Startup(object sender, StartupEventArgs e)
         {
-            if (Settings.Default.IsFirstLaunch)
+            if (SettingsHandler.IsFirstLaunch)
             {
                 SetupMainWindow setupWindow = new SetupMainWindow();
                 setupWindow.Show();

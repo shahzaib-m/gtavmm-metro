@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Windows;
 using System.Reflection;
 
 namespace gtavmm_metro
@@ -27,7 +26,7 @@ namespace gtavmm_metro
             return GetExecutingAssemblyFile().Directory;
         }
 
-        public static void MoveFile(string sourceFilePath, string destinationFilePath)
+        public static void CopyFileAndDelete(string sourceFilePath, string destinationFilePath)
         {
             File.Copy(sourceFilePath, destinationFilePath, true);
             File.Delete(sourceFilePath);

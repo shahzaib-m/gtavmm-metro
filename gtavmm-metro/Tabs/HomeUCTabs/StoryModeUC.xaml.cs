@@ -11,7 +11,7 @@ using MahApps.Metro.Controls;
 using MahApps.Metro.Controls.Dialogs;
 
 using gtavmm_metro.Models;
-using gtavmm_metro.Properties;
+using gtavmm_metro.AppSettings;
 
 namespace gtavmm_metro.Tabs.HomeUCTabs
 {
@@ -43,13 +43,13 @@ namespace gtavmm_metro.Tabs.HomeUCTabs
 
         private void LoadStateSettings()
         {
-            this.ModsToggleButton_ScriptMods.IsChecked = Settings.Default.GTAVModsScriptMods_IsChecked;
+            this.ModsToggleButton_ScriptMods.IsChecked = SettingsHandler.GTAVModsScriptMods_IsChecked;
             this.ModsToggleButton_ScriptMods_Click(this, null);
 
-            this.ModsToggleButton_AssetMods.IsChecked = Settings.Default.GTAVModsAssetMods_IsChecked;
+            this.ModsToggleButton_AssetMods.IsChecked = SettingsHandler.GTAVModsAssetMods_IsChecked;
             this.ModsToggleButton_AssetMods_Click(this, null);
 
-            this.OptionsToggleButton_OfflineMode.IsChecked = Settings.Default.GTAVOptionsOfflineMode_IsChecked;
+            this.OptionsToggleButton_OfflineMode.IsChecked = SettingsHandler.GTAVOptionsOfflineMode_IsChecked;
             this.OptionsToggleButton_OfflineMode_Click(this, null);
         }
 
@@ -60,7 +60,7 @@ namespace gtavmm_metro.Tabs.HomeUCTabs
             if (ModsToggleButton_ScriptMods.IsChecked == true)
             {
                 ModsToggleButton_ScriptMods.Content = "Enabled";
-                Settings.Default.GTAVModsScriptMods_IsChecked = true;
+                SettingsHandler.GTAVModsScriptMods_IsChecked = true;
             }
             else
             {
@@ -68,8 +68,8 @@ namespace gtavmm_metro.Tabs.HomeUCTabs
                 ModsToggleButton_AssetMods.Content = "Disabled";
 
                 ModsToggleButton_AssetMods.IsChecked = false;
-                Settings.Default.GTAVModsScriptMods_IsChecked = false;
-                Settings.Default.GTAVModsAssetMods_IsChecked = false;
+                SettingsHandler.GTAVModsScriptMods_IsChecked = false;
+                SettingsHandler.GTAVModsAssetMods_IsChecked = false;
             }
         }
 
@@ -78,12 +78,12 @@ namespace gtavmm_metro.Tabs.HomeUCTabs
             if (ModsToggleButton_AssetMods.IsChecked == true)
             {
                 ModsToggleButton_AssetMods.Content = "Enabled";
-                Settings.Default.GTAVModsAssetMods_IsChecked = true;
+                SettingsHandler.GTAVModsAssetMods_IsChecked = true;
             }
             else
             {
                 ModsToggleButton_AssetMods.Content = "Disabled";
-                Settings.Default.GTAVModsAssetMods_IsChecked = false;
+                SettingsHandler.GTAVModsAssetMods_IsChecked = false;
             }
         }
 
@@ -92,12 +92,12 @@ namespace gtavmm_metro.Tabs.HomeUCTabs
             if (OptionsToggleButton_OfflineMode.IsChecked == true)
             {
                 OptionsToggleButton_OfflineMode.Content = "Enabled";
-                Settings.Default.GTAVOptionsOfflineMode_IsChecked = true;
+                SettingsHandler.GTAVOptionsOfflineMode_IsChecked = true;
             }
             else
             {
                 OptionsToggleButton_OfflineMode.Content = "Disabled";
-                Settings.Default.GTAVOptionsOfflineMode_IsChecked = false;
+                SettingsHandler.GTAVOptionsOfflineMode_IsChecked = false;
             }
         }
 
@@ -108,8 +108,8 @@ namespace gtavmm_metro.Tabs.HomeUCTabs
                 "Launching GTAV Story with selected options. Please wait...");
             this.GTAVLaunchProgress.SetIndeterminate();
 
-            string gamePath = Settings.Default.GTAVDirectory;
-            GTAVDRM targetDRM = Settings.Default.IsSteamDRM ? GTAVDRM.Steam : GTAVDRM.Rockstar;
+            string gamePath = SettingsHandler.GTAVDirectory;
+            GTAVDRM targetDRM = SettingsHandler.IsSteamDRM ? GTAVDRM.Steam : GTAVDRM.Rockstar;
 
             this.GTAV = new GTAV(gamePath, GTAVMode.Offline, targetDRM);
             this.GTAV.GTAVExited += this.GTAVProcessExited;
@@ -139,7 +139,7 @@ namespace gtavmm_metro.Tabs.HomeUCTabs
                                 await this.MoveScriptModsBack();
 
                                 if (this.GTAV.HasBackedUpExistingFiles)
-                                    this.RestoreBackedUpFiles();
+                                    await this.RestoreBackedUpFiles();
 
                                 await this.GTAVLaunchProgress.CloseAsync();
                                 return;
@@ -167,33 +167,53 @@ namespace gtavmm_metro.Tabs.HomeUCTabs
                     this.GTAVLaunchProgress.SetTitle("Inserting asset mods");
                     this.GTAVLaunchProgress.SetMessage("...");
 
-                    foreach (AssetMod assetMod in enabledAssetMods)
+                    bool assetModDirCreateSuccess = this.GTAV.CreateDirectoryForAssetMods();
+                    if (!assetModDirCreateSuccess)
                     {
-                        this.GTAVLaunchProgress.SetMessage(assetMod.Name + " - inserting");
-                        bool currAssetModInsertSuccess = await Task.Run(() => this.GTAV.InsertAssetMod(assetMod));
-                        if (!currAssetModInsertSuccess)
-                        {
-                            MessageDialogResult res = await metroWindow.ShowMessageAsync("Unable to insert a modification into GTAV directory",
-                                "Could not move files of a modification over to GTAV directory. Stopping asset mod insertion. Continue launch?",
+                        MessageDialogResult res = await metroWindow.ShowMessageAsync("Unable to create directory for Asset Mods",
+                            "Could not create directory 'mods' in GTAV directory. Skipping all asset mods insertion. Continue launch?",
                                 MessageDialogStyle.AffirmativeAndNegative, new MetroDialogSettings { AffirmativeButtonText = "Yes", NegativeButtonText = "No" });
-                            if (res == MessageDialogResult.Negative)
-                            {
-                                await this.MoveScriptModsBack();
-                                await this.MoveAssetModsBack();
-
-                                if (this.GTAV.HasBackedUpExistingFiles)
-                                    this.RestoreBackedUpFiles();
-
-                                await this.GTAVLaunchProgress.CloseAsync();
-                                return;
-                            }
-                        }
-                        else
+                        if (res == MessageDialogResult.Negative)
                         {
-                            assetMod.IsInserted = true;
-                            await this.AssetModsUserControl.AssetModAPI.UpdateAssetModIsInserted(assetMod.Id, true);
+                            await this.MoveScriptModsBack();
 
-                            this.InsertedAssetMods.Add(assetMod);
+                            if (this.GTAV.HasBackedUpExistingFiles)
+                                await this.RestoreBackedUpFiles();
+
+                            await this.GTAVLaunchProgress.CloseAsync();
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        foreach (AssetMod assetMod in enabledAssetMods)
+                        {
+                            this.GTAVLaunchProgress.SetMessage(assetMod.Name + " - inserting");
+                            bool currAssetModInsertSuccess = await Task.Run(() => this.GTAV.InsertAssetMod(assetMod));
+                            if (!currAssetModInsertSuccess)
+                            {
+                                MessageDialogResult res = await metroWindow.ShowMessageAsync("Unable to insert a modification into GTAV directory",
+                                    "Could not move files of a modification over to GTAV directory. Stopping asset mod insertion. Continue launch?",
+                                    MessageDialogStyle.AffirmativeAndNegative, new MetroDialogSettings { AffirmativeButtonText = "Yes", NegativeButtonText = "No" });
+                                if (res == MessageDialogResult.Negative)
+                                {
+                                    await this.MoveScriptModsBack();
+                                    await this.MoveAssetModsBack();
+
+                                    if (this.GTAV.HasBackedUpExistingFiles)
+                                        await this.RestoreBackedUpFiles();
+
+                                    await this.GTAVLaunchProgress.CloseAsync();
+                                    return;
+                                }
+                            }
+                            else
+                            {
+                                assetMod.IsInserted = true;
+                                await this.AssetModsUserControl.AssetModAPI.UpdateAssetModIsInserted(assetMod.Id, true);
+
+                                this.InsertedAssetMods.Add(assetMod);
+                            }
                         }
                     }
                 }
@@ -230,9 +250,9 @@ namespace gtavmm_metro.Tabs.HomeUCTabs
             }
             else
             {
-                this.GTAVProcessExited(this, null);
+                await metroWindow.ShowMessageAsync("Failed to launch Grand Theft Auto V", "Couldn't launch GTAV Story. Please double check GTAV's directory/copy under Settings.", MessageDialogStyle.Affirmative);
 
-                await metroWindow.ShowMessageAsync("Failed to launch Grand Theft Auto V", "Couldn't launch GTAV Story.", MessageDialogStyle.Affirmative);
+                this.GTAVProcessExited(this, null);
             }
         }
 
@@ -269,7 +289,7 @@ namespace gtavmm_metro.Tabs.HomeUCTabs
             if (this.IsAssetModsInserted) { await this.MoveAssetModsBack(); this.IsAssetModsInserted = false; }
 
             if (this.GTAV.HasBackedUpExistingFiles)
-                this.RestoreBackedUpFiles();
+                await this.RestoreBackedUpFiles();
 
             await this.GTAVLaunchProgress.CloseAsync();
         }
@@ -332,7 +352,7 @@ namespace gtavmm_metro.Tabs.HomeUCTabs
                 {
                     foreach (DirectoryInfo dir in unknownFolders)
                     {
-                        string unknownFolderFullDest = Path.Combine(Settings.Default.ModsDirectory, "Script Mods",
+                        string unknownFolderFullDest = Path.Combine(SettingsHandler.ModsDirectory, "Script Mods",
                             scriptModForUnknownFolders.Name, dir.Name);
                         Directory.CreateDirectory(unknownFolderFullDest);
 
@@ -363,8 +383,8 @@ namespace gtavmm_metro.Tabs.HomeUCTabs
 
                 foreach (FileInfo file in unknownFiles)
                 {
-                    Utils.MoveFile(file.FullName,
-                        Path.Combine(Settings.Default.ModsDirectory, "Script Mods", scriptModForUnknownFiles.Name, file.Name));
+                    File.Move(file.FullName,
+                        Path.Combine(SettingsHandler.ModsDirectory, "Script Mods", scriptModForUnknownFiles.Name, file.Name));
                 }
             }
         }
@@ -399,7 +419,7 @@ namespace gtavmm_metro.Tabs.HomeUCTabs
                     "Couldn't delete 'mods' folder inside GTAV directory. Some files are remaining and preventing deletion."));
             }
         }
-        private async void RestoreBackedUpFiles()
+        private async Task RestoreBackedUpFiles()
         {
             if (this.GTAV.HasBackedUpExistingFiles)
             {

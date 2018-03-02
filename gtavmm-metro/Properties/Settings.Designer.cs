@@ -118,5 +118,29 @@ namespace gtavmm_metro.Properties {
                 this["GTAOOptionsStraightIntoFreemode_IsChecked"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("BaseDark")]
+        public string AppTheme {
+            get {
+                return ((string)(this["AppTheme"]));
+            }
+            set {
+                this["AppTheme"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Purple")]
+        public string AppAccent {
+            get {
+                return ((string)(this["AppAccent"]));
+            }
+            set {
+                this["AppAccent"] = value;
+            }
+        }
     }
 }

@@ -9,7 +9,6 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Media.Animation;
 
-using MahApps.Metro;
 using MahApps.Metro.IconPacks;
 
 using MahApps.Metro.Controls;
@@ -18,7 +17,7 @@ using MahApps.Metro.Controls.Dialogs;
 using gtavmm_metro.Tabs;
 using gtavmm_metro.Models;
 using gtavmm_metro.Common;
-using gtavmm_metro.Properties;
+using gtavmm_metro.AppSettings;
 
 namespace gtavmm_metro
 {
@@ -27,6 +26,7 @@ namespace gtavmm_metro
         private HomeUC HomeUserControl;
         private ScriptModsUC ScriptModsUserControl;
         private AssetModsUC AssetModsUserControl;
+        private SettingsUC SettingsUserControl;
         private AboutUC AboutUserControl;
 
         private DBInstance ModsDbConnection = null;
@@ -40,7 +40,7 @@ namespace gtavmm_metro
             InitializeComponent();
             Application.Current.MainWindow = this;
 
-            this.SetThemeAndIcon();
+            this.SetAppAppearance();
         }
         public MainWindow(DBInstance existingModsDbConnection)
         {
@@ -49,7 +49,7 @@ namespace gtavmm_metro
             Application.Current.MainWindow = this;
             this.ModsDbConnection = existingModsDbConnection;
 
-            this.SetThemeAndIcon();
+            this.SetAppAppearance();
         }
         public MainWindow(bool failedToUpdate, bool failedToCleanup)
         {
@@ -59,7 +59,7 @@ namespace gtavmm_metro
             this.FailedToUpdate = failedToUpdate;
             this.FailedToCleanup = failedToCleanup;
 
-            this.SetThemeAndIcon();
+            this.SetAppAppearance();
         }
         
 
@@ -71,7 +71,7 @@ namespace gtavmm_metro
 
         private void _this_Closing(object sender, CancelEventArgs e)
         {
-            Settings.Default.Save();
+            SettingsHandler.SaveAllSettings();
         }
 
         private void UpdateButton_Click(object sender, RoutedEventArgs e)
@@ -80,10 +80,10 @@ namespace gtavmm_metro
         }
         #endregion
 
-        private void SetThemeAndIcon()
+        private void SetAppAppearance()
         {
-            Tuple<AppTheme, Accent> appStyle = ThemeManager.DetectAppStyle(Application.Current);        // temp
-            this.Icon = new BitmapImage(new Uri(String.Format("pack://application:,,,/Assets/Icons/{0}.ico", appStyle.Item2.Name)));   // temp
+            Appearance.ChangeAppTheme(SettingsHandler.AppTheme);
+            Appearance.ChangeAppAccent(SettingsHandler.AppAccent);
         }
 
         private async Task Init()
@@ -92,7 +92,7 @@ namespace gtavmm_metro
 
             if (this.ModsDbConnection == null)
             {
-                this.ModsDbConnection = new DBInstance(Settings.Default.ModsDirectory);
+                this.ModsDbConnection = new DBInstance(SettingsHandler.ModsDirectory);
                 await this.ModsDbConnection.VerifyTablesState();
             }
             this.UpdateHandler = new UpdateHandler(Utils.GetExecutingAssemblyVersion(),
@@ -136,6 +136,10 @@ namespace gtavmm_metro
             this.HomeUserControl = new HomeUC(this.ScriptModsUserControl, this.AssetModsUserControl);
             this.HomeTabItem.Content = this.HomeUserControl;
 
+            // Assigning Settings UserControl to About tab
+            this.SettingsUserControl = new SettingsUC();
+            this.SettingsTabItem.Content = this.SettingsUserControl;
+
             // Assigning About UserControl to About tab
             this.AboutUserControl = new AboutUC(this.UpdateHandler);
             this.AboutTabItem.Content = this.AboutUserControl;
@@ -173,7 +177,7 @@ namespace gtavmm_metro
                     foreach (ScriptMod scriptMod in insertedScriptMods)
                     {
                         prog.SetMessage(scriptMod.Name + " - moving back...");
-                        bool currScriptModMoveBackSuccess = GTAV.MoveScriptModBack(scriptMod, Settings.Default.GTAVDirectory);
+                        bool currScriptModMoveBackSuccess = GTAV.MoveScriptModBack(scriptMod, SettingsHandler.GTAVDirectory);
                         if (!currScriptModMoveBackSuccess)
                         {
                             await this.ShowMessageAsync("Failed to move back script modification files",
@@ -218,7 +222,7 @@ namespace gtavmm_metro
                     foreach (AssetMod assetMod in insertedAssetMods)
                     {
                         prog.SetMessage(assetMod.Name + " - moving back...");
-                        bool currAssetModMoveBackSuccess = GTAV.MoveAssetModBack(assetMod, Settings.Default.GTAVDirectory);
+                        bool currAssetModMoveBackSuccess = GTAV.MoveAssetModBack(assetMod, SettingsHandler.GTAVDirectory);
                         if (!currAssetModMoveBackSuccess)
                         {
                             await this.ShowMessageAsync("Failed to move back asset modification",
@@ -235,7 +239,7 @@ namespace gtavmm_metro
                     }
 
                     prog.SetMessage("Deleting 'mods' folder inside GTAV directory...");
-                    bool delModsFolderInGTAVDirSuccess = await Task.Run(() => GTAV.DeleteModsFolderInGTAVDirectory(Settings.Default.GTAVDirectory));
+                    bool delModsFolderInGTAVDirSuccess = await Task.Run(() => GTAV.DeleteModsFolderInGTAVDirectory(SettingsHandler.GTAVDirectory));
                     if (!delModsFolderInGTAVDirSuccess)
                     {
                         await this.Dispatcher.Invoke(async () => await this.ShowMessageAsync("Failed to delete 'mods' folder in GTAV directory",
@@ -257,7 +261,7 @@ namespace gtavmm_metro
 
         private async Task CheckForUpdates()
         {
-            await this.UpdateHandler.CheckForUpdateAsync();
+            await Task.Run(() => this.UpdateHandler.CheckForUpdateAsync());
             bool updateAvailable = this.UpdateHandler.IsUpdateAvailable();
             if (updateAvailable)
             {

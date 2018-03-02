@@ -26,5 +26,11 @@
     <Setting Name="GTAOOptionsStraightIntoFreemode_IsChecked" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
+    <Setting Name="AppTheme" Type="System.String" Scope="User">
+      <Value Profile="(Default)">BaseDark</Value>
+    </Setting>
+    <Setting Name="AppAccent" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Purple</Value>
+    </Setting>
   </Settings>
 </SettingsFile>
