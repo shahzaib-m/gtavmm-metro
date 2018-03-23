@@ -474,8 +474,7 @@ namespace gtavmm_metro.Models
                 if (this.TargetDRM == GTAVDRM.Steam) { initialProc.StartInfo.FileName = GTAVSteamProtocolURL; }
                 else { initialProc.StartInfo.FileName = Path.Combine(this.GamePath, GTAVRockstarEntryExe); }
 
-                initialProc.EnableRaisingEvents = true;
-                initialProc.Exited += (sender, e) => this.SetupGTAVLauncherProcessTimer();
+                this.SetupGTAVLauncherProcessTimer();
 
                 initialProc.Start();
             }
