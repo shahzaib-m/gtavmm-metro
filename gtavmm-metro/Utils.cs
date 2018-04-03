@@ -46,5 +46,31 @@ namespace gtavmm_metro
                 File.Copy(file, newFilePath, true);
             }
         }
+
+        public static bool IsChildDirectoryOfDirectory(string candidateDirectoryPath, string otherDirectoryPath)
+        {
+            bool isChildDirectory = false;
+
+            DirectoryInfo candidateDirectory = new DirectoryInfo(candidateDirectoryPath);
+            DirectoryInfo otherDirectory = new DirectoryInfo(otherDirectoryPath);
+
+            while (candidateDirectory.Parent != null)
+            {
+                if (candidateDirectory.Parent.FullName == otherDirectory.FullName)
+                {
+                    isChildDirectory = true;
+                    break;
+                }
+                else { candidateDirectory = candidateDirectory.Parent; }
+            }
+
+            return isChildDirectory;
+        }
+
+        public static void DeleteDirectoryContents(string directoryPath)
+        {
+            foreach (string dir in Directory.GetDirectories(directoryPath)) { Directory.Delete(dir, true); }
+            foreach (string file in Directory.GetFiles(directoryPath)) { File.Delete(file); }
+        }
     }
 }

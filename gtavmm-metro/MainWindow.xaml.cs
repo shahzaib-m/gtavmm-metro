@@ -6,7 +6,6 @@ using System.Collections.Generic;
 
 using System.Windows;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
 using System.Windows.Media.Animation;
 
 using MahApps.Metro.IconPacks;
@@ -114,7 +113,18 @@ namespace gtavmm_metro
             {
                 await this.NotifyUserOfCleanupFailure();
             }
+
+            SettingsHandler.ModsDirectoryChanged += (s, e) => this.UpdateDbConnection();
+
             await this.CheckForUpdates();
+        }
+        private async void UpdateDbConnection()
+        {
+            this.ModsDbConnection = new DBInstance(SettingsHandler.ModsDirectory);
+            await this.ModsDbConnection.VerifyTablesState();
+
+            await this.ScriptModsUserControl.ReloadAPI(this.ModsDbConnection);
+            await this.AssetModsUserControl.ReloadAPI(this.ModsDbConnection);
         }
 
         /// <summary>

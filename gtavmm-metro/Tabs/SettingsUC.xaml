@@ -67,7 +67,8 @@
                         <StackPanel Orientation="Horizontal" Margin="0 20 0 0">
                             <TextBox x:Name="ModificationsDirectoryTextBox" VerticalContentAlignment="Center" FontSize="13" IsReadOnly="True" Height="30" Width="700" 
                                      Focusable="False"/>
-                            <Button Margin="10 0 0 0" x:Name="ChangeModsificationsDirectoryButton" Width="130" ToolTip="Specify a different location for your Script/Asset mods">
+                            <Button Margin="10 0 0 0" x:Name="ChangeModsificationsDirectoryButton" Width="130" ToolTip="Specify a different location for your Script/Asset mods"
+                                    Click="ChangeModsificationsDirectoryButton_Click">
                                 <TextBlock Text="CHANGE" FontWeight="Light" FontSize="12" />
                             </Button>
                         </StackPanel>

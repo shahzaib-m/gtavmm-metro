@@ -1,5 +1,7 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 using System.Collections.Generic;
 
 using System.Windows;
@@ -61,7 +63,7 @@ namespace gtavmm_metro.Tabs
             IsInitLaunch = false;
         }
 
-        private void ChangeGTAVDirectoryButton_Click(object sender, RoutedEventArgs e)
+        private async void ChangeGTAVDirectoryButton_Click(object sender, RoutedEventArgs e)
         {
             using (CommonOpenFileDialog folderSelectDialog = new CommonOpenFileDialog
             {
@@ -98,9 +100,106 @@ namespace gtavmm_metro.Tabs
                     }
                     else
                     {
-                        (Application.Current.MainWindow as MetroWindow).ShowMessageAsync("Invalid Selection",
+                        await (Application.Current.MainWindow as MetroWindow).ShowMessageAsync("Invalid Selection",
                             "The given path does not seem to be a valid GTAV directory. This setting will not be changed.");
                     }
+                }
+            }
+        }
+
+        private async void ChangeModsificationsDirectoryButton_Click(object sender, RoutedEventArgs e)
+        {
+            MetroWindow mainWindow = (Application.Current.MainWindow as MetroWindow);
+
+            using (CommonOpenFileDialog folderSelectDialog = new CommonOpenFileDialog
+            {
+                Title = "Select a new empty directory",
+                IsFolderPicker = true,
+                InitialDirectory = SettingsHandler.ModsDirectory,
+                DefaultDirectory = SettingsHandler.ModsDirectory,
+                EnsurePathExists = true
+            })
+            {
+                if (folderSelectDialog.ShowDialog() == CommonFileDialogResult.Ok)
+                {
+                    string newChosenPath = folderSelectDialog.FileName;
+
+                    if (newChosenPath == SettingsHandler.ModsDirectory) { return; }
+
+                    bool isSubDirInModsDir = false;
+                    try { isSubDirInModsDir = Utils.IsChildDirectoryOfDirectory(newChosenPath, SettingsHandler.ModsDirectory); }
+                    catch (Exception ex)
+                    {
+                        await mainWindow.ShowMessageAsync("Error", "The new directory could not be verified. (: " + ex.Message + ")");
+
+                        return;
+                    }
+
+                    if (isSubDirInModsDir)
+                    {
+                        await mainWindow.ShowMessageAsync("Invalid Selection", "The new directory cannot be a directory within the current modifications directory.");
+
+                        return;
+                    }
+
+                    bool isDirNotEmpty = Directory.EnumerateFileSystemEntries(newChosenPath, "*", SearchOption.TopDirectoryOnly).Any();
+                    if (isDirNotEmpty && !File.Exists(Path.Combine(newChosenPath, DBInstance.DBFileName)))
+                    {
+                        await mainWindow.ShowMessageAsync("Invalid Selection", "The new directory is not empty/not a previously used modifications directory.");
+
+                        return;
+                    }
+                    else if (File.Exists(Path.Combine(newChosenPath, DBInstance.DBFileName)))
+                    {
+                        MessageDialogResult changeDirectoryToOld = await mainWindow.ShowMessageAsync("Confirmation", "The chosen directory seems to be a previously used modifications directory." +
+                            " You will not be able to move your current modifications to this directory. Do you want to change the modifications directory to the chosen directory?",
+                            MessageDialogStyle.AffirmativeAndNegative, new MetroDialogSettings { AffirmativeButtonText = "Yes", NegativeButtonText = "No" });
+
+                        if (changeDirectoryToOld == MessageDialogResult.Affirmative)
+                        {
+                            SettingsHandler.ModsDirectory = newChosenPath;
+                            ModificationsDirectoryTextBox.Text = newChosenPath;
+
+                            return;
+                        }
+                        else { return; }
+                    }
+
+
+                    MessageDialogResult moveMods = await mainWindow.ShowMessageAsync("Confirmation", "Would you also like to move your modifications to the new directory?",
+                        MessageDialogStyle.AffirmativeAndNegativeAndSingleAuxiliary, new MetroDialogSettings {
+                            AffirmativeButtonText = "Yes", NegativeButtonText = "No", FirstAuxiliaryButtonText = "Cancel",
+                            DefaultButtonFocus = MessageDialogResult.Affirmative
+                        }
+                    );
+
+                    if (moveMods == MessageDialogResult.FirstAuxiliary) { return; }
+                    
+                    if (moveMods == MessageDialogResult.Affirmative)
+                    {
+                        ProgressDialogController controller = await mainWindow.ShowProgressAsync("Please wait...", "Moving all modifications to new directory.", false);
+                        try
+                        {
+                            await Task.Run(() => Utils.CopyDirectoryWithContents(SettingsHandler.ModsDirectory, newChosenPath));
+                        }
+                        catch (Exception ex)
+                        {
+                            await mainWindow.ShowMessageAsync("Error", "Modifications could not be copied to the new directory. Modifications directory will not be changed. (Exception: " + ex.Message + ")");
+
+                            return;
+                        }
+
+                        try { Utils.DeleteDirectoryContents(SettingsHandler.ModsDirectory); }
+                        catch (Exception ex)
+                        {
+                            await mainWindow.ShowMessageAsync("Warning", "Couldn't delete modifications from old directory. You may have to manually delete them. (Exception: " + ex.Message + ")");
+                        }
+
+                        await controller.CloseAsync();
+                    }
+
+                    SettingsHandler.ModsDirectory = newChosenPath;
+                    ModificationsDirectoryTextBox.Text = newChosenPath;
                 }
             }
         }

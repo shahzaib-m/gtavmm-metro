@@ -333,6 +333,10 @@ namespace gtavmm_metro.Tabs
                 this.AssetModsDataGrid.ItemsSource = this.AssetMods;
             });
         }
+        public async Task ReloadAPI(DBInstance modsDbConnection)
+        {
+            await this.LoadAssetMods(modsDbConnection);
+        }
         #endregion
     }
 }

@@ -9,11 +9,13 @@ namespace gtavmm_metro.Models
     public class DBInstance
     {
         public SQLiteConnection Connection { get; private set; }
-        private static readonly string DbConnectionString = "Data Source={0}\\data.gtavmm-metro;Version=3;";
+
+        public static readonly string DBFileName = "data.gtavmm-metro";
+        private static readonly string DbConnectionString = "Data Source={0}\\{1};Version=3;";
 
         public DBInstance(string modsFolderRoot)
         {
-            this.Connection = new SQLiteConnection(String.Format(DbConnectionString, modsFolderRoot));
+            this.Connection = new SQLiteConnection(String.Format(DbConnectionString, modsFolderRoot, DBFileName));
         }
 
         public async Task VerifyTablesState()

@@ -256,6 +256,11 @@ namespace gtavmm_metro.Tabs
                 this.ScriptModsDataGrid.ItemsSource = this.ScriptMods;
             });
         }
+        
+        public async Task ReloadAPI(DBInstance modsDbConnection)
+        {
+            await this.LoadScriptMods(modsDbConnection);
+        }
         #endregion
     }
 }

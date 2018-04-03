@@ -8,6 +8,8 @@ using System.Windows.Controls;
 
 using Microsoft.WindowsAPICodePack.Dialogs;
 
+using gtavmm_metro.Models;
+
 namespace gtavmm_metro.Setup.Pages
 {
     public partial class ModsDirectoryUC : UserControl
@@ -37,7 +39,7 @@ namespace gtavmm_metro.Setup.Pages
                 {
                     this.ModsDirectoryTextBlock.Text = folderSelectDialog.FileName;
 
-                    if (this.IsDirectoryEmpty(folderSelectDialog.FileName) || File.Exists(Path.Combine(folderSelectDialog.FileName, "data.gtavmm-metro")))
+                    if (this.IsDirectoryEmpty(folderSelectDialog.FileName) || File.Exists(Path.Combine(folderSelectDialog.FileName, DBInstance.DBFileName)))
                     {
                         this.ModsDirectoryTextBlock.BorderBrush = Brushes.Green;
                         this.ModsDirectoryConfirmedLocation = new DirectoryInfo(folderSelectDialog.FileName);
