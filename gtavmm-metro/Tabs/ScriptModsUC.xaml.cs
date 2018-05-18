@@ -99,6 +99,7 @@ namespace gtavmm_metro.Tabs
                 }
 
                 this.ScriptModsProgressRingIsActive = false;
+                await this.ScriptModAPI.UpdateScriptModOrderIndexes(this.ScriptMods);
             }
         }
 
@@ -217,8 +218,14 @@ namespace gtavmm_metro.Tabs
         // Add New Script Modification Behaviour
         private async void AddNewScriptModButton_Click(object sender, RoutedEventArgs e)
         {
-            ScriptMod newScriptMod = await this.ScriptModAPI.CreateScriptMod("New Mod Name", this.ScriptMods.Count, "New Mod Description", false);
-            this.ScriptMods.Add(newScriptMod);
+            this.AddNewScriptModButton.IsEnabled = false;
+
+            ScriptMod newScriptMod = await this.ScriptModAPI.CreateScriptMod("New Mod Name", 0, "New Mod Description", false);
+            this.ScriptMods.Insert(0, newScriptMod);
+
+            await this.ScriptModAPI.UpdateScriptModOrderIndexes(this.ScriptMods);
+
+            this.AddNewScriptModButton.IsEnabled = true;
         }
         #endregion
         #endregion

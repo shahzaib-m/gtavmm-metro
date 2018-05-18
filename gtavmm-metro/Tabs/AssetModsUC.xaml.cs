@@ -108,6 +108,7 @@ namespace gtavmm_metro.Tabs
                 }
 
                 this.AssetModsProgressRing.IsActive = false;
+                await this.AssetModAPI.UpdateAssetModOrderIndexes(this.AssetMods);
             }
         }
 
@@ -277,11 +278,13 @@ namespace gtavmm_metro.Tabs
                 ProgressDialogController controller = await metroWindow.ShowProgressAsync("Copying file", "Please wait...", false);
                 controller.SetIndeterminate();
 
-                this.AssetMods.Add(await Task.Run(() => this.AssetModAPI.CreateAssetMod("New Mod Package Name", targetRPFString,
-                    this.AssetMods.Count, "New Mod Package Description", false, true)));
+                this.AssetMods.Insert(0, await Task.Run(() => this.AssetModAPI.CreateAssetMod("New Mod Package Name", targetRPFString,
+                    0, "New Mod Package Description", false, true)));
 
                 this.TargetRPFComboxBox.SelectedIndex = -1;
                 await controller.CloseAsync();
+
+                await this.AssetModAPI.UpdateAssetModOrderIndexes(this.AssetMods);
             }
         }
         // ---------------------------------------------------------------------------------------------------------------------------------
